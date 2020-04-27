@@ -50,3 +50,6 @@ src/java/version.properties
 build/
 dist/
 *.properties
+.vscode/
+node-modules/
+ant/
