@@ -15,11 +15,15 @@
 package edu.slu.tpen.servlet;
 
 /**
- * Class to hold all static values that will be reused in project. 
+ * Class to hold all static values that will be reused in project.
+ *
  * @author hanyan
  */
 public class Constant {
-      public static String ANNOTATION_SERVER_ADDR = "http://devstore.rerum.io/v1/api";
-      public static String TPEN_CANVAS_PREFIX = "http://tpentest.rerum.io/TPEN";
+
+    public static String ANNOTATION_SERVER_ADDR = "http://devstore.rerum.io/v1/api";
+    public static String TPEN_CANVAS_PREFIX = "http://tpentest.rerum.io/TPEN";
     //public static String ANNOTATION_SERVER_ADDR = "http://localhost:8080/annotationstore";
+    public static String PROPERTIES_FILE_NAME = "";
+    public static String RERUM_ACCESS_TOKEN_URL = "";
 }

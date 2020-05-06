@@ -187,7 +187,7 @@ textarea:focus{
 .demoteUser{
     font-weight: bold;
     font-size: 117%;
-    color: #264aa0; //#A63321
+    color: #264aa0; /*#A63321*/
     margin-right: 5px;
 }
 .removeUser{
@@ -347,11 +347,11 @@ textarea:focus{
     }
     
     #imgTop img{
-        transition: left .25s, width .25s, max-width .25s; //top: .25s
+        transition: left .25s, width .25s, max-width .25s; /* top: .25s */
     }
     
     #imgBottom img{
-        transition: left .25s, width .25s, max-width .25s; //top: .25s
+        transition: left .25s, width .25s, max-width .25s; /* top: .25s */
     }
 
     #imgTop img,#imgBottom img {
@@ -1261,7 +1261,7 @@ button.imgTool{
     text-align: center;
 }
 .fullScreenTrans:hover{
-    background-color: #264aa0; //#A63321 
+    background-color: #264aa0; /* #A63321 */
     color: #272727;
 }
 .fullScreenTrans::before {
@@ -1490,11 +1490,11 @@ button.imgTool{
 }
 #lineControls i:hover{
     cursor: pointer;
-    color: #264aa0; //#A63321
+    color: #264aa0; /* #A63321 */
 }
 #pageControls i:hover{
     cursor: pointer;
-    color: #264aa0; //#A63321
+    color: #264aa0; /* #A63321 */
 }
 #prevLine,#nextLine,#toggleNotes,#nextPage,#prevPage{
     position: relative;
@@ -1522,11 +1522,11 @@ button.imgTool{
 }
 #lineControls i:hover{
     cursor: pointer;
-    color: #264aa0; //#A63321
+    color: #264aa0; /* #A63321 */
 }
 #pageControls i:hover{
     cursor: pointer;
-    color: #264aa0; //#A63321
+    color: #264aa0; /* #A63321 */
 }
 #ruler1,#ruler2 {display: none;background: black;position: absolute;z-index: 6; pointer-events:none;}
 
@@ -1563,7 +1563,7 @@ button{
 }
 
 button:hover{
-    background-color: #264aa0; //#A63321
+    background-color: #264aa0; /* #A63321 */
 }
 p{
     /*font-family: 'Open Sans','Helvetica Neue',sans-serif;*/

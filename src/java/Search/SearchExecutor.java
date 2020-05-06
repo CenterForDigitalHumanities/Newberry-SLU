@@ -151,7 +151,7 @@ public class SearchExecutor {
                 Document hitDoc = is.doc(hits[i].doc);
 
                 field = hitDoc.getField("line");
-                Transcription t = new Transcription(Integer.parseInt(hitDoc.getField("id").stringValue()));
+                Transcription t = new Transcription(String.valueOf(Integer.parseInt(hitDoc.getField("id").stringValue())));
                 results.add(t);
                 String paragraph = field.stringValue();
                 String pageno = "";

@@ -349,11 +349,11 @@ textarea:focus{
     }
     
     #imgTop img{
-        transition: left .25s, width .25s, max-width .25s; //top: .25s
+        transition: left .25s, width .25s, max-width .25s; /* top: .25s */
     }
     
     #imgBottom img{
-        transition: left .25s, width .25s, max-width .25s; //top: .25s
+        transition: left .25s, width .25s, max-width .25s; /* top: .25s */
     }
 
     #imgTop img,#imgBottom img {
@@ -1493,11 +1493,11 @@ button.imgTool{
 }
 #lineControls i:hover{
     cursor: pointer;
-    color: #b43d2e; //#b43d2e
+    color: #b43d2e; /* #b43d2e */
 }
 #pageControls i:hover{
     cursor: pointer;
-    color: #b43d2e; //#b43d2e
+    color: #b43d2e; /* #b43d2e */
 }
 #prevLine,#nextLine,#toggleNotes,#nextPage,#prevPage{
     position: relative;
@@ -1525,11 +1525,11 @@ button.imgTool{
 }
 #lineControls i:hover{
     cursor: pointer;
-    color: #b43d2e; //#A63321
+    color: #b43d2e; /* #A63321 */
 }
 #pageControls i:hover{
     cursor: pointer;
-    color: #b43d2e; //#A63321
+    color: #b43d2e; /* #A63321 */
 }
 #ruler1,#ruler2 {display: none;background: black;position: absolute;z-index: 6; pointer-events:none;}
 
