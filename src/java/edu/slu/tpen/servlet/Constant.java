@@ -21,9 +21,13 @@ package edu.slu.tpen.servlet;
  */
 public class Constant {
 
+    public static String OLD_ANNOTATION_SERVER_ADDR = "http://165.134.105.29/annotationstore";
     public static String ANNOTATION_SERVER_ADDR = "http://devstore.rerum.io/v1/api";
     public static String TPEN_CANVAS_PREFIX = "http://tpentest.rerum.io/TPEN";
-    //public static String ANNOTATION_SERVER_ADDR = "http://localhost:8080/annotationstore";
-    public static String PROPERTIES_FILE_NAME = "";
-    public static String RERUM_ACCESS_TOKEN_URL = "";
+    public static String PROPERTIES_FILE_NAME = "version.properties";
+    public static String RERUM_ID_PATTERN = "http://devstore.rerum.io/v1/id";
+    public static String RERUM_ACCESS_TOKEN_URL = "http://devstore.rerum.io/v1/api/accessToken.action";
+    public static String RERUM_REFRESH_TOKEN_URL = "http://devstore.rerum.io/v1/api/refreshToken.action";
+    public static String RERUM_CONTEXT = "http://devstore.rerum.io/v1/context.json";
 }
+
