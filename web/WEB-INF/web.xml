@@ -150,6 +150,10 @@
         <servlet-class>characterImage</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>proxy</servlet-name>
+        <servlet-class>servlets.proxy</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>WitnessServlet</servlet-name>
         <servlet-class>edu.slu.tpen.servlet.WitnessServlet</servlet-class>
     </servlet>
