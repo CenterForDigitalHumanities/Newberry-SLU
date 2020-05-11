@@ -64,11 +64,11 @@ public class TokenManager{
         setFileLocation(fileLoc);
         InputStream input = new FileInputStream(propFileLocation);
         props.load(input);
-        currentAccessToken = props.getProperty("TPEN_NL_ACCESS_TOKEN");
-        currentRefreshToken = props.getProperty("TPEN_NL_REFRESH_TOKEN");
-        registeredAgent = props.getProperty("TPEN_NL_AGENT");
-        canvasPrefix = props.getProperty("PALEO_CANVAS_ID_PREFIX");
-        testingFlag = props.getProperty("TESTING");
+        currentAccessToken = Constant.RERUM_ACCESS_TOKEN_URL;
+        currentRefreshToken = Constant.RERUM_REFRESH_TOKEN_URL;
+        registeredAgent = "tag://newberry-slu/test";
+        canvasPrefix = Constant.TPEN_CANVAS_PREFIX;
+        testingFlag = props.getProperty("debug");
         input.close();
         
 //        System.out.println("Read in props.  Here is my token info");
