@@ -1008,7 +1008,7 @@
 
                     },
                     error: function (jqXHR, error, errorThrown) {
-                        if (error.status === 401 || error.status === 403) { // issue https://github.com/CenterForDigitalHumanities/Newberry-SLU/issues/8
+                        if (jqXHR.error().status === 401 || jqXHR.error().status === 403) { // issue https://github.com/CenterForDigitalHumanities/Newberry-SLU/issues/8
                             var theURL = window.location.href;
                             return window.location.href = "nl-index-fr.html?ref=" + encodeURIComponent(theURL);
                         }
