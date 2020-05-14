@@ -689,11 +689,29 @@
         <servlet-name>autoParse</servlet-name>
         <url-pattern>/autoParse</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>UpdateV0AnnoListServlet</servlet-name>
+        <servlet-class>edu.slu.tpen.servlet.UpdateV0AnnoListServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UndoLine</servlet-name>
+        <servlet-class>edu.slu.tpen.servlet.UndoLine</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UpdateV0AnnoListServlet</servlet-name>
+        <url-pattern>/updateV0AnnoList</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UndoLine</servlet-name>
+        <url-pattern>/undoLine</url-pattern>
+    </servlet-mapping>
+
     <session-config>
         <!-- In minutes -->
         <session-timeout>60</session-timeout>
     </session-config>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
+        <welcome-file>login.html</welcome-file>
     </welcome-file-list>
 </web-app>
