@@ -23,7 +23,7 @@
                 if(request.getHeader("referer")==null || request.getHeader("referer").compareTo("")==0 || request.getHeader("referer").contains("login")){
                     %>
                     <script>
-                        document.location = "index.jsp";
+                        document.location = "./index.html";
                     </script>
         <%}
                 //response.sendRedirect("index.jsp");
@@ -33,7 +33,7 @@
                         {
                     %>
                     <script>
-                        document.location = "index.jsp";
+                        document.location = "./index.html";
                     </script>
         <%                       // response.sendRedirect("index.jsp");
                         }
@@ -50,8 +50,8 @@
                 
             else
                 {
-                String errorMessage = "Incorrect log in. Try again or <a href='login.jsp'>Request an Account</a>.";
-            %><%@include file="WEB-INF/includes/errorBang.jspf" %><%
+                String errorMessage = "Incorrect log in. Try again or <a href='./login.jsp'>Request an Account</a>.";
+            %><%@include file="../WEB-INF/includes/errorBang.jspf" %><%
                 return;
                 }
            
@@ -66,20 +66,20 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Login or Register a New Account</title>
-        <link rel="stylesheet" href="css/tpen.css" type="text/css" media="screen, projection">
-        <link rel="stylesheet" href="css/print.css" type="text/css" media="print">
-        <!--[if lt IE 8]><link rel="stylesheet" href="css/ie.css" type="text/css" media="screen, projection"><![endif]-->
-        <link type="text/css" href="css/custom-theme/jQuery.css" rel="Stylesheet" />
+        <title>Login or Register a Newberry Account</title>
+        <link rel="stylesheet" href="../css/tpen.css" type="text/css" media="screen, projection">
+        <link rel="stylesheet" href="../css/print.css" type="text/css" media="print">
+        <!--[if lt IE 8]><link rel="stylesheet" href="../css/ie.css" type="text/css" media="screen, projection"><![endif]-->
+        <link type="text/css" href="../css/custom-theme/jQuery.css" rel="Stylesheet" />
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script> 
-        <script src="js/manuscriptFilters.js" type="text/javascript"></script>
-        <script src="js/tpen.js" type="text/javascript"></script>
+        <script src="../js/manuscriptFilters.js" type="text/javascript"></script>
+        <script src="../js/tpen.js" type="text/javascript"></script>
         <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
         <style>
         #login, #register { width: 45%;padding:10px;}
         #content {max-width: 800px;}
-        #forgetForm {margin:-4px 5px 2px;background: url(images/linen.png);padding:10px 15px;display:none;overflow: hidden;z-index: 1; border: 1px solid #A68329;
+        #forgetForm {margin:-4px 5px 2px;background: url(../images/linen.png);padding:10px 15px;display:none;overflow: hidden;z-index: 1; border: 1px solid #A68329;
             box-shadow:-1px -1px 2px black;}
         #forgetFormBtn {position: relative;z-index: 2;cursor: pointer;margin: 0 0 5px 0;}
 	</style>
@@ -123,16 +123,16 @@ session.setAttribute("ref",request.getParameter("referrer"));
             <div id="main" class="ui-widget ui-widget-content ui-corner-all ui-tabs ui-helper-reset ui-helper-clearfix">
                 <div id="login" class="left">
                     <h3 class="ui-widget-header ui-tabs ui-corner-all ui-state-default">Log In</h3>
-            <p> You may log into your account to start transcribing or to manage your projects.</p>
+            <p> You may log into your account to view your manuscript projects.</p>
                         <div id="resetPassword">
                             <h6 id="forgetFormBtn" class="clear-right">Forgot your Password?<span class="left ui-icon ui-icon-arrowstop-1-s"></span></h6>
-                            <form id="forgetForm" action="admin.jsp" method="POST" class="ui-corner-all">
+                            <form id="forgetForm" action="./admin.jsp" method="POST" class="ui-corner-all">
                             <span>Enter the email address associated with your account to have your password reset.</span>
                                 <input id="email" type="text" class="text" style="width:220px;" placeholder="Forgot your password?" name="email">
                                 <input class="right ui-corner-all ui-state-default" type="submit" name="emailSubmitted" value="Reset Password"/>
                             </form>
                         </div>
-            <form id="login" action="nl-login-fr.jsp" method="POST" >
+            <form id="login" action="./login.jsp" method="POST" >
                             <fieldset>
                                 <legend>Login Here:</legend>
                                 <label for="uname">Email</label><input class="text" type="text" name="uname"/><br/>
@@ -144,7 +144,7 @@ session.setAttribute("ref",request.getParameter("referrer"));
                 </div>
                 <div id="register" class="right">
                     <h3 class="ui-widget-header ui-tabs ui-corner-all ui-state-default">Register a New Account</h3>
-               <form action="signup.jsp" method="POST">
+               <form action="./signup.jsp" method="POST">
                <fieldset>
                                 <legend>or Register as a New User:</legend>
                                 Note: You will receive your password via email after your account is activated by an administrator
@@ -155,7 +155,7 @@ session.setAttribute("ref",request.getParameter("referrer"));
                </fieldset></form>
                 </div>
             </div>
-        <a class="returnButton" href="nl-indexfr.jsp">Return to Paleography Home</a>
+        <a class="returnButton" href="./index.html">Return to Paleography Home</a>
         </div>
         </div>
     </body>

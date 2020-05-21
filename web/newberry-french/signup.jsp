@@ -11,13 +11,13 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Account Creation</title>
-        <link rel="stylesheet" href="css/tpen.css" type="text/css" media="screen, projection">
-        <link rel="stylesheet" href="css/print.css" type="text/css" media="print">
-        <!--[if lt IE 8]><link rel="stylesheet" href="css/ie.css" type="text/css" media="screen, projection"><![endif]-->
-        <link type="text/css" href="css/custom-theme/jQuery.css" rel="Stylesheet" />
+        <link rel="stylesheet" href="../css/tpen.css" type="text/css" media="screen, projection">
+        <link rel="stylesheet" href="../css/print.css" type="text/css" media="print">
+        <!--[if lt IE 8]><link rel="stylesheet" href="../css/ie.css" type="text/css" media="screen, projection"><![endif]-->
+        <link type="text/css" href="../css/custom-theme/jQuery.css" rel="Stylesheet" />
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script> 
-        <script type="text/javascript" src="js/tpen.js"></script>
+        <script type="text/javascript" src="../js/tpen.js"></script>
         <style type="text/css">
             .reginput
             {
@@ -53,7 +53,7 @@
 
     <body>
         <div id="wrapper">
-            <div id="header"><p align="center" class="tagline">transcription for paleographical and editorial notation</p>
+            <div id="header"><p align="center" class="tagline">Newberry French Renaissance Paleography</p>
             </div>
             <div id="content">
                 <h1><script type="text/javascript">document.write(document.title); </script></h1>
@@ -84,7 +84,7 @@
                                 out.println("<div class=\"error\"><p style=\"font-size:2em;\">There was an error with your submission. Please check the form and try again.</p></div>");
                             }
                     %>                       
-                    <form action="signup.jsp" name="signup" onsubmit="return simpleFormValidation();">
+                    <form action="./signup.jsp" name="signup" onsubmit="return simpleFormValidation();">
                         Email<input class="reginput" type="text" name="uname" <%if (request.getParameter("uname") != null) {
                                out.print("value=\"" + request.getParameter("uname") + "\"");
                            }%>/><br/><br/>
@@ -98,7 +98,7 @@
                     </form>
                     <%}%>
                 </div>
-                <a class="returnButton" href="index.jsp">Return to T&#8209;PEN Home</a>
+                <a class="returnButton" href="./index.html">Return to Paleography Home</a>
             </div>
         </div>
     </body>
