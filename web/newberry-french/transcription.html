@@ -6,9 +6,9 @@
         <meta http-equiv="Cache-Control" content="no-cache"/>
         <meta http-equiv="Expires" content="0"/>
         <title>Newberry French Transcription</title>
-        <link type="text/css" href="css/custom-theme/jQuery.css" rel="Stylesheet" />
-        <link type="text/css" href="css/newberryFrenchSkin.css" rel="Stylesheet" />
-        <script type="text/javascript" src="js/newberry.js"></script>
+        <link type="text/css" href="../css/custom-theme/jQuery.css" rel="Stylesheet" />
+        <link type="text/css" href="./css/newberryFrenchSkin.css" rel="Stylesheet" />
+        <script type="text/javascript" src="./js/newberry.js"></script>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"></script>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.js"></script>
         <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
@@ -54,7 +54,7 @@
     <body>
         <div class="pageTurnCover">
             <div class="turnMsg">Please wait while we load the page...</div>
-            <div class="turnLoader"><img src="images/loading2.gif" /></div>
+            <div class="turnLoader"><img src="../images/loading2.gif" /></div>
         </div>
         <div class="topTrim navigation">
             <span class="trimSection"><span id="trimTitle">TITLE</span></span>
@@ -113,7 +113,7 @@
         <button id="loadBtn" class="hideme" onclick="loadTranscription();"> Load Transcription </button> 
         <div id="transTemplateLoading">
             <p>Please wait while we load the transcription interface.  This may take up to 2 minutes.  A message will appear here if there is an error.</p>
-            <div class="turnLoader transLoader"><img src="images/loading2.gif" /></div>
+            <div class="turnLoader transLoader"><img src="../images/loading2.gif" /></div>
         </div>
         <div class="centerInterface">
             <div id="transcriptionTemplate">
@@ -140,7 +140,7 @@
                     <div id="transWorkspace">
                         <div id="lineUpdateNotice">
                             <div class="luMsg">Saving line...</div>
-                            <div class="luLoader"><img src="images/loading2.gif" /></div>
+                            <div class="luLoader"><img src="../images/loading2.gif" /></div>
                         </div>
                         <div title="Slide Workspace" class="workspaceHandle slideHandleLeft"><i class="fa fa-bars"></i><i class="fa fa-arrows-v"></i></div><div title="Slide Workspace" class="workspaceHandle slideHandleRight"><i class="fa fa-arrows-v"></i><i class="fa fa-bars"></i></div>
                         <div class="flex-container flex-stretch">
@@ -258,14 +258,14 @@
                             <div id="specialCharsFloat" class="flex-container special-charactered">
                                 <div id="charactersPopin" class="specialCharacters"  title="Special Characters" >
                                 </div>
-                                <a title="Edit Special Characters" class="lookLikeButtons editButtons exitPage" href="project.html">
+                                <a title="Edit Special Characters" class="lookLikeButtons editButtons exitPage" href="./project.html">
                                     Edit <i class="fa fa-edit"></i>
                                 </a>
                             </div>
                             <div id="xmlTagFloat" class="flex-container xml-tagged">
                                 <div id="xmlTagPopin" class="xmlTags" title="Custom XML Tags">
                                 </div>
-                                <a title="Edit XML Tags" class="lookLikeButtons editButtons exitPage" href="project.html?">
+                                <a title="Edit XML Tags" class="lookLikeButtons editButtons exitPage" href="./project.html?">
                                     Edit <i class="fa fa-edit"></i>
                                 </a>
                             </div>
@@ -366,10 +366,10 @@
                         </div>
                         <div id="editTransButtons" class="actions">
                             <h4 id="editBtns" title="Edit available XML Tags and Special Characters" class="clear-left">Workspace Tags & Chars</h4>
-                            <a title="Edit Special Characters" class="lookLikeButtons editButtons exitPage" href="project.html">
+                            <a title="Edit Special Characters" class="lookLikeButtons editButtons exitPage" href="./project.html">
                                 Edit Special Characters <i class="fa fa-edit"></i>
                             </a>
-                            <a title="Edit XML Tags" class="lookLikeButtons editButtons exitPage" href="project.html">
+                            <a title="Edit XML Tags" class="lookLikeButtons editButtons exitPage" href="./project.html">
                                 Edit XML Tags <i class="fa fa-edit"></i>
                             </a>
                         </div>
@@ -383,78 +383,78 @@
 
             <div id="startSplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="content/get-started?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/get-started?response_type=embed"></iframe>
             </div>
 
             <div id="frenchdocsSplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="content/about-french-documents?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/about-french-documents?response_type=embed"></iframe>
             </div>
 
             <div id="calligraphySplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="islandora/object/paleography%3Acalligraphybooks?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/islandora/object/paleography%3Acalligraphybooks?response_type=embed"></iframe>
             </div>
 
             <div id="mapsSplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="islandora/object/paleography%3Ahistoricalmaps?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/islandora/object/paleography%3Ahistoricalmaps?response_type=embed"></iframe>
             </div>
 
             <div id="scriptsSplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="content/scripts?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/scripts?response_type=embed"></iframe>
             </div>
 
             <div id="documentsSplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="content/about-french-documents?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/about-french-documents?response_type=embed"></iframe>
             </div>
 
             <div id="conservationSplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>          
-                <iframe class="loadingIframe" data_src="content/conservation?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/conservation?response_type=embed"></iframe>
             </div>
 
             <div id="conventionsSplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="content/transcribing-editing-conventions?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/transcribing-editing-conventions?response_type=embed"></iframe>
             </div>
 
             <div id="teachersSplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="content/teachers?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/teachers?response_type=embed"></iframe>
             </div>
 
             <div id="groupSplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="content/group-work?response_type=embed"> </iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/group-work?response_type=embed"> </iframe>
             </div>
 
             <div id="abbrevSplit" class="split" >
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="content/abbreviations?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/abbreviations?response_type=embed"></iframe>
             </div>
 
             <div id="dictionarySplit" class="split iTool">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" id="frenchDictionary" data_src="content/dictionaries?response_type=embed">
+                <iframe class="loadingIframe" id="frenchDictionary" data_src="https://paleography.library.utoronto.ca/content/dictionaries?response_type=embed">
                 </iframe>
             </div>
 
             <div id="glossarySplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="content/glossary-of-terms?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/glossary-of-terms?response_type=embed"></iframe>
             </div>
 
             <div id="fInstitutionsSplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="content/french-institutions?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/french-institutions?response_type=embed"></iframe>
             </div>
 
             <div id="otherSplit" class="split">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" data_src="content/other-reference-resources?response_type=embed"></iframe>
+                <iframe class="loadingIframe" data_src="https://paleography.library.utoronto.ca/content/other-reference-resources?response_type=embed"></iframe>
             </div>
 
             <div id="linebreakSplit" class="ui-widget ui-widget-content split">
@@ -495,12 +495,12 @@
             </div>
             <div id="essaySplit" class="split iTool">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" id="contextualEssay" data_src="content/background-essays?response_type=embed">
+                <iframe class="loadingIframe" id="contextualEssay" data_src="https://paleography.library.utoronto.ca/content/background-essays?response_type=embed">
                 </iframe>
             </div>
             <div id="partialTransSplit" class="split iTool">
                 <div style="text-align: center;" class="fullScreenTrans"><i class="fa fa-share fa-flip-vertical"></i></div>
-                <iframe class="loadingIframe" id="partialTrans" data_src="content/partial_transcriptions?response_type=embed">
+                <iframe class="loadingIframe" id="partialTrans" data_src="https://paleography.library.utoronto.ca/content/partial_transcriptions?response_type=embed">
                 </iframe>
             </div>
             <div id="helpSplit" class="split">
@@ -914,7 +914,7 @@
             </div>
             <div id="localParsingChangesSavingNotice">
                 <div id="localParsingChangesSavingMsg"> Saving... </div>
-                <div class="turnLoader"><img src="images/loading2.gif" /></div>
+                <div class="turnLoader"><img src="../images/loading2.gif" /></div>
             </div>
         </div>
         <div class="shadow_overlay"></div>
@@ -956,7 +956,7 @@
                 //$('.transcriptionImage').attr('src', "images/loading2.gif"); //background loader if there is a hang time waiting for image
                 //check if logged in
                 var user = "";
-                var url = "geti";
+                var url = "../geti";
                 $.ajax({
                     url: url,
                     type: "GET",
@@ -974,7 +974,7 @@
                             if (theURL.indexOf("projectID=") > -1) {
                                 var projID = getURLVariable("projectID");
                                 theProjectID = parseInt(projID);
-                                $(".editButtons").attr("href", "project.html?projectID=" + theProjectID);
+                                $(".editButtons").attr("href", "./project.html?projectID=" + theProjectID);
                                 $("#transcriptionText").val(projID);
                                 $("#loadBtn").click();
                             } else {
@@ -1010,7 +1010,7 @@
                     error: function (jqXHR, error, errorThrown) {
                         if (jqXHR.error().status === 401 || jqXHR.error().status === 403) { // issue https://github.com/CenterForDigitalHumanities/Newberry-SLU/issues/8
                             var theURL = window.location.href;
-                            return window.location.href = "nl-index-fr.html?ref=" + encodeURIComponent(theURL);
+                            return window.location.href = "login.jsp?ref=" + encodeURIComponent(theURL);
                         }
                         $("#trimCurrentUser").html("No User");
                         loggedInUser = false;
@@ -1028,7 +1028,7 @@
                         $("#parsingBtn").unbind("click");
                         $("#parsingBtn").attr("onclick", "");
                         $("#parsingBtn").click(function () {
-                            alert("You must be logged in to correct line parsing.  Log in and refresh the page to correct parsing.");
+                            alert("You must be logged in to correct line parsing. Log in and refresh the page to correct parsing.");
                         });
                     }
                 });
