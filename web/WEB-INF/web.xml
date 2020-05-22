@@ -242,171 +242,6 @@
         <servlet-name>autoParse</servlet-name>
         <servlet-class>edu.slu.tpen.servlet.AutoParse</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>imageResize</servlet-name>
-        <url-pattern>/imageResize</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>transcriptionPDF</servlet-name>
-        <url-pattern>/transcriptionPDF</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>processImage</servlet-name>
-        <url-pattern>/processImage</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>pageImage</servlet-name>
-        <url-pattern>/pageImage</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>updateLine</servlet-name>
-        <url-pattern>/updateLine</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>textUpload</servlet-name>
-        <url-pattern>/textUpload</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>uploadTextfile</servlet-name>
-        <url-pattern>/uploadTextfile</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>sequence</servlet-name>
-        <url-pattern>/sequence</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>transcription</servlet-name>
-        <url-pattern>/transcription</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>manuscriptListings</servlet-name>
-        <url-pattern>/manuscriptListings</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>repoLister</servlet-name>
-        <url-pattern>/repoLister</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>logout</servlet-name>
-        <url-pattern>/logout</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>LineRecognizer</servlet-name>
-        <url-pattern>/LineRecognizer</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>updateLinePositions</servlet-name>
-        <url-pattern>/updateLinePositions</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>transcriptionText</servlet-name>
-        <url-pattern>/transcriptionText</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>binarizedImage</servlet-name>
-        <url-pattern>/binarizedImage</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>validate</servlet-name>
-        <url-pattern>/validate</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>export</servlet-name>
-        <url-pattern>/export</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>tagTracker</servlet-name>
-        <url-pattern>/tagTracker</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>linePositions</servlet-name>
-        <url-pattern>/linePositions</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>parseImage</servlet-name>
-        <url-pattern>/parseImage</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>addTag</servlet-name>
-        <url-pattern>/addTag</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>batchUpdateLinePositions</servlet-name>
-        <url-pattern>/batchUpdateLinePositions</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>addHotkey</servlet-name>
-        <url-pattern>/addHotkey</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>updateRemainingText</servlet-name>
-        <url-pattern>/updateRemainingText</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>fixColumns</servlet-name>
-        <url-pattern>/fixColumns</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>heartbeat</servlet-name>
-        <url-pattern>/heartbeat</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>annotation</servlet-name>
-        <url-pattern>/annotation</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>uploadHeader</servlet-name>
-        <url-pattern>/uploadHeader</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>UploadImages</servlet-name>
-        <url-pattern>/UploadImages</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>characterImage</servlet-name>
-        <url-pattern>/characterImage</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>FileUpload</servlet-name>
-        <url-pattern>/FileUpload</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>proxy</servlet-name>
-        <url-pattern>/proxy</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ProjectsServlet</servlet-name>
-        <url-pattern>/projects</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ManuscriptsServlet</servlet-name>
-        <url-pattern>/manuscripts</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>LoginServlet</servlet-name>
-        <url-pattern>/login</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>createManuscript</servlet-name>
-        <url-pattern>/createManuscript</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ProjectServlet</servlet-name>
-        <url-pattern>/project/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ProjectServlet</servlet-name>
-        <url-pattern>/manifest/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CanvasServlet</servlet-name>
-        <url-pattern>/canvas/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>FolioReport</servlet-name>
-        <url-pattern>/folioReport</url-pattern>
-    </servlet-mapping>
-    <!-- tpen webservices for newberry starts -->
     <servlet>
         <servlet-name>imageParsing</servlet-name>
         <servlet-class>edu.slu.tpen.servlet.ImageAutoParsingServlet</servlet-class>
@@ -515,195 +350,525 @@
         <servlet-name>LogoutHookServlet</servlet-name>
         <servlet-class>edu.slu.tpen.servlet.LogoutHookServlet</servlet-class>
     </servlet>
-    <!-- Depricated.  This turned in to CopyProjectAndAnnos    
-    <servlet>
-        <servlet-name>copyProjWithAnnoServlet</servlet-name>
-        <servlet-class>edu.slu.tpen.servlet.CopyProjWithAnnoServlet</servlet-class>
-    </servlet>-->
     <servlet>
         <servlet-name>CopyProjectAndAnnos</servlet-name>
         <servlet-class>edu.slu.tpen.servlet.CopyProjectAndAnnos</servlet-class>
     </servlet>
     <servlet-mapping>
+        <servlet-name>imageResize</servlet-name>
+        <url-pattern>/imageResize</url-pattern>
+        <url-pattern>/newberry-french/imageResize</url-pattern>
+        <url-pattern>/newberry-italian/imageResize</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>transcriptionPDF</servlet-name>
+        <url-pattern>/transcriptionPDF</url-pattern>
+        <url-pattern>/newberry-french/transcriptionPDF</url-pattern>
+        <url-pattern>/newberry-italian/transcriptionPDF</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>processImage</servlet-name>
+        <url-pattern>/processImage</url-pattern>
+        <url-pattern>/newberry-french/processImage</url-pattern>
+        <url-pattern>/newberry-italian/processImage</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>pageImage</servlet-name>
+        <url-pattern>/pageImage</url-pattern>
+        <url-pattern>/newberry-french/pageImage</url-pattern>
+        <url-pattern>/newberry-italian/pageImage</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>updateLine</servlet-name>
+        <url-pattern>/updateLine</url-pattern>
+        <url-pattern>/newberry-french/updateLine</url-pattern>
+        <url-pattern>/newberry-italian/updateLine</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>textUpload</servlet-name>
+        <url-pattern>/textUpload</url-pattern>
+        <url-pattern>/newberry-french/textUpload</url-pattern>
+        <url-pattern>/newberry-italian/textUpload</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>uploadTextfile</servlet-name>
+        <url-pattern>/uploadTextfile</url-pattern>
+        <url-pattern>/newberry-french/uploadTextfile</url-pattern>
+        <url-pattern>/newberry-italian/uploadTextfile</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>sequence</servlet-name>
+        <url-pattern>/sequence</url-pattern>
+        <url-pattern>/newberry-french/sequence</url-pattern>
+        <url-pattern>/newberry-italian/sequence</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>transcription</servlet-name>
+        <url-pattern>/transcription</url-pattern>
+        <url-pattern>/newberry-french/transcription</url-pattern>
+        <url-pattern>/newberry-italian/transcription</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>manuscriptListings</servlet-name>
+        <url-pattern>/manuscriptListings</url-pattern>
+        <url-pattern>/newberry-french/manuscriptListings</url-pattern>
+        <url-pattern>/newberry-italian/manuscriptListings</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>repoLister</servlet-name>
+        <url-pattern>/repoLister</url-pattern>
+        <url-pattern>/newberry-french/repoLister</url-pattern>
+        <url-pattern>/newberry-italian/repoLister</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>logout</servlet-name>
+        <url-pattern>/logout</url-pattern>
+        <url-pattern>/newberry-french/logout</url-pattern>
+        <url-pattern>/newberry-italian/logout</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LineRecognizer</servlet-name>
+        <url-pattern>/LineRecognizer</url-pattern>
+        <url-pattern>/newberry-french/LineRecognizer</url-pattern>
+        <url-pattern>/newberry-italian/LineRecognizer</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>updateLinePositions</servlet-name>
+        <url-pattern>/updateLinePositions</url-pattern>
+        <url-pattern>/newberry-french/updateLinePositions</url-pattern>
+        <url-pattern>/newberry-italian/updateLinePositions</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>transcriptionText</servlet-name>
+        <url-pattern>/transcriptionText</url-pattern>
+        <url-pattern>/newberry-french/transcriptionText</url-pattern>
+        <url-pattern>/newberry-italian/transcriptionText</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>binarizedImage</servlet-name>
+        <url-pattern>/binarizedImage</url-pattern>
+        <url-pattern>/newberry-french/binarizedImage</url-pattern>
+        <url-pattern>/newberry-italian/binarizedImage</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>validate</servlet-name>
+        <url-pattern>/validate</url-pattern>
+        <url-pattern>/newberry-french/validate</url-pattern>
+        <url-pattern>/newberry-italian/validate</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>export</servlet-name>
+        <url-pattern>/export</url-pattern>
+        <url-pattern>/newberry-french/export</url-pattern>
+        <url-pattern>/newberry-italian/export</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>tagTracker</servlet-name>
+        <url-pattern>/tagTracker</url-pattern>
+        <url-pattern>/newberry-french/tagTracker</url-pattern>
+        <url-pattern>/newberry-italian/tagTracker</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>linePositions</servlet-name>
+        <url-pattern>/linePositions</url-pattern>
+        <url-pattern>/newberry-french/linePositions</url-pattern>
+        <url-pattern>/newberry-italian/linePositions</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>parseImage</servlet-name>
+        <url-pattern>/parseImage</url-pattern>
+        <url-pattern>/newberry-french/parseImage</url-pattern>
+        <url-pattern>/newberry-italian/parseImage</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>addTag</servlet-name>
+        <url-pattern>/addTag</url-pattern>
+        <url-pattern>/newberry-french/addTag</url-pattern>
+        <url-pattern>/newberry-italian/addTag</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>batchUpdateLinePositions</servlet-name>
+        <url-pattern>/batchUpdateLinePositions</url-pattern>
+        <url-pattern>/newberry-french/batchUpdateLinePositions</url-pattern>
+        <url-pattern>/newberry-italian/batchUpdateLinePositions</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>addHotkey</servlet-name>
+        <url-pattern>/addHotkey</url-pattern>
+        <url-pattern>/newberry-french/addHotkey</url-pattern>
+        <url-pattern>/newberry-italian/addHotkey</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>updateRemainingText</servlet-name>
+        <url-pattern>/updateRemainingText</url-pattern>
+        <url-pattern>/newberry-french/updateRemainingText</url-pattern>
+        <url-pattern>/newberry-italian/updateRemainingText</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>fixColumns</servlet-name>
+        <url-pattern>/fixColumns</url-pattern>
+        <url-pattern>/newberry-french/fixColumns</url-pattern>
+        <url-pattern>/newberry-italian/fixColumns</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>heartbeat</servlet-name>
+        <url-pattern>/heartbeat</url-pattern>
+        <url-pattern>/newberry-french/heartbeat</url-pattern>
+        <url-pattern>/newberry-italian/heartbeat</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>annotation</servlet-name>
+        <url-pattern>/annotation</url-pattern>
+        <url-pattern>/newberry-french/annotation</url-pattern>
+        <url-pattern>/newberry-italian/annotation</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>uploadHeader</servlet-name>
+        <url-pattern>/uploadHeader</url-pattern>
+        <url-pattern>/newberry-french/uploadHeader</url-pattern>
+        <url-pattern>/newberry-italian/uploadHeader</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UploadImages</servlet-name>
+        <url-pattern>/UploadImages</url-pattern>
+        <url-pattern>/newberry-french/UploadImages</url-pattern>
+        <url-pattern>/newberry-italian/UploadImages</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>characterImage</servlet-name>
+        <url-pattern>/characterImage</url-pattern>
+        <url-pattern>/newberry-french/characterImage</url-pattern>
+        <url-pattern>/newberry-italian/characterImage</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FileUpload</servlet-name>
+        <url-pattern>/FileUpload</url-pattern>
+        <url-pattern>/newberry-french/FileUpload</url-pattern>
+        <url-pattern>/newberry-italian/FileUpload</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>proxy</servlet-name>
+        <url-pattern>/proxy</url-pattern>
+        <url-pattern>/newberry-french/proxy</url-pattern>
+        <url-pattern>/newberry-italian/proxy</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ProjectsServlet</servlet-name>
+        <url-pattern>/projects</url-pattern>
+        <url-pattern>/newberry-french/projects</url-pattern>
+        <url-pattern>/newberry-italian/projects</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManuscriptsServlet</servlet-name>
+        <url-pattern>/manuscripts</url-pattern>
+        <url-pattern>/newberry-french/manuscripts</url-pattern>
+        <url-pattern>/newberry-italian/manuscripts</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/login</url-pattern>
+        <url-pattern>/newberry-french/login</url-pattern>
+        <url-pattern>/newberry-italian/login</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>createManuscript</servlet-name>
+        <url-pattern>/createManuscript</url-pattern>
+        <url-pattern>/newberry-french/createManuscript</url-pattern>
+        <url-pattern>/newberry-italian/createManuscript</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ProjectServlet</servlet-name>
+        <url-pattern>/project/*</url-pattern>
+        <url-pattern>/newberry-french/project/*</url-pattern>
+        <url-pattern>/newberry-italian/project/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ProjectServlet</servlet-name>
+        <url-pattern>/manifest/*</url-pattern>
+        <url-pattern>/newberry-french/manifest/*</url-pattern>
+        <url-pattern>/newberry-italian/manifest/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CanvasServlet</servlet-name>
+        <url-pattern>/canvas/*</url-pattern>
+        <url-pattern>/newberry-french/canvas/*</url-pattern>
+        <url-pattern>/newberry-italian/canvas/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FolioReport</servlet-name>
+        <url-pattern>/folioReport</url-pattern>
+        <url-pattern>/newberry-french/folioReport</url-pattern>
+        <url-pattern>/newberry-italian/folioReport</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>imageParsing</servlet-name>
         <url-pattern>/imageParsing</url-pattern>
+        <url-pattern>/newberry-french/imageParsing</url-pattern>
+        <url-pattern>/newberry-italian/imageParsing</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>createProject</servlet-name>
         <url-pattern>/createProject</url-pattern>
+        <url-pattern>/newberry-french/createProject</url-pattern>
+        <url-pattern>/newberry-italian/createProject</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>createProjectFromManifest</servlet-name>
         <url-pattern>/createProjectFromManifest</url-pattern>
+        <url-pattern>/newberry-french/createProjectFromManifest</url-pattern>
+        <url-pattern>/newberry-italian/createProjectFromManifest</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>createProjectFromMSID</servlet-name>
         <url-pattern>/createProjectFromMSID</url-pattern>
+        <url-pattern>/newberry-french/createProjectFromMSID</url-pattern>
+        <url-pattern>/newberry-italian/createProjectFromMSID</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>copyProject</servlet-name>
         <url-pattern>/copyProject</url-pattern>
+        <url-pattern>/newberry-french/copyProject</url-pattern>
+        <url-pattern>/newberry-italian/copyProject</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>changeUserPermission</servlet-name>
         <url-pattern>/changeUserPermission</url-pattern>
+        <url-pattern>/newberry-french/changeUserPermission</url-pattern>
+        <url-pattern>/newberry-italian/changeUserPermission</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>getProjectLog</servlet-name>
         <url-pattern>/getProjectLog</url-pattern>
+        <url-pattern>/newberry-french/getProjectLog</url-pattern>
+        <url-pattern>/newberry-italian/getProjectLog</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>getAllManuscript</servlet-name>
         <url-pattern>/getAllManuscript</url-pattern>
+        <url-pattern>/newberry-french/getAllManuscript</url-pattern>
+        <url-pattern>/newberry-italian/getAllManuscript</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>getManuscriptByCityAndRepository</servlet-name>
         <url-pattern>/getManuscriptByCityAndRepository</url-pattern>
+        <url-pattern>/newberry-french/getManuscriptByCityAndRepository</url-pattern>
+        <url-pattern>/newberry-italian/getManuscriptByCityAndRepository</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>saveImageByURL</servlet-name>
         <url-pattern>/saveImageByURL</url-pattern>
+        <url-pattern>/newberry-french/saveImageByURL</url-pattern>
+        <url-pattern>/newberry-italian/saveImageByURL</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>addUserToProject</servlet-name>
         <url-pattern>/addUserToProject</url-pattern>
+        <url-pattern>/newberry-french/addUserToProject</url-pattern>
+        <url-pattern>/newberry-italian/addUserToProject</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>delUserFromProject</servlet-name>
         <url-pattern>/delUserFromProject</url-pattern>
+        <url-pattern>/newberry-french/delUserFromProject</url-pattern>
+        <url-pattern>/newberry-italian/delUserFromProject</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>updateLineServlet</servlet-name>
         <url-pattern>/updateLineServlet</url-pattern>
+        <url-pattern>/newberry-french/updateLineServlet</url-pattern>
+        <url-pattern>/newberry-italian/updateLineServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>getProjectTPENServlet</servlet-name>
         <url-pattern>/getProjectTPENServlet</url-pattern>
+        <url-pattern>/newberry-french/getProjectTPENServlet</url-pattern>
+        <url-pattern>/newberry-italian/getProjectTPENServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>geti</servlet-name>
         <url-pattern>/geti</url-pattern>
+        <url-pattern>/newberry-french/geti</url-pattern>
+        <url-pattern>/newberry-italian/geti</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>updateMetadataByProjectIDServlet</servlet-name>
         <url-pattern>/updateMetadataByProjectIDServlet</url-pattern>
+        <url-pattern>/newberry-french/updateMetadataByProjectIDServlet</url-pattern>
+        <url-pattern>/newberry-italian/updateMetadataByProjectIDServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>delProject</servlet-name>
         <url-pattern>/delProject</url-pattern>
+        <url-pattern>/newberry-french/delProject</url-pattern>
+        <url-pattern>/newberry-italian/delProject</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>saveNewTransLineServlet</servlet-name>
         <url-pattern>/saveNewTransLineServlet</url-pattern>
+        <url-pattern>/newberry-french/saveNewTransLineServlet</url-pattern>
+        <url-pattern>/newberry-italian/saveNewTransLineServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>updateTransLineServlet</servlet-name>
         <url-pattern>/updateTransLineServlet</url-pattern>
+        <url-pattern>/newberry-french/updateTransLineServlet</url-pattern>
+        <url-pattern>/newberry-italian/updateTransLineServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>addProjectToolServlet</servlet-name>
         <url-pattern>/addProjectToolServlet</url-pattern>
+        <url-pattern>/newberry-french/addProjectToolServlet</url-pattern>
+        <url-pattern>/newberry-italian/addProjectToolServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>removeProjectToolServlet</servlet-name>
         <url-pattern>/removeProjectToolServlet</url-pattern>
+        <url-pattern>/newberry-french/removeProjectToolServlet</url-pattern>
+        <url-pattern>/newberry-italian/removeProjectToolServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>addUserToolServlet</servlet-name>
         <url-pattern>/addUserToolServlet</url-pattern>
+        <url-pattern>/newberry-french/addUserToolServlet</url-pattern>
+        <url-pattern>/newberry-italian/addUserToolServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>removeUserToolServlet</servlet-name>
         <url-pattern>/removeUserToolServlet</url-pattern>
+        <url-pattern>/newberry-french/removeUserToolServlet</url-pattern>
+        <url-pattern>/newberry-italian/removeUserToolServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>updateAnnoListServlet</servlet-name>
         <url-pattern>/updateAnnoList</url-pattern>
+        <url-pattern>/newberry-french/updateAnnoList</url-pattern>
+        <url-pattern>/newberry-italian/updateAnnoList</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>GetAnnotationByPropertiesServlet</servlet-name>
         <url-pattern>/getAnno</url-pattern>
+        <url-pattern>/newberry-french/getAnno</url-pattern>
+        <url-pattern>/newberry-italian/getAnno</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>LoginHookServlet</servlet-name>
         <url-pattern>/loginHook</url-pattern>
+        <url-pattern>/newberry-french/loginHook</url-pattern>
+        <url-pattern>/newberry-italian/loginHook</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>GetSharedProjectsByUserServlet</servlet-name>
         <url-pattern>/getSharedProjectsByUser</url-pattern>
+        <url-pattern>/newberry-french/getSharedProjectsByUser</url-pattern>
+        <url-pattern>/newberry-italian/getSharedProjectsByUser</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>LogoutHookServlet</servlet-name>
         <url-pattern>/logoutHook</url-pattern>
+        <url-pattern>/newberry-french/logoutHook</url-pattern>
+        <url-pattern>/newberry-italian/logoutHook</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CopyProjectAndAnnos</servlet-name>
         <url-pattern>/copyProjectWithAnnotations</url-pattern>
+        <url-pattern>/newberry-french/copyProjectWithAnnotations</url-pattern>
+        <url-pattern>/newberry-italian/copyProjectWithAnnotations</url-pattern>
     </servlet-mapping>
-    <!-- tpen webservices for newberry ends -->
     <servlet-mapping>
         <servlet-name>UpdateProjectCharacter</servlet-name>
         <url-pattern>/updateProjectCharacter</url-pattern>
+        <url-pattern>/newberry-french/updateProjectCharacter</url-pattern>
+        <url-pattern>/newberry-italian/updateProjectCharacter</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RemoveProjectCharacter</servlet-name>
         <url-pattern>/removeProjectCharacter</url-pattern>
+        <url-pattern>/newberry-french/removeProjectCharacter</url-pattern>
+        <url-pattern>/newberry-italian/removeProjectCharacter</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>UpdateProjectTag</servlet-name>
         <url-pattern>/updateProjectTag</url-pattern>
+        <url-pattern>/newberry-french/updateProjectTag</url-pattern>
+        <url-pattern>/newberry-italian/updateProjectTag</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RemoveProjectTag</servlet-name>
         <url-pattern>/removeProjectTag</url-pattern>
+        <url-pattern>/newberry-french/removeProjectTag</url-pattern>
+        <url-pattern>/newberry-italian/removeProjectTag</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>SaveNewProjectCharacter</servlet-name>
         <url-pattern>/saveNewProjectCharacter</url-pattern>
+        <url-pattern>/newberry-french/saveNewProjectCharacter</url-pattern>
+        <url-pattern>/newberry-italian/saveNewProjectCharacter</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>SaveNewProjectXML</servlet-name>
         <url-pattern>/saveNewProjectXML</url-pattern>
+        <url-pattern>/newberry-french/saveNewProjectXML</url-pattern>
+        <url-pattern>/newberry-italian/saveNewProjectXML</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>BulkUpdateAnnos</servlet-name>
         <url-pattern>/bulkUpdateAnnos</url-pattern>
+        <url-pattern>/newberry-french/bulkUpdateAnnos</url-pattern>
+        <url-pattern>/newberry-italian/bulkUpdateAnnos</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>AcceptIPRServlet</servlet-name>
         <url-pattern>/acceptIPR</url-pattern>
+        <url-pattern>/newberry-french/acceptIPR</url-pattern>
+        <url-pattern>/newberry-italian/acceptIPR</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>GetHistory</servlet-name>
         <url-pattern>/getHistory</url-pattern>
+        <url-pattern>/newberry-french/getHistory</url-pattern>
+        <url-pattern>/newberry-italian/getHistory</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>UpgradeManagement</servlet-name>
         <url-pattern>/upgradeManagement</url-pattern>
+        <url-pattern>/newberry-french/upgradeManagement</url-pattern>
+        <url-pattern>/newberry-italian/upgradeManagement</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ClassicProjectFromManifest</servlet-name>
         <url-pattern>/ClassicProjectFromManifest</url-pattern>
+        <url-pattern>/newberry-french/ClassicProjectFromManifest</url-pattern>
+        <url-pattern>/newberry-italian/ClassicProjectFromManifest</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>autoParse</servlet-name>
         <url-pattern>/autoParse</url-pattern>
+        <url-pattern>/newberry-french/autoParse</url-pattern>
+        <url-pattern>/newberry-italian/autoParse</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>UpdateV0AnnoListServlet</servlet-name>
+        <servlet-class>edu.slu.tpen.servlet.UpdateV0AnnoListServlet</servlet-class>
+        <servlet-class>edu.slu.tpen.servlet.UpdateV0AnnoListServlet</servlet-class>
         <servlet-class>edu.slu.tpen.servlet.UpdateV0AnnoListServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>UndoLine</servlet-name>
         <servlet-class>edu.slu.tpen.servlet.UndoLine</servlet-class>
+        <servlet-class>edu.slu.tpen.servlet.UndoLine</servlet-class>
+        <servlet-class>edu.slu.tpen.servlet.UndoLine</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>UpdateV0AnnoListServlet</servlet-name>
         <url-pattern>/updateV0AnnoList</url-pattern>
+        <url-pattern>/newberry-french/updateV0AnnoList</url-pattern>
+        <url-pattern>/newberry-italian/updateV0AnnoList</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>UndoLine</servlet-name>
         <url-pattern>/undoLine</url-pattern>
+        <url-pattern>/newberry-french/undoLine</url-pattern>
+        <url-pattern>/newberry-italian/undoLine</url-pattern>
     </servlet-mapping>
 
     <session-config>
@@ -712,6 +877,7 @@
     </session-config>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
-        <welcome-file>login.html</welcome-file>
+        <welcome-file>newberry-french/login.html</welcome-file>
+        <welcome-file>newberry-italian/login.html</welcome-file>
     </welcome-file-list>
 </web-app>
