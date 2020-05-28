@@ -20,34 +20,31 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import static java.awt.Toolkit.getDefaultToolkit;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import static java.lang.Integer.parseInt;
-import static java.lang.System.out;
-import static java.lang.Thread.sleep;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
-import static java.nio.charset.Charset.defaultCharset;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import java.util.*;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import static java.util.regex.Pattern.compile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 /**
  * A blob is a representation of the boolean matrix that describes a single glyph from a binarized image
@@ -61,7 +58,7 @@ public class blob implements Serializable {
    /**
     * Draw a blob on an image starting from the given coordinates.
     */
-   public static void drawBlob(BufferedImage img, int x, int y, blob b) {
+   public static void drawBlob(final BufferedImage img, final int x, final int y, final blob b) {
       int color = 0xcc0000;
       if (b.size % 3 == 0) {
          color = 0xcc0000;
@@ -74,10 +71,10 @@ public class blob implements Serializable {
       }
 
       for (int i = 0; i < b.pixels.size(); i++) {
-         pixel p = b.pixels.get(i);
+         final pixel p = b.pixels.get(i);
          try {
             img.setRGB(x + p.x, y + p.y, color);
-         } catch (ArrayIndexOutOfBoundsException e) {
+         } catch (final ArrayIndexOutOfBoundsException e) {
             return;
          }
       }
@@ -86,18 +83,19 @@ public class blob implements Serializable {
    /**
     * Draw the blob onto a buffere
     */
-   public static void drawBlob(BufferedImage img, int x, int y, blob b, int color) {
+   public static void drawBlob(final BufferedImage img, final int x, final int y, final blob b, final int color) {
       for (int i = 0; i < b.pixels.size(); i++) {
-         pixel p = b.pixels.get(i);
+         final pixel p = b.pixels.get(i);
          try {
             img.setRGB(x + p.x, y + p.y, color);
-         } catch (ArrayIndexOutOfBoundsException e) {
+         } catch (final ArrayIndexOutOfBoundsException e) {
          }
       }
    }
-//coordinates of a pixel in the blob. Any pixel will do.
-   static Pattern p = compile("\\n");
-   static Pattern comma = compile(",");
+
+   // coordinates of a pixel in the blob. Any pixel will do.
+   static Pattern p = Pattern.compile("\\n");
+   static Pattern comma = Pattern.compile(",");
    protected int x;
    protected int y;
    protected int width;
@@ -120,46 +118,48 @@ public class blob implements Serializable {
       id = -1;
    }
 
-   public blob(int x, int y) {
+   public blob(final int x, final int y) {
       this.x = x;
       this.y = y;
-      //pixels.push(new pixel(x,y));
+      // pixels.push(new pixel(x,y));
       id = -1;
       size = 0;
    }
 
    /**
-    * Service a request for a single blob from a page, intended for drawing the blob. Currently loads the
-    * entire page worth of data, so quite inefficient. Returns null if it couldnt service the request.
+    * Service a request for a single blob from a page, intended for drawing the
+    * blob. Currently loads the entire page worth of data, so quite inefficient.
+    * Returns null if it couldnt service the request.
     */
-   public static blob getBlob(String imageName, int blobIdentifier) {
+   public static blob getBlob(final String imageName, final int blobIdentifier) {
       try {
-         Vector<blob> b = getBlobs("data/" + imageName);
+         final Vector<blob> b = blob.getBlobs("data/" + imageName);
 
          return b.get(blobIdentifier);
-      } catch (FileNotFoundException ex) {
-            getLogger(blob.class.getName()).log(SEVERE, null, ex);
+      } catch (final FileNotFoundException ex) {
+         Logger.getLogger(blob.class.getName()).log(Level.SEVERE, null, ex);
          return null;
-      } catch (IOException ex) {
-            getLogger(blob.class.getName()).log(SEVERE, null, ex);
+      } catch (final IOException ex) {
+         Logger.getLogger(blob.class.getName()).log(Level.SEVERE, null, ex);
          return null;
       }
    }
 
    /**
-    * Service a request for a single blob from a page, intended for drawing the blob. Currently loads the
-    * entire page worth of data, so quite inefficient. Returns null if it couldnt service the request.
+    * Service a request for a single blob from a page, intended for drawing the
+    * blob. Currently loads the entire page worth of data, so quite inefficient.
+    * Returns null if it couldnt service the request.
     */
-   public static blob getBlob(String path, String imageName, int blobIdentifier) {
+   public static blob getBlob(final String path, final String imageName, final int blobIdentifier) {
       try {
-         Vector<blob> b = getBlobs(path + imageName);
+         final Vector<blob> b = blob.getBlobs(path + imageName);
 
          return b.get(blobIdentifier);
-      } catch (FileNotFoundException ex) {
-            getLogger(blob.class.getName()).log(SEVERE, null, ex);
+      } catch (final FileNotFoundException ex) {
+         Logger.getLogger(blob.class.getName()).log(Level.SEVERE, null, ex);
          return null;
-      } catch (IOException ex) {
-            getLogger(blob.class.getName()).log(SEVERE, null, ex);
+      } catch (final IOException ex) {
+         Logger.getLogger(blob.class.getName()).log(Level.SEVERE, null, ex);
          return null;
       }
    }
@@ -167,30 +167,31 @@ public class blob implements Serializable {
    /**
     * Draw this blob on the image in the requested color. Color is RGB.
     */
-   protected void drawBlob(BufferedImage img, int color) {
-      Stack<pixel> pixels2 = new Stack();
+   protected void drawBlob(final BufferedImage img, final int color) {
+      final Stack<pixel> pixels2 = new Stack();
       for (int i = 0; i < pixels.size(); i++) {
-         pixel thisOne = pixels.get(i);
+         final pixel thisOne = pixels.get(i);
          try {
             img.setRGB(thisOne.x, thisOne.y, color);
-         } catch (ArrayIndexOutOfBoundsException ex) {
+         } catch (final ArrayIndexOutOfBoundsException ex) {
          }
          pixels2.push(thisOne);
       }
-      //displayImage(img);
+      // displayImage(img);
       pixels = pixels2;
    }
 
    /**
-    * Find the topmost and leftmost points, and subtract their positions from all pixels, the result being a
-    * coordinate set that describes this blob from a base of 0,0
+    * Find the topmost and leftmost points, and subtract their positions from all
+    * pixels, the result being a coordinate set that describes this blob from a
+    * base of 0,0
     */
    protected void calculateRelativeCoordinates() {
 
       int top_lowest = 9999999;
       int left_lowest = 9999999;
       for (int i = 0; i < pixels.size(); i++) {
-         pixel thisOne = pixels.get(i);
+         final pixel thisOne = pixels.get(i);
          if (thisOne.y < left_lowest) {
             left_lowest = thisOne.y;
          }
@@ -198,15 +199,15 @@ public class blob implements Serializable {
             top_lowest = thisOne.x;
          }
 
-
       }
 
-      //This is the point that the relative coordinates are based on, store its real location within the image so the blob can be
-      //redrawn later using the blob data.
+      // This is the point that the relative coordinates are based on, store its real
+      // location within the image so the blob can be
+      // redrawn later using the blob data.
       this.x = top_lowest;
       this.y = left_lowest;
       for (int i = 0; i < pixels.size(); i++) {
-         pixel tmp = pixels.get(i);
+         final pixel tmp = pixels.get(i);
          tmp.x = (short) (tmp.x - this.x);
          tmp.y = (short) (tmp.y - this.y);
       }
@@ -217,48 +218,47 @@ public class blob implements Serializable {
     * Sort blob pixels by x, with y as the secondary sort criteria
     */
    private void sort() {
-      pixel[] pixelArray = pixels.toArray(new pixel[pixels.size()]);
+      final pixel[] pixelArray = pixels.toArray(new pixel[pixels.size()]);
       Arrays.sort(pixelArray);
       pixels = new Vector();
-        for (pixel pixelArray1 : pixelArray) {
-            pixels.add(pixelArray1);
-        }
+      for (int i = 0; i < pixelArray.length; i++) {
+         pixels.add(pixelArray[i]);
+      }
    }
 
    /**
-    * count the number of black pixels adjacent to x,y using recursion. this is the character/blob
-    * segmentation mechanism. It is primative.
+    * count the number of black pixels adjacent to x,y using recursion. this is the
+    * character/blob segmentation mechanism. It is primative.
     */
-   public void count(BufferedImage img, int currentx, int currenty) {
-      //increase size and set this pixel to white so it doesnt get counted again
-      //System.out.println(currentx+" "+currenty);
+   public void count(final BufferedImage img, final int currentx, final int currenty) {
+      // increase size and set this pixel to white so it doesnt get counted again
+      // System.out.println(currentx+" "+currenty);
 
-      //if(size>50000)
-      //	return;
+      // if(size>50000)
+      // return;
 
       img.setRGB(currentx, currenty, -1);
       if (size > 1 && size < 4000) {
          copy.setRGB(currentx, currenty, color);
          pixels.add(new pixel(currentx, currenty));
 
-         //imageHelpers.writeImage(copy, "/usr/web/bin"+size+".jpg");
+         // imageHelpers.writeImage(copy, "/usr/web/bin"+size+".jpg");
       }
-      //prevent stack overflow if the blob is too large, if it is this large it is uninteresting
+      // prevent stack overflow if the blob is too large, if it is this large it is
+      // uninteresting
       if (size > 4000) {
          return;
       }
       size++;
-      //check the 8 surrounding pixels, if any of them is black, call this function again.
+      // check the 8 surrounding pixels, if any of them is black, call this function
+      // again.
       try {
-         /*if(img.getRGB(currentx-1, currenty)!=-1)
-
-          {
-          count(img,currentx-1, currenty);
-          }
-          if(img.getRGB(currentx-1, currenty+1)!=-1)
-          {
-          count(img,currentx-1, currenty+1);
-          }*/
+         /*
+          * if(img.getRGB(currentx-1, currenty)!=-1)
+          * 
+          * { count(img,currentx-1, currenty); } if(img.getRGB(currentx-1,
+          * currenty+1)!=-1) { count(img,currentx-1, currenty+1); }
+          */
          if (img.getRGB(currentx - 1, currenty) != -1) {
             count(img, currentx - 1, currenty);
          }
@@ -271,38 +271,34 @@ public class blob implements Serializable {
          if (img.getRGB(currentx + 1, currenty) != -1) {
             count(img, currentx + 1, currenty);
          }
-         /*if(img.getRGB(currentx+1, currenty+1)!=-1)
-          {
-          count(img,currentx+1, currenty+1);
-          }
-          if(img.getRGB(currentx+1, currenty-1)!=-1)
-          {
-          count(img,currentx+1, currenty-1);
-          }*/
-      } catch (ArrayIndexOutOfBoundsException e) {
+         /*
+          * if(img.getRGB(currentx+1, currenty+1)!=-1) { count(img,currentx+1,
+          * currenty+1); } if(img.getRGB(currentx+1, currenty-1)!=-1) {
+          * count(img,currentx+1, currenty-1); }
+          */
+      } catch (final ArrayIndexOutOfBoundsException e) {
       }
    }
 
    /**
-    * Given mean height and width for this page, this blob will attpemt to break itself into a reasonable
-    * number of smaller pieces.
+    * Given mean height and width for this page, this blob will attpemt to break
+    * itself into a reasonable number of smaller pieces.
     */
-   /*blob [] breakBlob(int width, int height)
-    {
-    
-    blob [] toret=new blob[1];
-    matrixBlob thisOne = new matrixBlob(this);
-    int [] [] matrixVersion=thisOne.matrix
-    return toret;
-    }*/
+   /*
+    * blob [] breakBlob(int width, int height) {
+    * 
+    * blob [] toret=new blob[1]; matrixBlob thisOne = new matrixBlob(this); int []
+    * [] matrixVersion=thisOne.matrix return toret; }
+    */
    /**
-    * count the number of black pixels adjacent to x,y No longer used, blob drawing happens after this so
-    * overly large and small blobs are excluded from the drawing process, and so the same methodology can be
-    * used for the graphical demonstration where blobs are drawn as they are matched.
+    * count the number of black pixels adjacent to x,y No longer used, blob drawing
+    * happens after this so overly large and small blobs are excluded from the
+    * drawing process, and so the same methodology can be used for the graphical
+    * demonstration where blobs are drawn as they are matched.
     */
-   public void count(BufferedImage img, BufferedImage bin, int currentx, int currenty) {
-      //increase size and set this pixel to white so it doesnt get counted again
-      //System.out.println(currentx+" "+currenty);
+   public void count(final BufferedImage img, final BufferedImage bin, final int currentx, final int currenty) {
+      // increase size and set this pixel to white so it doesnt get counted again
+      // System.out.println(currentx+" "+currenty);
 
       if (size > 5000) {
          return;
@@ -311,22 +307,20 @@ public class blob implements Serializable {
       if (size > 1) {
          copy.setRGB(currentx, currenty, color);
 
-         //imageHelpers.writeImage(copy, "/usr/web/bin"+size+".jpg");
+         // imageHelpers.writeImage(copy, "/usr/web/bin"+size+".jpg");
       }
       size++;
-      //check the 8 surrounding pixels, if any of them is black, call this function again.
+      // check the 8 surrounding pixels, if any of them is black, call this function
+      // again.
       try {
          if (img.getRGB(currentx - 1, currenty) != -1) {
             count(img, bin, currentx - 1, currenty);
          }
-         /*if(img.getRGB(currentx-1, currenty+1)!=-1)
-          {
-          count(img,bin,currentx-1, currenty+1);
-          }
-          if(img.getRGB(currentx-1, currenty-1)!=-1)
-          {
-          count(img,bin,currentx-1, currenty-1);
-          }*/
+         /*
+          * if(img.getRGB(currentx-1, currenty+1)!=-1) { count(img,bin,currentx-1,
+          * currenty+1); } if(img.getRGB(currentx-1, currenty-1)!=-1) {
+          * count(img,bin,currentx-1, currenty-1); }
+          */
          if (img.getRGB(currentx, currenty + 1) != -1) {
             count(img, bin, currentx, currenty + 1);
          }
@@ -336,33 +330,31 @@ public class blob implements Serializable {
          if (img.getRGB(currentx + 1, currenty) != -1) {
             count(img, bin, currentx + 1, currenty);
          }
-         /*if(img.getRGB(currentx+1, currenty+1)!=-1)
-          {
-          count(img,bin,currentx+1, currenty+1);
-          }
-          if(img.getRGB(currentx+1, currenty-1)!=-1)
-          {
-          count(img,bin,currentx+1, currenty-1);
-          }*/
-      } catch (ArrayIndexOutOfBoundsException e) {
+         /*
+          * if(img.getRGB(currentx+1, currenty+1)!=-1) { count(img,bin,currentx+1,
+          * currenty+1); } if(img.getRGB(currentx+1, currenty-1)!=-1) {
+          * count(img,bin,currentx+1, currenty-1); }
+          */
+      } catch (final ArrayIndexOutOfBoundsException e) {
       }
    }
 
-   public static BufferedImage drawBlob(blob b, BufferedImage bin) {
+   public static BufferedImage drawBlob(final blob b, final BufferedImage bin) {
 
       return bin;
    }
 
    /**
-    * Display the image...like on the screen. Useful for debugging, not so great on a server.
+    * Display the image...like on the screen. Useful for debugging, not so great on
+    * a server.
     */
-   public static ImagePanel2 displayImage(BufferedImage img) {
-      JFrame fr = new JFrame();
-      fr.setDefaultCloseOperation(EXIT_ON_CLOSE);
-      //fr.setTitle(title)
-      ImagePanel2 pan = new ImagePanel2(img);
-      Toolkit toolkit = getDefaultToolkit();
-      Dimension screensize = toolkit.getScreenSize();
+   public static ImagePanel2 displayImage(final BufferedImage img) {
+      final JFrame fr = new JFrame();
+      fr.setDefaultCloseOperation(fr.EXIT_ON_CLOSE);
+      // fr.setTitle(title)
+      final ImagePanel2 pan = new ImagePanel2(img);
+      final Toolkit toolkit = java.awt.Toolkit.getDefaultToolkit();
+      final Dimension screensize = toolkit.getScreenSize();
 
       pan.setSize(screensize.width, screensize.height);
       fr.getContentPane().add(pan);
@@ -379,19 +371,19 @@ public class blob implements Serializable {
       public ImagePanel2() {
       }
 
-      public ImagePanel2(BufferedImage img) {
+      public ImagePanel2(final BufferedImage img) {
          image = img;
       }
 
-      public void setImage(BufferedImage img) {
+      public void setImage(final BufferedImage img) {
          image = img;
       }
 
-      public void paintComponent(Graphics g) {
-         Rectangle rect = this.getBounds();
+      public void paintComponent(final Graphics g) {
+         final Rectangle rect = this.getBounds();
          if (image != null) {
             int newWidth, newHeight;
-            double scale = image.getWidth() / 800;
+            final double scale = image.getWidth() / 800;
             newHeight = 800;
             newWidth = (int) (image.getWidth() / scale);
             g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), this);
@@ -412,70 +404,56 @@ public class blob implements Serializable {
    }
 
    /**
-    * Returns the percentage of pixels in the relative positioned blobs that are in common
+    * Returns the percentage of pixels in the relative positioned blobs that are in
+    * common
     */
-   public static double compare(blob a, blob b) {
+   public static double compare(final blob a, final blob b) {
       if (a.size - b.size > 500 || a.size - b.size < -500) {
          return 0.01;
       }
       int good = 0;
-      //first, find the center of mass of each blob, this will be used to best align them. well, maybe not best.
-      int axSum = 0;
-      int aySum = 0;
-      int bxSum = 0;
-      int bySum = 0;
-      pixel[] aArray = a.pixels.toArray(new pixel[a.pixels.size()]);
-      pixel[] bArray = b.pixels.toArray(new pixel[b.pixels.size()]);
+      // first, find the center of mass of each blob, this will be used to best align
+      // them. well, maybe not best.
+      final int axSum = 0;
+      final int aySum = 0;
+      final int bxSum = 0;
+      final int bySum = 0;
+      final pixel[] aArray = a.pixels.toArray(new pixel[a.pixels.size()]);
+      final pixel[] bArray = b.pixels.toArray(new pixel[b.pixels.size()]);
 
       int innercount = 0;
-      /* for(int i=0;i<aArray.length;i++)
-       {
-       pixel aCurrent=aArray[i];
-       axSum+=aCurrent.x;
-       aySum+=aCurrent.y;
-       }
+      /*
+       * for(int i=0;i<aArray.length;i++) { pixel aCurrent=aArray[i];
+       * axSum+=aCurrent.x; aySum+=aCurrent.y; }
+       * 
+       * for(int i=0;i<bArray.length;i++) { pixel bCurrent=bArray[i];
+       * Arrays.sort(bArray); bxSum+=bCurrent.x; bySum+=bCurrent.y; }
+       * 
+       * bxSum=bxSum/b.size; bySum=bySum/b.size;
+       * 
+       * aySum=aySum/a.size; axSum=axSum/a.size; int yDiff=aySum-bySum; int
+       * xDiff=axSum-bxSum; if(xDiff<0) xDiff=xDiff*-1; if(yDiff<0) yDiff=xDiff*-1;
+       * System.out.print("xDiff:"+xDiff+" yDiff:"+yDiff+"\n"); int maxgood=0;
+       */
 
-       for(int i=0;i<bArray.length;i++)
-       {
-       pixel bCurrent=bArray[i];
-       Arrays.sort(bArray);
-       bxSum+=bCurrent.x;
-       bySum+=bCurrent.y;
-       }
+      final Boolean wouldabroke = false;
+      for (int i = 0; i < aArray.length; i++) {
 
-       bxSum=bxSum/b.size;
-       bySum=bySum/b.size;
+         innercount = 0;
+         final pixel aCurrent = aArray[i];
 
-       aySum=aySum/a.size;
-       axSum=axSum/a.size;
-       int yDiff=aySum-bySum;
-       int xDiff=axSum-bxSum;
-       if(xDiff<0)
-       xDiff=xDiff*-1;
-       if(yDiff<0)
-       yDiff=xDiff*-1;
-       System.out.print("xDiff:"+xDiff+" yDiff:"+yDiff+"\n");
-       int maxgood=0;*/
+         for (int j = 0; j < bArray.length; j++) {
+            final pixel bCurrent = bArray[j];
+            if ((aCurrent.x == (bCurrent.x) && aCurrent.y == (bCurrent.y))) {
+               // System.out.print("offset "+ offset+"\n");
 
+               good++;
 
-
-      Boolean wouldabroke = false;
-        for (pixel aArray1 : aArray) {
-            innercount = 0;
-            pixel aCurrent = aArray1;
-            for (pixel bCurrent : bArray) {
-                if ((aCurrent.x == (bCurrent.x) && aCurrent.y == (bCurrent.y))) {
-                    //System.out.print("offset "+ offset+"\n");
-                    
-                    good++;
-                    
-                    
-                }
-                
-                innercount++;
             }
-        }
 
+            innercount++;
+         }
+      }
 
       if (a.size > b.size) {
          return (double) good / a.size;
@@ -488,61 +466,58 @@ public class blob implements Serializable {
    /**
     * @Depricated we no longer write blob data to a database
     */
-   public static void writeBlob(Connection j, blob b, String image) throws SQLException {
-      String query = "Insert into blobs(image, size) values(?,?)";
-      String pixelQuery = "Insert into pixels(x,y,BlobId) values(?,?,?)";
+   public static void writeBlob(final Connection j, final blob b, final String image) throws SQLException {
+      final String query = "Insert into blobs(image, size) values(?,?)";
+      final String pixelQuery = "Insert into pixels(x,y,BlobId) values(?,?,?)";
 
-      PreparedStatement stmt = j.prepareStatement(query, RETURN_GENERATED_KEYS);
+      PreparedStatement stmt = j.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
       stmt.setInt(2, b.size);
       stmt.setString(1, image);
       ResultSet rs;
       stmt.execute();
       rs = stmt.getGeneratedKeys();
       rs.next();
-      int blobID = rs.getInt(1);
+      final int blobID = rs.getInt(1);
 
-      /* stmt=j.prepareStatement("insert into bin_blobs (image, blob, blobID) values(?,?,?)");
-       stmt.setString(1, image);
-       stmt.setObject(2, b);
-       stmt.setInt(3, blobID);
-       stmt.execute();*/
-
+      /*
+       * stmt=j.
+       * prepareStatement("insert into bin_blobs (image, blob, blobID) values(?,?,?)"
+       * ); stmt.setString(1, image); stmt.setObject(2, b); stmt.setInt(3, blobID);
+       * stmt.execute();
+       */
 
       stmt = j.prepareStatement(pixelQuery);
       stmt.setInt(3, blobID);
-      Enumeration e = b.pixels.elements();
-      String InsertQuery = "insert into pixels(x,y,BlobId) values(";
-      int ctr = 0;
+      final Enumeration e = b.pixels.elements();
+      final String InsertQuery = "insert into pixels(x,y,BlobId) values(";
+      final int ctr = 0;
       while (e.hasMoreElements()) {
 
-         pixel thisOne = (pixel) e.nextElement();
+         final pixel thisOne = (pixel) e.nextElement();
 
          stmt.setInt(1, thisOne.x);
          stmt.setInt(2, thisOne.y);
          stmt.execute();
       }
 
-
-
-
-
    }
 
    /**
-    * Write the coordinate pairs for all black pixels in this blob in an xml format that can be read later
+    * Write the coordinate pairs for all black pixels in this blob in an xml format
+    * that can be read later
     */
-   public static void writeBlob(BufferedWriter w, blob b) throws IOException {
+   public static void writeBlob(final BufferedWriter w, final blob b) throws IOException {
       if (b.pixels.size() < 25) {
          return;
       }
       if (b.pixels.size() > 2000) {
          return;
       }
-      //save the original location of the blob within its image
+      // save the original location of the blob within its image
       w.append("b<sx>" + b.x + "</sx><sy>" + b.y + "</sy>\n");
-      Enumeration e = b.pixels.elements();
+      final Enumeration e = b.pixels.elements();
       while (e.hasMoreElements()) {
-         pixel p = (pixel) e.nextElement();
+         final pixel p = (pixel) e.nextElement();
          w.append(+p.x + "," + p.y + "\n");
       }
 
@@ -550,28 +525,26 @@ public class blob implements Serializable {
    }
 
    /**
-    * Rather than writing coordinate pairs, write the dimensions of the blob canvas and 1 for black 0 for
-    * white, this reads in much faster than coordinate pairs
+    * Rather than writing coordinate pairs, write the dimensions of the blob canvas
+    * and 1 for black 0 for white, this reads in much faster than coordinate pairs
     */
-   public static void writeMatrixBlob(BufferedWriter w, blob b) throws IOException {
+   public static void writeMatrixBlob(final BufferedWriter w, final blob b) throws IOException {
       /**
-       * if(b.pixels.size()<25) return; if(b.pixels.size()>4000)
-        return;*
+       * if(b.pixels.size()<25) return; if(b.pixels.size()>4000) return;*
        */
-      //save the original location of the blob within its image
+      // save the original location of the blob within its image
       w.append("b<sx>" + b.x + "</sx><sy>" + b.y + "</sy>\n");
 
-      int[][] matrix = b.matrixVersion.matrix;
+      final int[][] matrix = b.matrixVersion.matrix;
       if (matrix.length <= 0) {
          return;
       }
       w.append("<szx>" + matrix.length + "</szx><szy>" + matrix[0].length + "</szy><id>" + b.id + "</id>\n");
-        for (int[] matrix1 : matrix) {
-            for (int j = 0; j < matrix[0].length; j++) {
-                w.append(matrix1[j] + ",");
-            }
-        }
-
+      for (int i = 0; i < matrix.length; i++) {
+         for (int j = 0; j < matrix[0].length; j++) {
+            w.append(matrix[i][j] + ",");
+         }
+      }
 
       w.flush();
    }
@@ -579,17 +552,17 @@ public class blob implements Serializable {
    /**
     * Read a comparison assignment from an assignment file
     */
-   public static String[] getAssignment(BufferedReader assignmentReader, File statefile) {
+   public static String[] getAssignment(final BufferedReader assignmentReader, final File statefile) {
       try {
-         String buff = assignmentReader.readLine();
-         String[] toret = buff.split(" ");
-            try (FileWriter w = new FileWriter(statefile)) {
-                w.write(buff);
-                w.flush();
-            }
+         final String buff = assignmentReader.readLine();
+         final String[] toret = buff.split(" ");
+         final FileWriter w = new FileWriter(statefile);
+         w.write(buff);
+         w.flush();
+         w.close();
          return toret;
 
-      } catch (IOException ex) {
+      } catch (final IOException ex) {
 
          return null;
       }
@@ -599,17 +572,17 @@ public class blob implements Serializable {
    /**
     * Read a comparison assignment from an assignment file
     */
-   public static String[] getAssignment(BufferedReader stateReader, BufferedReader assignmentReader) {
+   public static String[] getAssignment(final BufferedReader stateReader, final BufferedReader assignmentReader) {
       try {
-         String buff = stateReader.readLine();
+         final String buff = stateReader.readLine();
          String assignment = "";
          while (assignment.compareTo(buff) != 0) {
             assignment = assignmentReader.readLine();
          }
-         String[] toret = buff.split(" ");
+         final String[] toret = buff.split(" ");
          return toret;
 
-      } catch (IOException ex) {
+      } catch (final IOException ex) {
 
          return null;
       }
@@ -619,89 +592,183 @@ public class blob implements Serializable {
    /**
     * @Depricated we no longer save these values to a DB
     */
-   public static void writeResults(Connection j, int count, String[] imageNames, int ms) throws SQLException {
+   public static void writeResults(final Connection j, final int count, final String[] imageNames, final int ms)
+         throws SQLException {
 
       try {
-         //Connection j=dbWrapperOld.getConnection();
-         //PreparedStatement stmt=j.prepareStatement("insert into comparisons (count,image1,image2,ms) values(? ,? ,?,? )");
-         PreparedStatement stmt = j.prepareStatement("update comparisons set count=? where image1=? and image2=?");
-         //    PreparedStatement stmt=j.prepareStatement("insert into comparisons(count,image1,image2) values(?,?,?)");
+         // Connection j=dbWrapperOld.getConnection();
+         // PreparedStatement stmt=j.prepareStatement("insert into comparisons
+         // (count,image1,image2,ms) values(? ,? ,?,? )");
+         final PreparedStatement stmt = j
+               .prepareStatement("update comparisons set count=? where image1=? and image2=?");
+         // PreparedStatement stmt=j.prepareStatement("insert into
+         // comparisons(count,image1,image2) values(?,?,?)");
          stmt.setInt(1, count);
          stmt.setString(2, imageNames[0]);
          stmt.setString(3, imageNames[1]);
          stmt.setInt(4, ms);
          stmt.execute();
-         //j.close();
+         // j.close();
          return;
-      } catch (Exception e) {
-            out.print("Encountered error sending results. " + e.toString() + "\n. Retrying in 5 seconds...");
+      } catch (final Exception e) {
+         System.out.print("Encountered error sending results. " + e.toString() + "\n. Retrying in 5 seconds...");
 
       }
-      //failed last time, try again.
+      // failed last time, try again.
       try {
-            sleep(4000);
-      } catch (InterruptedException ex) {
-            getLogger(blob.class.getName()).log(SEVERE, null, ex);
+         Thread.sleep(4000);
+      } catch (final InterruptedException ex) {
+         Logger.getLogger(blob.class.getName()).log(Level.SEVERE, null, ex);
       }
    }
 
-   public static synchronized void writeMatchResults(String toWrite, FileWriter w) {
+   public static synchronized void writeMatchResults(final String toWrite, final FileWriter w) {
 
       try {
 
          w.append(toWrite);
          w.flush();
-      } catch (IOException ex) {
+      } catch (final IOException ex) {
+         ex.printStackTrace();
       }
    }
 
-   public static synchronized void writeMatchResults(int count1, int count2, String[] imageNames, FileWriter w) {
+   public static synchronized void writeMatchResults(final int count1, final int count2, final String[] imageNames,
+         final FileWriter w) {
 
       try {
 
          w.append(imageNames[0] + ":" + count1 + ";" + imageNames[1] + ":" + count2 + "\n");
          w.flush();
-      } catch (IOException ex) {
+      } catch (final IOException ex) {
+         ex.printStackTrace();
       }
    }
 
-   public static void writeResults(int count, String[] imageNames, FileWriter w) throws SQLException {
+   public static void writeResults(final int count, final String[] imageNames, final FileWriter w) throws SQLException {
       try {
          w.append(imageNames[0] + ":" + imageNames[1] + ":" + count + "\n");
-            out.print(imageNames[0] + ":" + imageNames[1] + ":" + count + "\n");
-            out.flush();
+         System.out.print(imageNames[0] + ":" + imageNames[1] + ":" + count + "\n");
+         System.out.flush();
          w.flush();
-      } catch (IOException ex) {
-            getLogger(blob.class.getName()).log(SEVERE, null, ex);
+      } catch (final IOException ex) {
+         Logger.getLogger(blob.class.getName()).log(Level.SEVERE, null, ex);
       }
    }
 
+   /**
+    * Load the blobs associated with a particular image from the database
+    */
+   /*
+    * public static Vector<blob> getBlobs(String image, Connection j) throws
+    * SQLException { Vector <blob> blobs=new Vector(); PreparedStatement
+    * stmt=j.prepareStatement("select id from blobs where image=?");
+    * stmt.setString(1, image); ResultSet rs=stmt.executeQuery(); while(rs.next())
+    * { PreparedStatement
+    * stmt2=j.prepareStatement("select x,y from pixels where blobID=?"); ResultSet
+    * pixelSet=stmt2.executeQuery(); blob thisOne=new blob(); while(rs.next()) {
+    * pixel thisPixel=new pixel(pixelSet.getInt("x"),pixelSet.getInt("y"));
+    * thisOne.pixels.push(thisPixel); }
+    * 
+    * } return blobs; }
+    */
    /**
     * Read the blobs stored in a file
     */
-   public static Vector<blob> getBlobs(String filename) throws FileNotFoundException, IOException {
-        return (getMatrixBlobs(filename));
+   public static Vector<blob> getBlobs(final String filename) throws FileNotFoundException, IOException {
+      // do this is the blob file is in matrix format rather than coordinate pair
+      // format
+      if (true) {
+         return (getMatrixBlobs(filename));
+      }
+
+      final Vector<blob> blobs = new Vector();
+      // if(lastPage!=null)
+      // return lastPage;
+      blob thisOne = new blob();
+      int maxX = 0;
+      int maxY = 0;
+      String buff;
+
+      int idCounter = 0;
+
+      final String[] stuff = blob.readFileIntoArray(filename); // p.split(readFile(filename.replace(".txt.txt",
+                                                               // ".txt")));
+
+      for (int i = 0; i < stuff.length; i++) {
+         buff = stuff[i];
+
+         if (buff.contains("b")) {
+            if (thisOne != null) {
+               thisOne.arrayVersion = thisOne.pixels.toArray(new pixel[thisOne.pixels.size()]);
+               thisOne.width = maxX;
+               thisOne.height = maxY;
+               thisOne.matrixVersion = new matrixBlob(thisOne);
+               // thisOne.blockVersion=new BlockBlob(thisOne.matrixVersion);
+               thisOne.altVersion = new altBlob(thisOne);
+               blobs.add(thisOne);
+               thisOne.id = idCounter;
+               idCounter++;
+               maxX = 0;
+               maxY = 0;
+            }
+            thisOne = new blob();
+            try {
+               final int startx = buff.indexOf("<sx>") + 4;
+               final int endx = buff.indexOf("</sx>");
+               final int starty = buff.indexOf("<sy>") + 4;
+               final int endy = buff.indexOf("</sy>");
+               final int x = Integer.parseInt(buff.substring(startx, endx));
+
+               final int y = Integer.parseInt(buff.substring(starty, endy));
+               thisOne.x = x;
+               thisOne.y = y;
+
+            } catch (final StringIndexOutOfBoundsException e) {
+               final int k = 0;
+            }
+         } else {
+            final String[] parts = comma.split(buff);
+            final int x = Integer.parseInt(parts[0]);
+
+            final int y = Integer.parseInt(parts[1]);
+            if (x > maxX) {
+               maxX = x;
+            }
+            if (y > maxY) {
+               maxY = y;
+            }
+            thisOne.pixels.add(new pixel(x, y));
+            thisOne.size++;
+         }
+
+      }
+      // System.out.print(blobs.size() + " " + idCounter);
+      lastPage = blobs;
+      return blobs;
    }
 
    /**
-    * Read all blobs from the file. The file is in matrix format rather than coordinate pair format
+    * Read all blobs from the file. The file is in matrix format rather than
+    * coordinate pair format
     */
-   public static Vector<blob> getMatrixBlobs(String filename) throws FileNotFoundException, IOException {
+   public static Vector<blob> getMatrixBlobs(final String filename) throws FileNotFoundException, IOException {
       try {
 
-         Vector<blob> blobs = new Vector();
-//if(lastPage!=null)
-         //   return lastPage;
+         final Vector<blob> blobs = new Vector();
+         // if(lastPage!=null)
+         // return lastPage;
          blob thisOne = null;
          int maxX = 0;
          int maxY = 0;
          String buff;
-//BufferedImage img=imageHelpers.readAsBufferedImage("/usr/blankimg.jpg");
-         String fileName = filename.split("/")[filename.split("/").length - 1];
-//img=imageHelpers.scale(img,2500);
+         // BufferedImage img=imageHelpers.readAsBufferedImage("/usr/blankimg.jpg");
+         final String fileName = filename.split("/")[filename.split("/").length - 1];
+         // img=imageHelpers.scale(img,2500);
          int idCounter = 0;
 
-         String[] stuff = readFileIntoArray(filename); //p.split(readFile(filename.replace(".txt.txt", ".txt")));
+         final String[] stuff = blob.readFileIntoArray(filename); // p.split(readFile(filename.replace(".txt.txt",
+                                                                  // ".txt")));
          int[][] matrix = null;
 
          for (int i = 0; i < stuff.length; i++) {
@@ -714,8 +781,8 @@ public class blob implements Serializable {
                   thisOne.width = matrix.length;
                   thisOne.height = matrix[0].length;
                   thisOne.matrixVersion = new matrixBlob(matrix, thisOne.size);
-                  //thisOne.blockVersion=new BlockBlob(thisOne.matrixVersion);
-                  //thisOne.matrixVersion.drawBlob(img, thisOne.x, thisOne.y, 0xff0000);
+                  // thisOne.blockVersion=new BlockBlob(thisOne.matrixVersion);
+                  // thisOne.matrixVersion.drawBlob(img, thisOne.x, thisOne.y, 0xff0000);
                   thisOne.altVersion = new altBlob(thisOne);
                   blobs.add(thisOne);
                   thisOne.id = blobs.size() - 1;
@@ -726,39 +793,39 @@ public class blob implements Serializable {
                }
                thisOne = new blob();
                try {
-                  int startx = buff.indexOf("<sx>") + 4;
-                  int endx = buff.indexOf("</sx>");
-                  int starty = buff.indexOf("<sy>") + 4;
-                  int endy = buff.indexOf("</sy>");
-                  int x = parseInt(buff.substring(startx, endx));
+                  final int startx = buff.indexOf("<sx>") + 4;
+                  final int endx = buff.indexOf("</sx>");
+                  final int starty = buff.indexOf("<sy>") + 4;
+                  final int endy = buff.indexOf("</sy>");
+                  final int x = Integer.parseInt(buff.substring(startx, endx));
 
-                  int y = parseInt(buff.substring(starty, endy));
+                  final int y = Integer.parseInt(buff.substring(starty, endy));
                   thisOne.x = x;
                   thisOne.y = y;
 
-               } catch (StringIndexOutOfBoundsException e) {
-                  int k = 0;
+               } catch (final StringIndexOutOfBoundsException e) {
+                  final int k = 0;
                }
-               //now read the next line, which contains the matrix dimensions
+               // now read the next line, which contains the matrix dimensions
                i++;
                buff = stuff[i];
-               int startx = buff.indexOf("<szx>") + 5;
-               int endx = buff.indexOf("</szx>");
-               int starty = buff.indexOf("<szy>") + 5;
-               int endy = buff.indexOf("</szy>");
-               int startid = buff.indexOf("<id>") + 4;
-               int endid = buff.indexOf("</id>");
-               int id = parseInt(buff.substring(startid, endid));
-               int sizeX = parseInt(buff.substring(startx, endx));
+               final int startx = buff.indexOf("<szx>") + 5;
+               final int endx = buff.indexOf("</szx>");
+               final int starty = buff.indexOf("<szy>") + 5;
+               final int endy = buff.indexOf("</szy>");
+               final int startid = buff.indexOf("<id>") + 4;
+               final int endid = buff.indexOf("</id>");
+               final int id = Integer.parseInt(buff.substring(startid, endid));
+               final int sizeX = Integer.parseInt(buff.substring(startx, endx));
                thisOne.id = id;
-               int sizeY = parseInt(buff.substring(starty, endy));
+               final int sizeY = Integer.parseInt(buff.substring(starty, endy));
                matrix = new int[sizeY][sizeX];
                i++;
                buff = stuff[i];
-               String[] parts = comma.split(buff);
+               final String[] parts = comma.split(buff);
                for (int ctr = 0; ctr < parts.length; ctr++) {
                   if (parts[ctr].compareTo("1") == 0) {
-                     //thisOne.pixels.add(new pixel(ctr/sizeY,ctr-ctr/sizeY));
+                     // thisOne.pixels.add(new pixel(ctr/sizeY,ctr-ctr/sizeY));
                      thisOne.size++;
                      matrix[(ctr % sizeY)][ctr / sizeY] = 1;
                   }
@@ -766,15 +833,13 @@ public class blob implements Serializable {
 
             }
 
-
-
-
          }
-         //System.out.print(blobs.size() + " " + idCounter);
-         //imageHelpers.writeImage(img, "/usr/blobimgs/"+ fileName +".jpg");
+         // System.out.print(blobs.size() + " " + idCounter);
+         // imageHelpers.writeImage(img, "/usr/blobimgs/"+ fileName +".jpg");
          lastPage = blobs;
          return blobs;
-      } catch (Exception e) {
+      } catch (final Exception e) {
+         e.printStackTrace();
       }
       return null;
 
@@ -783,17 +848,17 @@ public class blob implements Serializable {
    /**
     * Quick method for reading a file in and spliting by line
     */
-   public static String[] readFileIntoArray(String file) {
+   public static String[] readFileIntoArray(final String file) {
       String[] toret = null;
 
-      Vector<String> v = new Vector();
+      final Vector<String> v = new Vector();
       try {
-         BufferedReader b = new BufferedReader(new FileReader(new File(file)));
+         final BufferedReader b = new BufferedReader(new FileReader(new File(file)));
          while (b.ready()) {
             v.add(b.readLine());
          }
-      } catch (IOException ex) {
-            getLogger(blob.class.getName()).log(SEVERE, null, ex);
+      } catch (final IOException ex) {
+         Logger.getLogger(blob.class.getName()).log(Level.SEVERE, null, ex);
       }
       toret = new String[v.size()];
       for (int i = 0; i < toret.length; i++) {
@@ -805,73 +870,84 @@ public class blob implements Serializable {
    /**
     * Faster way to read the entire data file in 1 go, courtesy of stackoverflow
     */
-   private static String readFile(String path) throws IOException {
-      try (FileInputStream stream = new FileInputStream(new File(path))) {
-         FileChannel fc = stream.getChannel();
-         MappedByteBuffer bb = fc.map(READ_ONLY, 0, fc.size());
+   private static String readFile(final String path) throws IOException {
+      final FileInputStream stream = new FileInputStream(new File(path));
+      try {
+         final FileChannel fc = stream.getChannel();
+         final MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
          /* Instead of using default, pass in a decoder. */
-         return defaultCharset().decode(bb).toString();
+         return Charset.defaultCharset().decode(bb).toString();
+      } finally {
+         stream.close();
       }
    }
 
    /**
-    * @Depricated This is left over fromt he time when we ran this as a distributed computing project
+    * @Depricated This is left over fromt he time when we ran this as a distributed
+    *             computing project
     */
-   public static void downloadFile(String urlString, String destination) throws MalformedURLException, IOException {
-      URL url = new URL(urlString);
+   public static void downloadFile(final String urlString, final String destination)
+         throws MalformedURLException, IOException {
+      final URL url = new URL(urlString);
       url.openConnection();
-      URLConnection conn = url.openConnection();
-
+      final URLConnection conn = url.openConnection();
 
         try ( // Read all the text returned by the server
                 InputStream in = conn.getInputStream()) {
-            File dest = new File(destination);
-            if (dest.exists()) {
-                dest.delete();
-            }     BufferedOutputStream tmpOut = new BufferedOutputStream(new FileOutputStream(destination));
-            int total = conn.getContentLength() / 1000000;
-            int done = 0;
-            int doneMB = -1;
-            byte[] bytes = new byte[4096];
-            String str = "";
-            while (true) {
-                int len = in.read(bytes);
-                if (len == -1) {
-                    break;
-                }      tmpOut.write(bytes, 0, len);
-                done += len;
-                if (doneMB < done / 1000000) {
-                    doneMB = done / 1000000;
-                    out.print("" + doneMB + "mb / " + total + "\n");
-                }
-                tmpOut.flush();
-            }
+            final File dest = new File(destination);
+      if (dest.exists()) {
+         dest.delete();
+      }
+      final BufferedOutputStream tmpOut = new BufferedOutputStream(new FileOutputStream(destination));
+      final int total = conn.getContentLength() / 1000000;
+      int done = 0;
+      int doneMB = -1;
+      final byte[] bytes = new byte[4096];
+
+      while (true) {
+         final int len = in.read(bytes);
+         if (len == -1) {
+            break;
+         }
+         tmpOut.write(bytes, 0, len);
+         done += len;
+
+         if (doneMB < done / 1000000) {
+            doneMB = done / 1000000;
+
+            System.out.print("" + doneMB + "mb / " + total + "\n");
+         }
+
+         tmpOut.flush();
+      }
         }
    }
 
    /**
-    * @Depricated This is left over fromt he time when we ran this as a distributed computing project
+    * @Depricated This is left over fromt he time when we ran this as a distributed
+    *             computing project
     */
-   public static void unzipFile(String fileLoc, String dataPath) throws FileNotFoundException, IOException {
-      int BUFFER = 4096;
+   public static void unzipFile(final String fileLoc, final String dataPath) throws FileNotFoundException, IOException {
+      final int BUFFER = 4096;
       BufferedOutputStream dest = null;
-      FileInputStream fis = new FileInputStream(fileLoc);
-        try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                out.println("Extracting: " + entry);
-                int count;
-                byte data[] = new byte[BUFFER];
-                // write the files to the disk
-                FileOutputStream fos = new FileOutputStream(dataPath + entry.getName());
-                dest = new BufferedOutputStream(fos, BUFFER);
-                while ((count = zis.read(data, 0, BUFFER))
-                        != -1) {
-                    dest.write(data, 0, count);
-                }      dest.flush();
-                dest.close();
-            }
-        }
+      final FileInputStream fis = new FileInputStream(fileLoc);
+      final ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
+      ZipEntry entry;
+      while ((entry = zis.getNextEntry()) != null) {
+         System.out.println("Extracting: " + entry);
+         int count;
+         final byte data[] = new byte[BUFFER];
+         // write the files to the disk
+         final FileOutputStream fos = new FileOutputStream(dataPath + entry.getName());
+         dest = new BufferedOutputStream(fos, BUFFER);
+         while ((count = zis.read(data, 0, BUFFER))
+                 != -1) {
+            dest.write(data, 0, count);
+         }
+         dest.flush();
+         dest.close();
+      }
+      zis.close();
    }
 
    public int getWidth() {

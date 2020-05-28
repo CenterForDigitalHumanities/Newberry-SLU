@@ -15,7 +15,6 @@
 package detectimages;
 
 import java.awt.image.BufferedImage;
-import static java.lang.String.format;
 
 
 /**
@@ -34,14 +33,14 @@ public class line {
    public line() {
    }
 
-   public line(int w, int hor, int ver) {
+   public line(final int w, final int hor, final int ver) {
       width = w;
       startHorizontal = hor;
       startVertical = ver;
       distance = 0;
    }
 
-   public line(int w, int hor, int ver, int dist) {
+   public line(final int w, final int hor, final int ver, final int dist) {
       width = w;
       startHorizontal = hor;
       startVertical = ver;
@@ -49,7 +48,7 @@ public class line {
 
    }
 
-   public BufferedImage drawLine(BufferedImage img, int color) {
+   public BufferedImage drawLine(final BufferedImage img, final int color) {
       if (width > 0) {
          for (int i = 0; i < width; i++) {
             img.setRGB(i + startHorizontal, startVertical, color);
@@ -58,19 +57,19 @@ public class line {
       return img;
    }
 
-   public void setWidth(int w) {
+   public void setWidth(final int w) {
       width = w;
    }
 
-   public void setStartHorizontal(int hor) {
+   public void setStartHorizontal(final int hor) {
       startHorizontal = hor;
    }
 
-   public void setStartVertical(int ver) {
+   public void setStartVertical(final int ver) {
       startVertical = ver;
    }
 
-   public void setDistance(int d) {
+   public void setDistance(final int d) {
       distance = d;
    }
 
@@ -100,6 +99,6 @@ public class line {
    
    @Override
    public String toString() {
-      return format("line(%d,%d,%d,%d)", startHorizontal, startVertical, width, distance);
+      return String.format("line(%d,%d,%d,%d)", startHorizontal, startVertical, width, distance);
    }
 }

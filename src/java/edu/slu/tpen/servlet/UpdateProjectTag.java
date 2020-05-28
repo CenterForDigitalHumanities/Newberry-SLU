@@ -7,10 +7,9 @@ package edu.slu.tpen.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import static java.lang.Integer.parseInt;
 import java.sql.SQLException;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -49,16 +48,18 @@ public class UpdateProjectTag extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int projectID = parseInt(request.getParameter("projectID"));
-        int position = parseInt(request.getParameter("position"));
+        int projectID = Integer.parseInt(request.getParameter("projectID"));
+        int position = Integer.parseInt(request.getParameter("position"));
+        String desc = request.getParameter("description");
         String newTag = request.getParameter("tag");
         PrintWriter out = response.getWriter();
         try {
             TagButton buttonToUpdate = new TagButton(projectID, position, true);
-            buttonToUpdate.setTag(newTag);
-            out.println("Tag updated");
+            String toUp = buttonToUpdate.getDescription();
+            buttonToUpdate.setTag(newTag, desc);
+            out.println("Tag "+toUp+" updated");
         } catch (SQLException ex) {
-            getLogger(UpdateProjectTag.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(UpdateProjectTag.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

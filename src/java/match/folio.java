@@ -47,33 +47,33 @@ public class folio {
       folioNumber = id;
       String query = "select * from imagepositions where imageName=? order by width,y";
         try (Connection j = getConnection()) {
-            PreparedStatement p = j.prepareStatement(query);
-            PreparedStatement p2 = j.prepareStatement(q1);
-            p2.setInt(1, id);
-            ResultSet name = p2.executeQuery();
-            name.next();
-            imageName = name.getString(1);
+      PreparedStatement p = j.prepareStatement(query);
+      PreparedStatement p2 = j.prepareStatement(q1);
+      p2.setInt(1, id);
+      ResultSet name = p2.executeQuery();
+      name.next();
+      imageName = name.getString(1);
             Vector<line> linePosVector = new Vector<>();
-            p.setString(1, imageName);
-            ResultSet rs = p.executeQuery();
-            int i = 0;
-            int pTop = 0;
-            while (rs.next()) {
-                int y = rs.getInt("x");
-                int x = rs.getInt("y");
-                if (x != 0) {
-                    int width = rs.getInt("width");
-                    int top = x - rs.getInt("height");
-                    
-                    pTop = top;
-                    
-                    line tmp = new line(y, y + width, top, x);
-                    linePosVector.add(tmp);
-                    
-                }
+      p.setString(1, imageName);
+      ResultSet rs = p.executeQuery();
+      int i = 0;
+      int pTop = 0;
+      while (rs.next()) {
+         int y = rs.getInt("x");
+         int x = rs.getInt("y");
+         if (x != 0) {
+            int width = rs.getInt("width");
+            int top = x - rs.getInt("height");
+
+            pTop = top;
+
+            line tmp = new line(y, y + width, top, x);
+            linePosVector.add(tmp);
+
+         }
             }     linePositions = new line[linePosVector.size()];
-            for (int k = 0; k < linePosVector.size(); k++) {
-                linePositions[k] = linePosVector.get(k);
+      for (int k = 0; k < linePosVector.size(); k++) {
+         linePositions[k] = linePosVector.get(k);
             } }
 
    }
@@ -81,16 +81,19 @@ public class folio {
    public static int randomPage() throws SQLException {
       String query = "select id from pages where finding=0 order by Rand() limit 1";
 
+      // String query="select min(id) from pages";
+
+
       //String query="SELECT * FROM `pages` WHERE id >= (SELECT FLOOR( MAX(id) * RAND()) FROM `pages` ) ORDER BY id LIMIT 1;";
-        try (Connection j = getConnection()) {
-            PreparedStatement p = j.prepareStatement(query);
-            ResultSet rs;
-            rs = p.executeQuery(query);
-            rs.next();
-            int min = rs.getInt(1);
-            j.close();
-            return min;             
-        }
+      Connection j = textdisplay.DatabaseWrapper.getConnection();
+      PreparedStatement p = j.prepareStatement(query);
+
+      ResultSet rs;
+      rs = p.executeQuery(query);
+      rs.next();
+      int min = rs.getInt(1);
+         j.close();
+         return min;
    }
 
    public String getImageName() {
@@ -101,46 +104,46 @@ public class folio {
 
       String query = "select count(id) from pages where finder=?";
       int amount;
-        try ( //System.out.print(query);
-                Connection j = getConnection()) {
-            PreparedStatement p = j.prepareStatement(query);
-            p.setString(1, user);
-            ResultSet rs = p.executeQuery();
-            rs.next();
+        try ( Connection j = getConnection()) {
+      PreparedStatement p = j.prepareStatement(query);
+      p.setString(1, user);
+      ResultSet rs = p.executeQuery();
+      rs.next();
             amount = rs.getInt(1);
-            query = "select * from leaders where uname=?";
-            p = j.prepareStatement(query);
-            p.setString(1, user);
-            rs = p.executeQuery();
-            if (!rs.next()) {
-                query = "insert into leaders (uname,count) values(?,0)";
-                p = j.prepareStatement(query);
-                p.setString(1, user);
-                p.execute();
-            }     query = "update leaders set count=? where uname=?";
-            p = j.prepareStatement(query);
-            p.setInt(1, amount);
-            p.setString(2, user);
-            p.execute();
-        }
+      query = "select * from leaders where uname=?";
+      p = j.prepareStatement(query);
+
+      p.setString(1, user);
+      rs = p.executeQuery();
+      if (!rs.next()) {
+         query = "insert into leaders (uname,count) values(?,0)";
+         p = j.prepareStatement(query);
+         p.setString(1, user);
+         p.execute();
+            }     
+            query = "update leaders set count=? where uname=?";
+      p = j.prepareStatement(query);
+      p.setInt(1, amount);
+      p.setString(2, user);
+      p.execute();
       return amount;
    }
+}
 
    public static String leaderBoard() throws SQLException {
       String toret = "<table cellpadding=\"5\" cellspacing=\"5\" border=\"2\"><tr><td>Standing<td >Name<td>Images Evaluated</tr>";
       String query = "select * from leaders order by count desc";
-        try ( //System.out.print(query);
-                Connection j = getConnection()) {
-            PreparedStatement p = j.prepareStatement(query);
-            
-            ResultSet rs = p.executeQuery();
-            int count = 0;
-            while (rs.next() && count < 10) {
-                count++;
-                toret += "<tr><td>" + count + "<td>" + rs.getString("uname") + "</td><td>" + rs.getInt("count") + "</td></tr>";
-                
-            }
-            toret += "</table>";
+        try ( Connection j = getConnection()) {
+      PreparedStatement p = j.prepareStatement(query);
+
+      ResultSet rs = p.executeQuery();
+      int count = 0;
+      while (rs.next() && count < 10) {
+         count++;
+         toret += "<tr><td>" + count + "<td>" + rs.getString("uname") + "</td><td>" + rs.getInt("count") + "</td></tr>";
+
+      }
+      toret += "</table>";
         }
       return toret;
    }
@@ -148,15 +151,15 @@ public class folio {
    public void setFinding(int finding, String user, int id) {
       try {
          String query = "update `pages` set `finding`=?, `finder`=? where `id`=?";
-            try ( //System.out.print(query);
-                    Connection j = getConnection()) {
-                PreparedStatement p = j.prepareStatement(query);
-                p.setInt(1, finding);
-                p.setString(2, user);
-                p.setInt(3, id);
-                int i = p.executeUpdate();
-                //p.execute();
-                // p.execute(query);
+            try ( Connection j = getConnection()) {
+         PreparedStatement p = j.prepareStatement(query);
+         p.setInt(1, finding);
+
+         p.setString(2, user);
+         p.setInt(3, id);
+         int i = p.executeUpdate();
+         //p.execute();
+         // p.execute(query);
             }
       } catch (SQLException ex) {
             getLogger(folio.class.getName()).log(SEVERE, null, ex);
@@ -219,7 +222,7 @@ public class folio {
     */
    public String getLinesAsDivsWithCols() {
          return "";
-   }
+      }
 
    public String parkerURL() {
       String[] nameBits = this.imageName.split("_");

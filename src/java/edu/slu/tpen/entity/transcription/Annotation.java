@@ -15,7 +15,7 @@ public class Annotation {
     public Annotation() {
     }
 
-    public Annotation(String content) {
+    public Annotation(final String content) {
         this.content = content;
     }
 
@@ -23,7 +23,7 @@ public class Annotation {
         return content;
     }
 
-    public void setContent(String content) {
+    public void setContent(final String content) {
         this.content = content;
     }
 }

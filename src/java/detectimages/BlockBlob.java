@@ -11,15 +11,23 @@
  */
 package detectimages;
 
-import com.nativelibs4java.opencl.*;
-import static com.nativelibs4java.opencl.CLMem.Usage.Input;
-import static com.nativelibs4java.opencl.JavaCL.createBestContext;
-import static com.nativelibs4java.util.IOUtils.readText;
+import static org.bridj.Pointer.allocateInts;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteOrder;
+
+import com.nativelibs4java.opencl.CLBuffer;
+import com.nativelibs4java.opencl.CLContext;
+import com.nativelibs4java.opencl.CLEvent;
+import com.nativelibs4java.opencl.CLKernel;
+import com.nativelibs4java.opencl.CLMem.Usage;
+import com.nativelibs4java.opencl.CLProgram;
+import com.nativelibs4java.opencl.CLQueue;
+import com.nativelibs4java.opencl.JavaCL;
+import com.nativelibs4java.util.IOUtils;
+
 import org.bridj.Pointer;
-import static org.bridj.Pointer.*;
 
 
 public class BlockBlob {
@@ -27,7 +35,7 @@ public class BlockBlob {
     static final int size = 8;
     PixelBlock[][] blocks;
 
-    public BlockBlob(matrixBlob b) {
+    public BlockBlob(final matrixBlob b) {
         blocks = new PixelBlock[b.matrix.length / size + 1][b.matrix[0].length / size + 1];
         for (int i = 0; i < blocks.length; i++) {
             for (int j = 0; j < blocks[0].length; j++) {
@@ -36,26 +44,26 @@ public class BlockBlob {
         }
     }
 
-    public int compare(BlockBlob b) {
+    public int compare(final BlockBlob b) {
+
         return blocks[0][0].compare(b.blocks[0][0]);
+
     }
+
     static CLKernel compareKernel = null;
 
-    public int[] openCLcompare(BlockBlob[] blockBlobs, int blockDim1, int blockDim2) throws IOException {
+    public int[] openCLcompare(final BlockBlob[] blockBlobs, int blockDim1, int blockDim2) throws IOException {
         blockDim1 = 0;
         blockDim2 = 0;
 
-        int[] results = new int[blockBlobs.length];
-        CLContext context = createBestContext();
-        CLQueue queue = context.createDefaultQueue();
-        ByteOrder byteOrder = context.getByteOrder();
-
+        final int[] results = new int[blockBlobs.length];
+        final CLContext context = JavaCL.createBestContext();
+        final CLQueue queue = context.createDefaultQueue();
+        final ByteOrder byteOrder = context.getByteOrder();
 
         // .order(byteOrder),
 
-
-
-        int totalCompareBlocks = blockBlobs.length;
+        final int totalCompareBlocks = blockBlobs.length;
         Pointer<Integer> aPtr = allocateInts(totalCompareBlocks * size * size).order(byteOrder);
         int ctr = 0;
         for (int i = 0; i < totalCompareBlocks; i++) {
@@ -72,26 +80,27 @@ public class BlockBlob {
 
         }
 
-        // Create OpenCL input buffers (using the native memory pointers aPtr and bPtr) :
-        CLBuffer<Integer> baseBlock = context.createBuffer(Input, bPtr);
-        CLBuffer<Integer> compareBlocks = context.createBuffer(Input, aPtr);
+        // Create OpenCL input buffers (using the native memory pointers aPtr and bPtr)
+        // :
+        CLBuffer<Integer> baseBlock = context.createBuffer(Usage.Input, bPtr);
+        CLBuffer<Integer> compareBlocks = context.createBuffer(Usage.Input, aPtr);
 
         // Create an OpenCL output buffer :
-        CLBuffer<Integer> result = context.createIntBuffer(Input, blockBlobs.length);
+        CLBuffer<Integer> result = context.createIntBuffer(Usage.Input, blockBlobs.length);
 
         // Read the program sources and compile them :
-        String src = readText(new File("/usr/blockCompare.cl"));
+        final String src = IOUtils.readText(new File("/usr/blockCompare.cl"));
 
-        CLProgram program = context.createProgram(src);
+        final CLProgram program = context.createProgram(src);
 
         // Get and call the kernel :
-        //   System.out.print("creating kernel\n");
-        //if(compareKernel==null)
+        // System.out.print("creating kernel\n");
+        // if(compareKernel==null)
         compareKernel = program.createKernel("blockCompare");
         compareKernel.setArgs(baseBlock, compareBlocks, result, size * size);
-        CLEvent addEvt = compareKernel.enqueueNDRange(queue, new int[]{totalCompareBlocks});
+        final CLEvent addEvt = compareKernel.enqueueNDRange(queue, new int[] { totalCompareBlocks });
         // System.out.print("ran kernel\n");
-        int[] cpuresults = new int[totalCompareBlocks];
+        final int[] cpuresults = new int[totalCompareBlocks];
         for (int j = 0; j < totalCompareBlocks; j++) {
 
             int ctr2 = 0;

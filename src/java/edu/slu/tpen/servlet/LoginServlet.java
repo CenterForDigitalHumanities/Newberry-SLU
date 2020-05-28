@@ -14,21 +14,22 @@
  */
 package edu.slu.tpen.servlet;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import static edu.slu.util.ServletUtils.getBaseContentType;
-import static edu.slu.util.ServletUtils.reportInternalError;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT;
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import javax.servlet.http.HttpSession;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static edu.slu.util.ServletUtils.getBaseContentType;
+import static edu.slu.util.ServletUtils.reportInternalError;
 import user.User;
 
 
@@ -74,19 +75,23 @@ public class LoginServlet extends HttpServlet {
             if (u.getUID() > 0) {
                HttpSession sess = req.getSession(true);
                sess.setAttribute("UID", u.getUID());
+//               System.out.println("HAve UID!!!!!!!!!!");
+//               System.out.println(u.getUID());
+//               System.out.println(sess.getAttribute("UID"));
                PrintWriter writer = resp.getWriter();
                writer.print(sess.getId());
             } else {
-               resp.sendError(SC_UNAUTHORIZED);
+               resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             }
          } else if (mail == null && password == null) {
             // Passing null data indicates a logout.
+            // System.out.println("Email and pwd null   !!!!!!!!!!");
             HttpSession sess = req.getSession(true);
             sess.removeAttribute("UID");
-            resp.setStatus(SC_NO_CONTENT);
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
          } else {
             // Only supplied one of user-id and password.
-            resp.sendError(SC_UNAUTHORIZED);
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
          }
       } catch (NoSuchAlgorithmException ex) {
          reportInternalError(resp, ex);

@@ -7,7 +7,7 @@ package edu.slu.tpen.servlet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import static edu.slu.tpen.entity.Image.Canvas.getAnnotationListsForProject;
+import static edu.slu.tpen.entity.image.Canvas.getAnnotationListsForProject;
 import static edu.slu.util.LangUtils.buildQuickMap;
 import static imageLines.ImageCache.getImageDimension;
 import java.awt.Dimension;
@@ -28,8 +28,9 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import static net.sf.json.JSONObject.fromObject;
 import textdisplay.Folio;
-import static textdisplay.Folio.getRbTok;
 import textdisplay.FolioDims;
+import tokens.TokenManager;
+
 import static textdisplay.FolioDims.createFolioDimsRecord;
 
 
@@ -100,7 +101,8 @@ public class CanvasServlet extends HttpServlet{
     private JSONObject buildPage(Folio f) throws SQLException, IOException {
       Integer msID = f.getMSID();
       String msID_str = msID.toString();
-      String canvasID = getRbTok("SERVERURL")+"canvas/"+f.getFolioNumber();  
+      final TokenManager man = new TokenManager();
+      String canvasID = man.getProperties().getProperty("SERVERURL")+"canvas/"+f.getFolioNumber();  
       String[] otherContent;
       FolioDims pageDim = new FolioDims(f.getFolioNumber(), true);
       Dimension storedDims = null;
@@ -124,7 +126,7 @@ public class CanvasServlet extends HttpServlet{
       imageAnnot.element("motivation", "sc:painting");
       String imageURL = f.getImageURL();
       if (imageURL.startsWith("/")) {
-        imageURL = String.format("%spageImage?folio=%s",getRbTok("SERVERURL"), f.getFolioNumber());
+        imageURL = String.format("%spageImage?folio=%s",man.getProperties().getProperty("SERVERURL"), f.getFolioNumber());
       }
       Map<String, Object> imageResource_map = buildQuickMap("@id", imageURL, "@type", "dctypes:Image", "format", "image/jpeg");
       JSONObject imageResource = fromObject(imageResource_map);

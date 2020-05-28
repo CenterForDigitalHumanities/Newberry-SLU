@@ -11,30 +11,31 @@ and limitations under the License.
  */
 package detectimages;
 
-import static detectimages.blob.getMatrixBlobs;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.concurrent.Callable;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BlobLoader implements Callable{
-    private blobManager bm;
+    private final blobManager bm;
     String blobFile;
-    public BlobLoader(blobManager bm, String blobFile)
-    {
-            this.bm=bm;
-            this.blobFile=blobFile;
-        
+
+    public BlobLoader(final blobManager bm, final String blobFile) {
+        this.bm = bm;
+        this.blobFile = blobFile;
+
     }
+
     @Override
     public Object call() {
         try {
-            //System.out.print("caching "+this.blobFile+"\n");
-            bm.add(getMatrixBlobs(blobFile), blobFile);
-        } catch (FileNotFoundException ex) {
-            getLogger(BlobLoader.class.getName()).log(SEVERE, null, ex);
-        } catch (Exception ex) {
-            getLogger(BlobLoader.class.getName()).log(SEVERE, null, ex);
+            // System.out.print("caching "+this.blobFile+"\n");
+            bm.add(blob.getMatrixBlobs(blobFile), blobFile);
+        } catch (final FileNotFoundException ex) {
+            Logger.getLogger(BlobLoader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (final Exception ex) {
+            Logger.getLogger(BlobLoader.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

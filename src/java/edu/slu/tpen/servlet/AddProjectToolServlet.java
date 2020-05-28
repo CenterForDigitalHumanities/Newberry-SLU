@@ -14,13 +14,12 @@
  */
 package edu.slu.tpen.servlet;
 
-import static edu.slu.util.ServletUtils.getDBConnection;
+import edu.slu.util.ServletUtils;
 import java.io.IOException;
-import static java.lang.Integer.parseInt;
 import java.sql.Connection;
 import java.sql.SQLException;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,19 +33,22 @@ import utils.UserTool;
 public class AddProjectToolServlet extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
+            throws ServletException, IOException {
         try {
-            Connection conn = getDBConnection();
-            UserTool ut = new UserTool();
-            ut.saveUserTool(conn, request.getParameter("name"), request.getParameter("url"), parseInt(request.getParameter("projectID")));
+            final Connection conn = ServletUtils.getDBConnection();
+            final UserTool ut = new UserTool();
+            ut.saveUserTool(conn, request.getParameter("name"), request.getParameter("url"),
+                    Integer.parseInt(request.getParameter("projectID")));
             response.getWriter().print("1");
-        } catch (SQLException ex) {
-            getLogger(AddProjectToolServlet.class.getName()).log(SEVERE, null, ex);
-        } 
+        } catch (final SQLException ex) {
+            Logger.getLogger(AddProjectToolServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ServletException, IOException {
         this.doPost(req, resp); 
     }
     

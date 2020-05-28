@@ -96,7 +96,7 @@
 ////                            String imageURL = folio.getImageURL();
 ////                            // use regex to extract paleography pid
 ////                            String canvasID = Constant.PALEO_CANVAS_ID_PREFIX + imageURL.replaceAll("^.*(paleography[^/]+).*$", "/$1");
-////                            //Folio.getRbTok("SERVERURL") + templateProject.getProjectName() + "/canvas/" + URLEncoder.encode(folio.getPageName(), "UTF-8")
+////                            //man.getProperties().getProperty("SERVERURL") + templateProject.getProjectName() + "/canvas/" + URLEncoder.encode(folio.getPageName(), "UTF-8")
 ////                            annoLsQuery.element("on", canvasID);
 ////                           
 ////                            //System.out.println(annoLsQuery.toString());
@@ -295,7 +295,7 @@
 ////                        }
 ////                    }
 ////                    System.out.println("return project ID for copied project");
-////                    String propVal = textdisplay.Folio.getRbTok("CREATE_PROJECT_RETURN_DOMAIN"); 
+////                    String propVal = man.getProperties().getProperty("CREATE_PROJECT_RETURN_DOMAIN"); 
 ////                    result = propVal + "/project/" + thisProject.getProjectID();
 ////                }
 ////            } catch(Exception e){

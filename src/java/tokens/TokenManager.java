@@ -34,7 +34,7 @@ public class TokenManager{
     private String currentRefreshToken = "";
     private String registeredAgent = "";
     private String canvasPrefix = "";
-    private String propFileLocation = "version.properties";
+    private String propFileLocation = "";
     private String testingFlag = "";
     private Properties props = new Properties();
     
@@ -158,7 +158,7 @@ public class TokenManager{
      * @throws Exception 
      */
     public String generateNewAccessToken() throws SocketTimeoutException, IOException, Exception{
-        System.out.println("TPEN_NL has to get a new access token...");
+        System.out.println("TPEN has to get a new access token...");
         String newAccessToken = "";
         JSONObject jsonReturn = new JSONObject();
         JSONObject tokenRequestParams = new JSONObject();
@@ -209,7 +209,7 @@ public class TokenManager{
         }
         setAccessToken(newAccessToken);
         writeProperty("access_token", newAccessToken);
-        System.out.println("TPEN_NL has a new access token, and it is written to the properties file...");
+        System.out.println("TPEN has a new access token, and it is written to the properties file...");
         return newAccessToken;
     }
     

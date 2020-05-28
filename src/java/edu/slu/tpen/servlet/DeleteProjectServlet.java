@@ -14,65 +14,75 @@
  */
 package edu.slu.tpen.servlet;
 
-import static edu.slu.util.ServletUtils.getUID;
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-import static java.lang.Integer.parseInt;
 import java.sql.SQLException;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+
+import edu.slu.util.ServletUtils;
+import javax.servlet.http.HttpSession;
 import textdisplay.Project;
 import user.Group;
 import user.User;
 
 /**
- * Delete project and project related attachments from tpen. 
- * This is a transformation of tpen function to web service. It's using tpen MySQL database. 
+ * Delete project and project related attachments from tpen. This is a
+ * transformation of tpen function to web service. It's using tpen MySQL
+ * database.
+ * 
  * @author hanyan
  */
 public class DeleteProjectServlet extends HttpServlet {
     private int projectID;
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int projectNumToDelete = parseInt(request.getParameter("projectID"));
+    protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
+            throws ServletException, IOException {
+        final int projectNumToDelete = Integer.parseInt(request.getParameter("projectID"));
         int UID = 0;
-        UID = getUID(request, response);
+        UID = ServletUtils.getUID(request, response);
+
+        // FIXME: unused?
+        final HttpSession session = request.getSession();
+        final Object role = "unknown";
+
         if (UID != -1) {
-            //UID = Integer.parseInt(request.getSession().getAttribute("UID").toString());
+            // UID = Integer.parseInt(request.getSession().getAttribute("UID").toString());
             try {
-                Project todel = new Project(projectNumToDelete);
-                Group projectGroup = new Group(todel.getGroupID());
-                boolean isTPENAdmin = (new User(UID)).isAdmin();
+                final Project todel = new Project(projectNumToDelete);
+                final Group projectGroup = new Group(todel.getGroupID());
+                final boolean isTPENAdmin = (new User(UID)).isAdmin();
 
                 if (isTPENAdmin || projectGroup.isAdmin(UID)) {
                     todel.delete();
-                }else{
+                } else {
                     response.setStatus(SC_UNAUTHORIZED);
-                    PrintWriter out = response.getWriter();
+                    final PrintWriter out = response.getWriter();
                     out.print(SC_UNAUTHORIZED);
                 }
-            } catch (SQLException ex) {
-                getLogger(DeleteProjectServlet.class.getName()).log(SEVERE, null, ex);
+            } catch (final SQLException ex) {
+                Logger.getLogger(DeleteProjectServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }else{
-            //user doesn't log in
-            PrintWriter out = response.getWriter();
+        } else {
+            // user doesn't log in
+            final PrintWriter out = response.getWriter();
             out.print("User doesn't log in.");
         }
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doPost(req, resp); 
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ServletException, IOException {
+        doPost(req, resp);
     }
-    
-    
 
     /**
      * @return the projectID
@@ -84,7 +94,7 @@ public class DeleteProjectServlet extends HttpServlet {
     /**
      * @param projectID the projectID to set
      */
-    public void setProjectID(int projectID) {
+    public void setProjectID(final int projectID) {
         this.projectID = projectID;
     }
 }

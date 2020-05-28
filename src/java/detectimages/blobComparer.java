@@ -12,7 +12,6 @@
  */
 package detectimages;
 
-import static java.lang.System.out;
 import java.util.concurrent.Callable;
 
 
@@ -21,63 +20,57 @@ public class blobComparer implements Callable
     public blob a;
     public blob b;
     public blob[]blobArray;
-    public blobComparer(blob one, blob two)
-    {
-        a=one;
-        b=two;
+    public blobComparer(final blob one, final blob two) {
+        a = one;
+        b = two;
     }
-    public blobComparer( blob [] blobArray)
-    {
-       this.blobArray=blobArray;
+
+    public blobComparer(final blob[] blobArray) {
+        this.blobArray = blobArray;
     }
-    public Object call()
-    {
-        Double [] results=new Double[blobArray.length*blobArray.length/2];
-        int ctr=0;
-        out.print("starting \n");
-        for(int i=0;i<blobArray.length;i+=2)
-            {
-                //if this is the last work set it may not contain a full compliment of work to be done
-                if(blobArray[i]==null || blobArray[i+1]== null)
-                    return results;
-                a=blobArray[i];
-                b=blobArray[i+1];
-                results[ctr]=run();
-                ctr++;
-            }
+
+    public Object call() {
+        final Double[] results = new Double[blobArray.length * blobArray.length / 2];
+        int ctr = 0;
+        System.out.print("starting \n");
+        for (int i = 0; i < blobArray.length; i += 2) {
+            // if this is the last work set it may not contain a full compliment of work to
+            // be done
+            if (blobArray[i] == null || blobArray[i + 1] == null)
+                return results;
+            a = blobArray[i];
+            b = blobArray[i + 1];
+            results[ctr] = run();
+            ctr++;
+        }
         return results;
     }
-    public double run()
-    {
-        if(true)
+
+    public double run() {
+        if (true)
             return a.matrixVersion.compareTo(b.matrixVersion);
-        //return a.matrixVersion.compareToWithAdjust(b.matrixVersion);
+        // return a.matrixVersion.compareToWithAdjust(b.matrixVersion);
         int good = 0;
-        
+
         int maxFailures = (int) (a.arrayVersion.length * .3);
-        for (int i = a.arrayVersion.length - 1; i >= 0; i--)
-        {
-            if(hasPixel(a.arrayVersion[i],b.arrayVersion))
-            {
+        for (int i = a.arrayVersion.length - 1; i >= 0; i--) {
+            if (hasPixel(a.arrayVersion[i], b.arrayVersion)) {
                 good++;
-            } else
-            {
+            } else {
                 maxFailures--;
             }
-            if (maxFailures <= 0)
-            {
+            if (maxFailures <= 0) {
                 return .1;
             }
         }
-        if (a.size > b.size)
-        {
+        if (a.size > b.size) {
             return (double) good / a.size;
-        } else
-        {
+        } else {
             return (double) good / b.size;
         }
     }
-private boolean hasPixel(pixel p, pixel [] blob)
+
+    private boolean hasPixel(final pixel p, final pixel[] blob)
 {
     for (int i=blob.length-1;i>=0;i--)
     {

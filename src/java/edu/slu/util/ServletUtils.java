@@ -15,6 +15,9 @@
 package edu.slu.util;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+
+import tokens.TokenManager;
+
 import static edu.slu.util.LangUtils.getMessage;
 import java.io.IOException;
 import static java.lang.Integer.parseInt;
@@ -33,7 +36,6 @@ import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import javax.servlet.http.HttpSession;
 import static textdisplay.DatabaseWrapper.getConnection;
-import static textdisplay.Folio.getRbTok;
 import user.User;
 
 /**
@@ -127,14 +129,21 @@ public class ServletUtils {
 	 * Check for the given host in a version.properties setting.
 	 */
 	public static boolean verifyHostInList(String host, String propName) {
-		String propVal = getRbTok(propName);
-		if (propVal != null) {
-			String[] propHosts = propVal.split(",");
-			for (String h : propHosts) {
-				if (host.equals(h)) {
-					return true;
+		TokenManager man;
+		try {
+			man = new TokenManager();
+			String propVal = man.getProperties().getProperty(propName);
+			if (propVal != null) {
+				String[] propHosts = propVal.split(",");
+				for (String h : propHosts) {
+					if (host.equals(h)) {
+						return true;
+					}
 				}
 			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return false;
 	}

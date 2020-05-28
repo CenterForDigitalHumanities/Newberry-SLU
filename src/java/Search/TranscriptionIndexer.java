@@ -103,43 +103,31 @@ public class TranscriptionIndexer {
     * @throws IOException
     * @throws SQLException
     */
-   public static void update(Transcription t) throws IOException, SQLException {
-/*
-      IndexWriter writer = null;
-      Analyzer analyser;
-      Directory directory;
-
-      // @TODO parameterize this location
-      String dest = "/usr/indexTranscriptions";
-
-      directory = FSDirectory.getDirectory(dest, true);
-      analyser = new StandardAnalyzer();
-      writer = new IndexWriter(directory, analyser, true);
-      Term j = new Term("id", "" + t.getLineID());
-      writer.deleteDocuments(j);
-      Document doc = new Document();
-      Field field;
-      field = new Field("text", t.getText(), Field.Store.YES, Field.Index.ANALYZED);
-      doc.add(field);
-      field = new Field("comment", t.getComment(), Field.Store.YES, Field.Index.ANALYZED);
-      doc.add(field);
-      field = new Field("creator", "" + t.UID, Field.Store.YES, Field.Index.ANALYZED);
-      doc.add(field);
-      field = new Field("security", "" + "private", Field.Store.YES, Field.Index.ANALYZED);
-      doc.add(field);
-      field = new Field("line", "" + t.getLine(), Field.Store.YES, Field.Index.ANALYZED);
-      doc.add(field);
-      field = new Field("page", "" + t.getFolio(), Field.Store.YES, Field.Index.ANALYZED);
-      doc.add(field);
-      field = new Field("id", "" + t.getLineID(), Field.Store.YES, Field.Index.ANALYZED);
-      doc.add(field);
-      field = new Field("manuscript", "" + new Manuscript(t.getFolio()).getID(), Field.Store.YES, Field.Index.ANALYZED);
-      doc.add(field);
-      field = new Field("projectID", "" + t.getProjectID(), Field.Store.YES, Field.Index.ANALYZED);
-      doc.add(field);
-      writer.addDocument(doc);
-      writer.commit();
-      writer.close();*/
+   public static void update(final Transcription t) throws IOException, SQLException {
+      /*
+       * IndexWriter writer = null; Analyzer analyser; Directory directory;
+       * 
+       * // @TODO parameterize this location String dest = "/usr/indexTranscriptions";
+       * 
+       * directory = FSDirectory.getDirectory(dest, true); analyser = new
+       * StandardAnalyzer(); writer = new IndexWriter(directory, analyser, true); Term
+       * j = new Term("id", "" + t.getLineID()); writer.deleteDocuments(j); Document
+       * doc = new Document(); Field field; field = new Field("text", t.getText(),
+       * Field.Store.YES, Field.Index.ANALYZED); doc.add(field); field = new
+       * Field("comment", t.getComment(), Field.Store.YES, Field.Index.ANALYZED);
+       * doc.add(field); field = new Field("creator", "" + t.UID, Field.Store.YES,
+       * Field.Index.ANALYZED); doc.add(field); field = new Field("security", "" +
+       * "private", Field.Store.YES, Field.Index.ANALYZED); doc.add(field); field =
+       * new Field("line", "" + t.getLine(), Field.Store.YES, Field.Index.ANALYZED);
+       * doc.add(field); field = new Field("page", "" + t.getFolio(), Field.Store.YES,
+       * Field.Index.ANALYZED); doc.add(field); field = new Field("id", "" +
+       * t.getLineID(), Field.Store.YES, Field.Index.ANALYZED); doc.add(field); field
+       * = new Field("manuscript", "" + new Manuscript(t.getFolio()).getID(),
+       * Field.Store.YES, Field.Index.ANALYZED); doc.add(field); field = new
+       * Field("projectID", "" + t.getProjectID(), Field.Store.YES,
+       * Field.Index.ANALYZED); doc.add(field); writer.addDocument(doc);
+       * writer.commit(); writer.close();
+       */
    }
 
    /**
@@ -149,7 +137,7 @@ public class TranscriptionIndexer {
     * @throws IOException
     * @throws SQLException
     */
-   public static void add(Transcription t) throws IOException, SQLException {
+   public static void add(final Transcription t) throws IOException, SQLException {
 /*      IndexWriter writer = null;
       Analyzer analyser;
       Directory directory;

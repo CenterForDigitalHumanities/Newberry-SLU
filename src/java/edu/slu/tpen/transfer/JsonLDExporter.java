@@ -14,32 +14,32 @@
  */
 package edu.slu.tpen.transfer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import static edu.slu.tpen.entity.Image.Canvas.getLinesForProject;
-import static edu.slu.util.LangUtils.buildQuickMap;
-import static imageLines.ImageCache.getImageDimension;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import static java.lang.String.format;
-import static java.lang.System.out;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import static java.util.logging.Level.INFO;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
-import net.sf.json.JSONArray;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.slu.tpen.entity.Image.Canvas;
+import edu.slu.tpen.servlet.Constant;
+import imageLines.ImageCache;
 import textdisplay.Folio;
-import static textdisplay.Folio.getRbTok;
-import textdisplay.FolioDims;
-import static textdisplay.FolioDims.createFolioDimsRecord;
-import static textdisplay.Metadata.getMetadataAsJSON;
 import textdisplay.Project;
 import user.User;
+import static edu.slu.util.LangUtils.buildQuickMap;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import net.sf.json.JSONArray;
+import tokens.TokenManager;
 
 /**
  * Class which manages serialisation to JSON-LD. Builds a Map containing the
@@ -62,62 +62,63 @@ public class JsonLDExporter {
     */
    public JsonLDExporter(Project proj, User u) throws SQLException, IOException {
       Folio[] folios = proj.getFolios();
-      int projID = proj.getProjectID();
+      TokenManager man = new TokenManager();
+      Date date2 = new Date();
+      DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+      //System.out.println(System.lineSeparator());
+      //System.out.println("***********************************");
+      //System.out.println("Back end has been told to export manifest "+proj.getProjectID()+" at "+dateFormat.format(date2));
       try {
-          //System.out.println("Export project "+projID);
-         String projName = getRbTok("SERVERURL") + "manifest/"+projID;
+         //System.out.println("Using SERVERURL to build name.  What is value: "+man.getProperties().getProperty("SERVERURL"));
+         String projName = man.getProperties().getProperty("SERVERURL") + proj.getProjectName();
+         //System.out.println("What is the project name in exporter: "+projName);
+         String[] supportedContexts = new String[3];
+         supportedContexts[0] = "http://store.rerum.io/v1/context.json";
+         supportedContexts[1] = "http://www.w3.org/ns/anno.jsonld";
+         supportedContexts[2] = "http://iiif.io/api/presentation/2/context.json";
          manifestData = new LinkedHashMap<>();
-         manifestData.put("@context", "http://www.shared-canvas.org/ns/context.json");
+         manifestData.put("@context", supportedContexts);
          manifestData.put("@id", projName + "/manifest.json");
          manifestData.put("@type", "sc:Manifest");
          manifestData.put("label", proj.getProjectName());
-         manifestData.put("metadata", getMetadataAsJSON(projID));
 
-           Map<String, Object> service = new LinkedHashMap<>();
-         service.put("@context", "http://iiif.io/api/auth/1/context.json");
-         service.put("@id","http://t-pen.org/TPEN/login.jsp");
-         service.put("profile", "http://iiif.io/api/auth/1/login");
-         service.put("label", "T-PEN Login");
-         service.put("header", "Login for image access");
-         service.put("description", "Agreement requires an open T-PEN session to view images");
-         service.put("confirmLabel", "Login");
-         service.put("failureHeader", "T-PEN Login Failed");
-         service.put("failureDescription", "<a href=\"http://t-pen.org/TPEN/about.jsp\">Read Agreement</a>");
-        Map<String, Object> logout = new LinkedHashMap<>();
-         logout.put("@id", "http://t-pen.org/TPEN/login.jsp");
-         logout.put("profile", "http://iiif.io/api/auth/1/logout");
-         logout.put("label", "End T-PEN Session");
-        service.put("service",new Object[] { logout });
-
-         manifestData.put("service",new Object[] { service });
-      
-         
          Map<String, Object> pages = new LinkedHashMap<>();
-         pages.put("@id", getRbTok("SERVERURL")+"manifest/"+projID + "/sequence/normal");
+         pages.put("@id", projName + "/sequence/normal");
          pages.put("@type", "sc:Sequence");
          pages.put("label", "Current Page Order");
 
          List<Map<String, Object>> pageList = new ArrayList<>();
-         //System.out.println("I found "+folios.length+" pages");
-         int index = 0;
          for (Folio f : folios) {
-             index++;
-             //System.out.println("Build page "+index);
-            pageList.add(buildPage(proj.getProjectID(), projName, f, u));
+            pageList.add(buildPage(proj.getProjectID(), projName, f, u, man));
          }
-         //System.out.println("Put all canvas together");
          pages.put("canvases", pageList);
          manifestData.put("sequences", new Object[] { pages });
+         Date date3 = new Date();
+         //System.out.println("Back end has finished building manifest "+proj.getProjectID()+" at "+dateFormat.format(date3)+".  It took "+getDateDiff(date2,date3,TimeUnit.SECONDS)+" seconds");
+         //System.out.println("***********************************");
+         //System.out.println(System.lineSeparator());
       } 
-      catch (UnsupportedEncodingException ignored) {
+      catch (UnsupportedEncodingException ignored){
+          
       }
    }
 
    public String export() throws JsonProcessingException {
-        out.println("Send out manifest");
       ObjectMapper mapper = new ObjectMapper();
       return mapper.writer().withDefaultPrettyPrinter().writeValueAsString(manifestData);
    }
+   
+        /**
+      * Get a diff between two dates
+      * @param date1 the oldest date
+      * @param date2 the newest date
+      * @param timeUnit the unit in which you want the diff
+      * @return the diff value, in the provided unit
+      */
+     public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
+         long diffInMillies = date2.getTime() - date1.getTime();
+         return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
+     }
 
    /**
     * Get the map which contains the serialisable information for the given
@@ -127,89 +128,80 @@ public class JsonLDExporter {
     * @return a map containing the relevant info, suitable for Jackson
     * serialisation
     */
-   private Map<String, Object> buildPage(int projID, String projName, Folio f, User u) throws SQLException, IOException {
-      //Integer msID = f.getMSID();
-      //String msID_str = msID.toString();
-       //System.out.println("Building page "+f.getFolioNumber());
-      String canvasID = getRbTok("SERVERURL")+"canvas/"+f.getFolioNumber();
-      //JSONObject annotationList = new JSONObject();
-      //JSONArray resources_array = new JSONArray();
- //     String annoListID = Folio.getRbTok("SERVERURL")+"project/"+projID+"/annotations/"+f.getFolioNumber();  
-//      annotationList.element("@id", annoListID);
-//      annotationList.element("@type", "sc:AnnotationList");
-//      annotationList.element("label", canvasID+" List");
-//      annotationList.element("proj", projID);
-//      annotationList.element("on", canvasID);
-//      annotationList.element("@context", "http://iiif.io/api/presentation/2/context.json");
-      //annotationList.element("testing", "msid_creation");
-      //String canvasID = projName + "/canvas/" + URLEncoder.encode(f.getPageName(), "UTF-8");
-      //System.out.println("Need pageDim in buildPage()");
-      FolioDims pageDim = new FolioDims(f.getFolioNumber(), true);
-      Dimension storedDims = null;
-      
-      JSONArray otherContent;
-      if (pageDim.getImageHeight() <= 0) { //There was no foliodim entry
-         storedDims = getImageDimension(f.getFolioNumber());
-         if(null == storedDims || storedDims.height <=0){ //There was no imagecache entry or a bad one we can't use
-            // System.out.println("Need to resolve image headers for dimensions");
-            storedDims = f.getImageDimension(); //Resolve the image headers and get the image dimensions
-         }
-      }
+   private Map<String, Object> buildPage(int projID, String projName, Folio f, User u, TokenManager man) throws SQLException, IOException {
+       /*
+        System.out.println("Exporter building canvas.  Here are its params");
+        System.out.println("projectID: "+ projID);
+        System.out.println("projName: "+projName);
+        System.out.println("Folio Page Name: "+ URLEncoder.encode(f.getPageName(), "UTF-8"));
+        System.out.println("Folio Number: "+f.getFolioNumber());
+        System.out.println("Folio Number: "+f.getFolioNumber());
+        System.out.println("Folio URL Resize: "+f.getImageURLResize());
+       */
+        
+        String canvasID = man.getProperties().getProperty("PALEO_CANVAS_ID_PREFIX") + f.getImageURL().replaceAll("^.*(paleography[^/]+).*$", "$1"); //for paleo dev and prod
+        //String canvasID = projName + "/canvas/" + URLEncoder.encode(f.getPageName(), "UTF-8"); //For SLU testing    
+        
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+        Date date = new Date();
+        ///System.out.println(System.lineSeparator());
+        ///System.out.println("==============================================");
+        ///System.out.println("build page for "+f.getPageName()+" at "+dateFormat.format(date));
+        Dimension pageDim = ImageCache.getImageDimension(f.getFolioNumber());
+        if (pageDim == null) {
+           LOG.log(Level.INFO, "Image for {0} not found in cache, loading image...", f.getFolioNumber());
+           pageDim = f.getImageDimension();
+        }
+        Date date3 = new Date();
+        //System.out.println("++++++++++++++++++++++++++++++++++");
+        //System.out.println("It took "+getDateDiff(date,date3,TimeUnit.SECONDS)+" seconds to get the image dimensions for this page");
+        Map<String, Object> result = new LinkedHashMap<>();
+        List<Object> images = new ArrayList<>();
+        result.put("@id", canvasID);
+        result.put("@type", "sc:Canvas");
+        result.put("label", f.getPageName());
 
-      LOG.log(INFO, "pageDim={0}", pageDim);
-      Map<String, Object> result = new LinkedHashMap<>();
-      result.put("@id", canvasID);
-      result.put("@type", "sc:Canvas");
-      result.put("label", f.getPageName());
-      int canvasHeight = pageDim.getCanvasHeight();
-      int canvasWidth = pageDim.getCanvasWidth();
-      if (storedDims != null) {//Then we were able to resolve image headers and we have good values to run this code block
-            if(storedDims.height > 0){//The image header resolved to 0, so actually we have bad values.
-                if(pageDim.getImageHeight() <= 0){ //There was no foliodim entry, so make one.
-                    //generate canvas values for foliodim
-                    canvasHeight = 1000;
-                    canvasWidth = storedDims.width * canvasHeight / storedDims.height; 
-                    //System.out.println("Need to make folio dims record");
-                    createFolioDimsRecord(storedDims.width, storedDims.height, canvasWidth, canvasHeight, f.getFolioNumber());
-                }
-            }
-            else{ //We were unable to resolve the image or for some reason it is 0, we must continue forward with values of 0
-                canvasHeight = 0;
-                canvasWidth = 0;
-            }
-      }
-      else{ //define a 0, 0 storedDims
-          storedDims = new Dimension(0,0);
-      }
-      result.put("width", canvasWidth);
-      result.put("height", canvasHeight);
-      List<Object> images = new ArrayList<>();
-      Map<String, Object> imageAnnot = new LinkedHashMap<>();
-      imageAnnot.put("@type", "oa:Annotation");
-      imageAnnot.put("motivation", "sc:painting");
-      String imageURL = f.getImageURL();
-      if (imageURL.startsWith("/")) {
-          imageURL = String.format("%spageImage?folio=%s",getRbTok("SERVERURL"), f.getFolioNumber());
-      }
-      Map<String, Object> imageResource = buildQuickMap("@id", imageURL, "@type", "dctypes:Image", "format", "image/jpeg");
-      
-      if (storedDims.height > 0) { //We could ignore this and put the 0's into the image annotation
-          //doing this check will return invalid images because we will not include height and width of 0.
-         imageResource.put("height", storedDims.height ); 
-         imageResource.put("width", storedDims.width ); 
-      }
-      imageAnnot.put("resource", imageResource);
-      imageAnnot.put("on", canvasID);
-      images.add(imageAnnot);
-      //If this list was somehow stored in the SQL DB, we could skip calling to the store every time.
-      //System.out.println("Get otherContent");
-      //System.out.println(projID + "  " + canvasID + "  " + f.getFolioNumber() + "  " + u.getUID());
-      otherContent = getLinesForProject(projID, canvasID, f.getFolioNumber(), u.getUID()); //Can be an empty array now.
-      //System.out.println("Finalize result");
-      result.put("otherContent", otherContent);
-      result.put("images", images);
-      //System.out.println("Return");
-      return result;
+        int canvasHeight = 1000;
+        result.put("height", canvasHeight);
+
+        if (pageDim != null) {
+           int canvasWidth = pageDim.width * canvasHeight / pageDim.height;  // Convert to canvas coordinates.
+           result.put("width", canvasWidth);
+        }
+        List<Object> resources = new ArrayList<>();
+        Map<String, Object> imageAnnot = new LinkedHashMap<>();
+        imageAnnot.put("@type", "oa:Annotation");
+        imageAnnot.put("motivation", "sc:painting");
+        Map<String, Object> imageResource = buildQuickMap("@id", f.getImageURLResize(f.getImageURL(), 2000), "@type", "dctypes:Image", "format", "image/jpeg"); //For SLU testing
+        //Map<String, Object> imageResource = buildQuickMap("@id", String.format("%s%s&user=%s", man.getProperties().getProperty("SERVERURL"), f.getImageURLResize(), u.getUname()), "@type", "dctypes:Image", "format", "image/jpeg");
+        //LOG.log(Level.INFO, "pageDim={0}", pageDim);
+  //      imageResource.put("iiif", ?);
+        if (pageDim != null) {
+           imageResource.put("height", pageDim.height);
+           imageResource.put("width", pageDim.width);
+        }
+        imageAnnot.put("resource", imageResource);
+
+        imageAnnot.put("on", canvasID);
+        images.add(imageAnnot);
+        resources.add(imageAnnot);
+
+        JSONArray otherContent = new JSONArray();
+        Date date4 = new Date();
+        otherContent = Canvas.getAnnotationListsForProject(projID, canvasID, u.getUID(), man);
+        Date date5 = new Date();
+        //System.out.println("++++++++++++++++++++++++++++++++++");
+        //System.out.println("It took "+getDateDiff(date4,date5,TimeUnit.SECONDS)+" seconds to get the list for this page");
+        //result.put("resources", resources);
+        result.put("otherContent", otherContent);
+        result.put("images", images);
+        Date date2 = new Date();
+       //System.out.println("Finished build page for "+f.getPageName()+" at "+dateFormat.format(date2)+".  It took "+getDateDiff(date,date2,TimeUnit.SECONDS)+" seconds");
+        //System.out.println("==============================================");
+        //System.out.println(System.lineSeparator());
+        return result;
    }
-   private static final Logger LOG = getLogger(JsonLDExporter.class.getName());
+
+   private static final Logger LOG = Logger.getLogger(JsonLDExporter.class.getName());
 }
+        

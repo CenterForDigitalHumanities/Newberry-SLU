@@ -14,6 +14,8 @@ package user;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.err;
+
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,11 +30,11 @@ import static textdisplay.DatabaseWrapper.closeDBConnection;
 import static textdisplay.DatabaseWrapper.closePreparedStatement;
 import static textdisplay.DatabaseWrapper.getConnection;
 import textdisplay.Folio;
-import static textdisplay.Folio.getRbTok;
 import textdisplay.Manuscript;
 import textdisplay.Project;
 import textdisplay.ProjectPriority;
 import textdisplay.WelcomeMessage;
+import tokens.TokenManager;
 import utils.RandomString;
 
 /**
@@ -399,8 +401,9 @@ public class User {
             body = this.getFname() + " " + this.getLname() + " (" + this.getUname() + ") says:\n" + body;
 
             try {
-                m.sendMail(getRbTok("EMAILSERVER"), "TPEN@t-pen.org", getRbTok("NOTIFICATIONEMAIL"),
-                        "TPEN contact", body);
+                TokenManager man = new TokenManager();
+                m.sendMail(man.getProperties().getProperty("EMAILSERVER"), "TPEN@t-pen.org",
+                        man.getProperties().getProperty("NOTIFICATIONEMAIL"), "TPEN contact", body);
             } catch (Exception e) {
                 return 2; // created user, but email issue occured
             }
@@ -425,21 +428,24 @@ public class User {
         User newUser = new User(uname, lname, fname, "");
         if (newUser.getUID() > 0) {
             // textdisplay.mailer m = new textdisplay.mailer();
-            // String body = newUser.getFname() + " " + newUser.getLname() + " (" + newUser.getUname()
-            //         + ") has created a new account, which needs your approval.\n";
-            // body += "Proceed to http://t-pen.org/TPEN/admin.jsp to approve their account";
+            // String body = newUser.getFname() + " " + newUser.getLname() + " (" +
+            // newUser.getUname()
+            // + ") has created a new account, which needs your approval.\n";
+            // body += "Proceed to http://t-pen.org/TPEN/admin.jsp to approve their
+            // account";
             try {
                 newUser.activateUser();
-                // m.sendMail(Folio.getRbTok("EMAILSERVER"), "TPEN@t-pen.org",
-                // Folio.getRbTok("NOTIFICATIONEMAIL"), "new user request", body);
+                // m.sendMail(man.getProperties().getProperty("EMAILSERVER"), "TPEN@t-pen.org",
+                // man.getProperties().getProperty("NOTIFICATIONEMAIL"), "new user request", body);
             } catch (Exception e) {
-                err.println("Created User, "+uname+", but activation issue occurred during signup:"+e.getMessage());
+                err.println(
+                        "Created User, " + uname + ", but activation issue occurred during signup:" + e.getMessage());
                 // return 2; // created user, but email issue occurred
                 return 3; // created user, but activation issue occurred
             }
             return 0; // total success
         } else {
-            err.println("Did not create User at signup: "+uname);
+            err.println("Did not create User at signup: " + uname);
             return 1; // failed to create
         }
     }
@@ -719,7 +725,14 @@ public class User {
             textdisplay.mailer m = new textdisplay.mailer();
             String body = "Your TPEN password has been reset to " + newPass + "\n"
                     + "You may head to http://t-pen.org and change it.";
-            m.sendMail(getRbTok("EMAILSERVER"), "TPEN@t-pen.org", this.Uname, "TPEN Password Reset", body);
+            TokenManager man;
+            try {
+                man = new TokenManager();
+                m.sendMail(man.getProperties().getProperty("EMAILSERVER"), "TPEN@t-pen.org", this.Uname, "TPEN Password Reset", body);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
         return newPass;
     }
@@ -729,7 +742,8 @@ public class User {
     public String activateUser() throws SQLException, NoSuchAlgorithmException, MessagingException, Exception {
         String pass = resetPassword(false);
         textdisplay.mailer m = new textdisplay.mailer();
-        m.sendMail(getRbTok("EMAILSERVER"), getRbTok("NOTIFICATIONEMAIL"), this.Uname, "Welcome to TPEN",
+        TokenManager man = new TokenManager();
+        m.sendMail(man.getProperties().getProperty("EMAILSERVER"), man.getProperties().getProperty("NOTIFICATIONEMAIL"), this.Uname, "Welcome to TPEN",
                 new WelcomeMessage().getMessage(this.fname + " " + this.lname, pass));
         return pass;
     }
@@ -935,9 +949,10 @@ public class User {
                     + newUser.getFname() + " " + newUser.getLname() + " (" + newUser.getUname()
                     + ") to join TPEN, which needs your approval.\n";
             try {
-                m.sendMail(getRbTok("EMAILSERVER"), "TPEN@t-pen.org", getRbTok("NOTIFICATIONEMAIL"),
+                TokenManager man = new TokenManager();
+                m.sendMail(man.getProperties().getProperty("EMAILSERVER"), "TPEN@t-pen.org", man.getProperties().getProperty("NOTIFICATIONEMAIL"),
                         "new user request", body);
-            } catch (MessagingException e) {
+            } catch (MessagingException | IOException e) {
                 emailFailure = true;
             }
             // send a notification email to the invitee
@@ -948,9 +963,10 @@ public class User {
                     + "This is the last message you will receive if you do not wish to create an account and no further action is required.\n\n"
                     + "Thanks for transcribing, the TPEN team";
             try {
-                m.sendMail(getRbTok("EMAILSERVER"), "TPEN@t-pen.org", newUser.getUname(),
+                TokenManager man = new TokenManager();
+                m.sendMail(man.getProperties().getProperty("EMAILSERVER"), "TPEN@t-pen.org", newUser.getUname(),
                         "An invitation to transcribe on t-pen.org", body);
-            } catch (MessagingException e) {
+            } catch (MessagingException | IOException e) {
                 emailFailure = true;
             }
             // System.out.println("What is email failure: "+emailFailure);

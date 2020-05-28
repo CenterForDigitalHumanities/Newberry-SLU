@@ -14,40 +14,25 @@
  * 
  * @author Jon Deering
  */
-import com.lowagie.text.DocumentException;
-import static edu.slu.util.ServletUtils.reportInternalError;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import static java.lang.Integer.parseInt;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import static java.util.logging.Level.INFO;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static textdisplay.Manuscript.getFullDocument;
-import static textdisplay.Manuscript.getPartialDocument;
+import com.lowagie.text.DocumentException;
+import edu.slu.util.ServletUtils;
+import textdisplay.Manuscript;
 import textdisplay.Metadata;
 import textdisplay.Project;
 import textdisplay.TagFilter;
-import static textdisplay.TagFilter.noteStyles.endnote;
-import static textdisplay.TagFilter.noteStyles.footnote;
-import static textdisplay.TagFilter.noteStyles.inline;
-import static textdisplay.TagFilter.noteStyles.remove;
-import static textdisplay.TagFilter.noteStyles.sidebyside;
-import static textdisplay.TagFilter.styles.bold;
-import static textdisplay.TagFilter.styles.italic;
-import static textdisplay.TagFilter.styles.none;
-import static textdisplay.TagFilter.styles.paragraph;
-import static textdisplay.TagFilter.styles.superscript;
-import static textdisplay.TagFilter.styles.underlined;
-import static textdisplay.TagFilter.styles.remove;
 
 /**
  *
@@ -64,22 +49,23 @@ public class export extends HttpServlet {
     * @throws IOException if an I/O error occurs
     */
    @Override
-   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+   protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
+         throws ServletException, IOException {
 
-      Enumeration paramNames = req.getParameterNames();
+      final Enumeration paramNames = req.getParameterNames();
       String paramString = "";
       while (paramNames.hasMoreElements()) {
-         String name = (String) paramNames.nextElement();
+         final String name = (String) paramNames.nextElement();
          paramString += name + "=" + req.getParameter(name) + "&";
       }
-      LOG.log(INFO, "Export request params: {0}", paramString);
+      LOG.log(Level.INFO, "Export request params: {0}", paramString);
 
       try {
          int projectID = 0;
          if (req.getParameter("projectID") != null) {
-            projectID = parseInt(req.getParameter("projectID"));
+            projectID = Integer.parseInt(req.getParameter("projectID"));
          }
-         Project p = new Project(projectID);
+         final Project p = new Project(projectID);
 
          switch (req.getParameter("type")) {
             case "pdf":
@@ -93,128 +79,128 @@ public class export extends HttpServlet {
                break;
          }
       } catch (SQLException | DocumentException ex) {
-            reportInternalError(resp, ex);
+         ServletUtils.reportInternalError(resp, ex);
       }
    }
 
-   private void exportPDF(HttpServletRequest req, HttpServletResponse resp, Project p) throws IOException, SQLException, DocumentException {
-         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            resp.setContentType("application/pdf");
+   private void exportPDF(final HttpServletRequest req, final HttpServletResponse resp, final Project p)
+         throws IOException, SQLException, DocumentException {
+      try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+         resp.setContentType("application/pdf");
             //response.setHeader( "Content-Disposition", "filename="+p.getProjectName()+".pdf");
 
-            String text = getMetadataString(req, p) + "\n";
-            text += getDocumentText(req, p, false);
-            TagFilter f = new TagFilter(text);
-            String[] tagArray = getTags(req);
-            TagFilter.styles[] styleArray = getStyles(req, tagArray);
-            f.replaceTagsWithPDFEncoding(tagArray, styleArray, bos);
-            resp.getOutputStream().write(bos.toByteArray());
-         }
-   }
-   
-   private void exportRTF(HttpServletRequest req, HttpServletResponse resp, Project p) throws IOException, SQLException {
-      resp.setContentType("application/rtf");
-      resp.setHeader("Content-Disposition", " filename=\"" + p.getProjectName().replace(",", "").replace(".", "") + ".rtf\"");
-      PrintWriter out = resp.getWriter();
-      String text = getMetadataString(req, p);
-      TagFilter.noteStyles noteStyle = getNoteStyle(req);
-      if (req.getParameter("beginFolio") != null && req.getParameter("endFolio") != null) {
-         int endFolio = parseInt(req.getParameter("endFolio"));
-         int beginFolio = parseInt(req.getParameter("beginFolio"));
-         text += getPartialDocument(p, noteStyle, hasLineBreak(req), hasPageLabels(req), beginFolio, endFolio);
-      } else {
-         text += getFullDocument(p, noteStyle, hasLineBreak(req), hasPageLabels(req), false);
+         String text = getMetadataString(req, p) + "\n";
+         text += getDocumentText(req, p, false);
+         final TagFilter f = new TagFilter(text);
+         final String[] tagArray = getTags(req);
+         final TagFilter.styles[] styleArray = getStyles(req, tagArray);
+         f.replaceTagsWithPDFEncoding(tagArray, styleArray, bos);
+         resp.getOutputStream().write(bos.toByteArray());
       }
-      String[] tagArray = getTags(req);
-      TagFilter.styles[] styleArray = getStyles(req, tagArray);
-      TagFilter f = new TagFilter(text);
+   }
+
+   private void exportRTF(final HttpServletRequest req, final HttpServletResponse resp, final Project p)
+         throws IOException, SQLException {
+      resp.setContentType("application/rtf");
+      resp.setHeader("Content-Disposition",
+            " filename=\"" + p.getProjectName().replace(",", "").replace(".", "") + ".rtf\"");
+      final PrintWriter out = resp.getWriter();
+      String text = getMetadataString(req, p);
+      final TagFilter.noteStyles noteStyle = getNoteStyle(req);
+      if (req.getParameter("beginFolio") != null && req.getParameter("endFolio") != null) {
+         final int endFolio = Integer.parseInt(req.getParameter("endFolio"));
+         final int beginFolio = Integer.parseInt(req.getParameter("beginFolio"));
+         text += Manuscript.getPartialDocument(p, noteStyle, hasLineBreak(req), hasPageLabels(req), beginFolio,
+               endFolio);
+      } else {
+         text += Manuscript.getFullDocument(p, noteStyle, hasLineBreak(req), hasPageLabels(req), false);
+      }
+      final String[] tagArray = getTags(req);
+      final TagFilter.styles[] styleArray = getStyles(req, tagArray);
+      final TagFilter f = new TagFilter(text);
       f.replaceTagsWithRTFEncoding(tagArray, styleArray, out);
    }
 
-   private void exportXML(HttpServletRequest req, HttpServletResponse resp, Project p) throws SQLException, IOException {
+   private void exportXML(final HttpServletRequest req, final HttpServletResponse resp, final Project p)
+         throws SQLException, IOException {
       resp.setContentType("application/txt");
       resp.setCharacterEncoding("UTF-8");
       resp.setHeader("Content-Disposition", "filename=\"" + p.getProjectName() + ".txt");
       String text = "";
-      
+
       if (req.getParameter("beginFolio") != null && req.getParameter("endFolio") != null) {
          Boolean imageWrap = false;
          if (req.getParameter("imageWrap") != null) {
             imageWrap = true;
          }
-         int endFolio = parseInt(req.getParameter("endFolio"));
-         int beginFolio = parseInt(req.getParameter("beginFolio"));
-         text += getPartialDocument(p, getNoteStyle(req), hasLineBreak(req), hasPageLabels(req), beginFolio, endFolio, imageWrap);
+         final int endFolio = Integer.parseInt(req.getParameter("endFolio"));
+         final int beginFolio = Integer.parseInt(req.getParameter("beginFolio"));
+         text += Manuscript.getPartialDocument(p, getNoteStyle(req), hasLineBreak(req), hasPageLabels(req), beginFolio,
+               endFolio, imageWrap);
       } else {
          Boolean imageWrap = false;
          if (req.getParameter("imageWrap") != null) {
             imageWrap = true;
          }
-         text += getFullDocument(p, getNoteStyle(req), hasLineBreak(req), hasPageLabels(req), imageWrap);
+         text += Manuscript.getFullDocument(p, getNoteStyle(req), hasLineBreak(req), hasPageLabels(req), imageWrap);
       }
       if (req.getParameter("tei") != null) {
          // Stick the header after the <TEI> tag if it exists.
          if (text.contains("<TEI>")) {
-            String tmp = text;
-            text = text.substring(0, text.indexOf("<TEI>") + 4) + p.getMetadata().getTEI() + tmp.substring(tmp.indexOf("<TEI>") + 4);
-         } //if there was no <TEI>, prepend the header. Wdont ahve to wrorry about breaking the document, it is already not valid tei
+            final String tmp = text;
+            text = text.substring(0, text.indexOf("<TEI>") + 4) + p.getMetadata().getTEI()
+                  + tmp.substring(tmp.indexOf("<TEI>") + 4);
+         } // if there was no <TEI>, prepend the header. Wdont ahve to wrorry about
+           // breaking the document, it is already not valid tei
          else {
             text = p.getMetadata().getTEI() + text;
          }
       }
       TagFilter f = new TagFilter(text);
-      String[] tagArray = getTags(req);
-      // Note that XML styling only cares about style=none and style=remove; other styles have no impact.
-      String[] tagArrayKeepContent = new String[tagArray.length];    
-        for (int i = 0; i < tagArray.length; i++) {
-            if(req.getParameterMap().containsKey(REMOVE_PARAM_PREFIX+(i+1))){ //make sure there is at lest one to avoid Null Point Exception
-                switch (req.getParameter(REMOVE_PARAM_PREFIX + (i + 1))) {
-                   case "on":
-                      tagArrayKeepContent[i] = tagArray[i];
-                      break;
-                   default:
-                      tagArray[i] = "";
-                      tagArrayKeepContent[i] = "";
-                      break;
-                }
-            }
-            else{
-                tagArray[i] = "";
-            }
+      final String[] tagArray = getTags(req);
+
+      // Note that XML styling only cares about style=none and style=remove; other
+      // styles have no impact.
+      final String[] tagArrayKeepContent = new String[tagArray.length];
+      for (int i = 0; i < tagArray.length; i++) {
+         switch (req.getParameter(STYLE_PARAM_PREFIX + (i + 1))) {
+            case "remove":
+               break;
+            case "checked":
+               tagArrayKeepContent[i] = tagArray[i];
+               break;
+            default:
+               tagArray[i] = "";
+               break;
          }
- 
-      PrintWriter out = resp.getWriter();
-      String result = "";
-      if(tagArray == null || tagArray.length == 0){
-        result = text;
       }
-      else{
-        result =  f.stripTags(tagArray);
-      }
-      result = "<?xml version='1.1'?>\n" + result; //need to have xml header here.  1.0 or 1.1?   
-      out.append(result);
+
+      final PrintWriter out = resp.getWriter();
+      final String result = f.removeTagsAndContents(tagArray);
+      f = new TagFilter(result);
+      out.append(f.stripTags(tagArrayKeepContent));
    }
 
-   private boolean hasLineBreak(HttpServletRequest req) {
+   private boolean hasLineBreak(final HttpServletRequest req) {
       return "newline".equals(req.getParameter("linebreak"));
    }
-   
-   private boolean hasPageLabels(HttpServletRequest req) {
+
+   private boolean hasPageLabels(final HttpServletRequest req) {
       return req.getParameter("pageLabels") != null;
    }
 
-   private TagFilter.noteStyles getNoteStyle(HttpServletRequest req) {
-      String param = req.getParameter("notes");
+   private TagFilter.noteStyles getNoteStyle(final HttpServletRequest req) {
+      final String param = req.getParameter("notes");
       if (param != null) {
          switch (param) {
             case "sideBySide":
-               return sidebyside;
+               return TagFilter.noteStyles.sidebyside;
             case "line":
-               return inline;
+               return TagFilter.noteStyles.inline;
             case "endnote":
-               return endnote;
+               return TagFilter.noteStyles.endnote;
             case "footnote":
-               return footnote;
+               return TagFilter.noteStyles.footnote;
             case "remove":
             default:
                break;
@@ -223,10 +209,10 @@ public class export extends HttpServlet {
       return TagFilter.noteStyles.remove;
    }
 
-   private String getMetadataString(HttpServletRequest req, Project p) throws SQLException {
+   private String getMetadataString(final HttpServletRequest req, final Project p) throws SQLException {
       String metadataString = "";
       if (req.getParameter("metadata") != null) {
-         Metadata m = p.getMetadata();
+         final Metadata m = p.getMetadata();
          metadataString += "Title:" + m.getTitle() + "\n";
          metadataString += "Subtitle:" + m.getSubtitle() + "\n";
          metadataString += "MS identifier:" + m.getMsIdentifier() + "\n";
@@ -244,19 +230,21 @@ public class export extends HttpServlet {
       return metadataString;
    }
 
-   private String getDocumentText(HttpServletRequest req, Project p, boolean imageWrap) throws SQLException {
-      TagFilter.noteStyles noteStyle = getNoteStyle(req);
+   private String getDocumentText(final HttpServletRequest req, final Project p, final boolean imageWrap)
+         throws SQLException {
+      final TagFilter.noteStyles noteStyle = getNoteStyle(req);
       if (req.getParameter("beginFolio") != null && req.getParameter("endFolio") != null) {
-         int endFolio = parseInt(req.getParameter("endFolio"));
-         int beginFolio = parseInt(req.getParameter("beginFolio"));
-         return getPartialDocument(p, noteStyle, hasLineBreak(req), hasPageLabels(req), beginFolio, endFolio, imageWrap);
+         final int endFolio = Integer.parseInt(req.getParameter("endFolio"));
+         final int beginFolio = Integer.parseInt(req.getParameter("beginFolio"));
+         return Manuscript.getPartialDocument(p, noteStyle, hasLineBreak(req), hasPageLabels(req), beginFolio, endFolio,
+               imageWrap);
       } else {
-         return getFullDocument(p, noteStyle, hasLineBreak(req), hasPageLabels(req), imageWrap);
-      }      
+         return Manuscript.getFullDocument(p, noteStyle, hasLineBreak(req), hasPageLabels(req), imageWrap);
+      }
    }
 
-   private String[] getTags(HttpServletRequest req) {
-      List<String> tagList = new ArrayList<>();
+   private String[] getTags(final HttpServletRequest req) {
+      final List<String> tagList = new ArrayList<>();
       String tag;
       int i = 1;
       while ((tag = req.getParameter(TAG_PARAM_PREFIX + i)) != null) {
@@ -268,41 +256,42 @@ public class export extends HttpServlet {
 
    /**
     * Build an array of styles for the tags.
-    * @param req servlet request
+    * 
+    * @param req      servlet request
     * @param tagArray array of tags already extracted
     * @return an array of styles corresponding to the tags
     */
-   private TagFilter.styles[] getStyles(HttpServletRequest req, String[] tagArray) {
-      TagFilter.styles[] styleArray = new TagFilter.styles[tagArray.length];
-      TagFilter.noteStyles noteStyle = getNoteStyle(req);
+   private TagFilter.styles[] getStyles(final HttpServletRequest req, final String[] tagArray) {
+      final TagFilter.styles[] styleArray = new TagFilter.styles[tagArray.length];
+      final TagFilter.noteStyles noteStyle = getNoteStyle(req);
       for (int i = 0; i < tagArray.length; i++) {
-         if (tagArray[i].equals("tpen_note") && noteStyle == endnote) {
-            styleArray[i] = superscript;
+         if (tagArray[i].equals("tpen_note") && noteStyle == TagFilter.noteStyles.endnote) {
+            styleArray[i] = TagFilter.styles.superscript;
          }
          switch (req.getParameter(STYLE_PARAM_PREFIX + (i + 1))) {
             case "italic":
-               styleArray[i] = italic;
+               styleArray[i] = TagFilter.styles.italic;
                break;
             case "bold":
-               styleArray[i] = bold;
+               styleArray[i] = TagFilter.styles.bold;
                break;
             case "underlined":
-               styleArray[i] = underlined;
+               styleArray[i] = TagFilter.styles.underlined;
                break;
             case "none":
-               styleArray[i] = none;
+               styleArray[i] = TagFilter.styles.none;
                break;
             case "paragraph":
-               styleArray[i] = paragraph;
+               styleArray[i] = TagFilter.styles.paragraph;
                break;
             default:
                styleArray[i] = TagFilter.styles.remove;
                break;
          }
-         if (tagArray[i].equals("tpen_note") && noteStyle == endnote) {
-            styleArray[i] = superscript;
+         if (tagArray[i].equals("tpen_note") && noteStyle == TagFilter.noteStyles.endnote) {
+            styleArray[i] = TagFilter.styles.superscript;
          }
-         LOG.log(INFO, "Tag {0}: {1} {2}", new Object[] { i + 1, tagArray[i], styleArray[i] });
+         LOG.log(Level.INFO, "Tag {0}: {1} {2}", new Object[] { i + 1, tagArray[i], styleArray[i] });
       }
       return styleArray;
    }
@@ -319,7 +308,6 @@ public class export extends HttpServlet {
    
    private static final String TAG_PARAM_PREFIX = "tag";
    private static final String STYLE_PARAM_PREFIX = "style";
-   private static final String REMOVE_PARAM_PREFIX = "removeTag";
    
-   private static final Logger LOG = getLogger(export.class.getName());
+   private static final Logger LOG = Logger.getLogger(export.class.getName());
 }

@@ -1,30 +1,17 @@
 
 package textdisplay;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import static java.lang.System.getProperties;
-import static java.net.IDN.toASCII;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import static javax.mail.Message.RecipientType.TO;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import static javax.mail.Session.getDefaultInstance;
-import static javax.mail.Transport.send;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import static javax.mail.internet.InternetAddress.parse;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import static textdisplay.Folio.getRbTok;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.mail.*;
+import javax.mail.internet.*;
+import tokens.TokenManager;
 
 /**Sends mail when an error occurs
  */
@@ -49,8 +36,15 @@ public class mailer {
     
     public mailer()
     {
-        this.mailServer = getRbTok("EMAILSERVER");
-        this.mailFrom = getRbTok("NOTIFICATIONEMAIL");
+        try{
+            TokenManager man = new TokenManager();
+            this.mailServer = man.getProperties().getProperty("MAIL_SERVER");
+            this.mailFrom = man.getProperties().getProperty("MAIL_FROM");
+        }
+        catch(IOException e){
+            this.mailServer = "Unknown";
+            this.mailFrom = "Unknown";
+        }
     }
     
     
@@ -109,11 +103,11 @@ public class mailer {
             // BOZO:  This will never be used, right?  (Since Java prevents nulls here.)
             mailServer = this.mailServer;
         }
-        Properties props = getProperties();
+        Properties props = System.getProperties();
         props.put("mail.smtp.host", mailServer);
         
         // Get a mail session
-        Session session = getDefaultInstance(props, null);
+        Session session = Session.getDefaultInstance(props, null);
         
         // Define a new mail message
         Message message = new MimeMessage(session);
@@ -126,7 +120,7 @@ public class mailer {
         message.setFrom(new InternetAddress(from));
         
         //message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-        message.addRecipients(TO, unicodifyAddresses(to));
+        message.addRecipients(Message.RecipientType.TO, unicodifyAddresses(to));
         message.setSubject(subject);
         
         // Create a message part to represent the body text
@@ -143,7 +137,7 @@ public class mailer {
         message.setContent(multipart);
         
         // Send the message
-        send(message);
+        Transport.send(message);
      }
     
     
@@ -155,12 +149,12 @@ public class mailer {
      * @throws AddressException 
      */
     InternetAddress[] unicodifyAddresses(String addresses) throws AddressException {
-        InternetAddress[] recips = parse(toASCII(addresses), false);
+        InternetAddress[] recips = InternetAddress.parse(java.net.IDN.toASCII(addresses), false);
         for(int i=0; i<recips.length; i++) {
             try {
                 recips[i] = new InternetAddress(recips[i].getAddress(), recips[i].getPersonal(), "utf-8");
             } catch (UnsupportedEncodingException ex) {
-                getLogger(mailer.class.getName()).log(SEVERE, null, ex);
+                Logger.getLogger(mailer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return recips;

@@ -15,8 +15,9 @@
 
 package edu.slu.tpen.servlet;
 
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+
 import java.io.IOException;
-import static java.lang.Integer.parseInt;
 import java.sql.SQLException;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
@@ -24,51 +25,48 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import javax.servlet.http.HttpSession;
 import textdisplay.Project;
 import user.Group;
 import user.User;
 
 /**
- * Delete user from project. 
- * This is a transformation of tpen function to web service. It's using tpen MySQL database. 
+ * Delete user from project. This is a transformation of tpen function to web
+ * service. It's using tpen MySQL database.
+ * 
  * @author hanyan
  */
 public class DelUserFromProjectServlet extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         HttpSession session = request.getSession();
         if (session.getAttribute("UID") != null) {
             try {
-                int UID = parseInt(session.getAttribute("UID").toString());
+                int UID = Integer.parseInt(session.getAttribute("UID").toString());
                 User thisUser = new user.User(UID);
-                if(null != request.getParameter("uname") && null != request.getParameter("projectID")){
+                if (null != request.getParameter("uname") && null != request.getParameter("projectID")) {
                     User newUser = new User(request.getParameter("uname"));
-                    if(null != newUser){
-                        Project thisProject = new Project(parseInt(request.getParameter("projectID")));
-                        Group g = new Group(thisProject.getGroupID());
-                        if (g.isAdmin(thisUser.getUID())) {
-                            g.remove(newUser.getUID());
-                        }else{
-                            //if user is not admin, return unauthorized. 
-                            response.getWriter().print(SC_UNAUTHORIZED);
-                        }
-                    }else{
-                        //if there is no uname
-                        response.getWriter().print(SC_NOT_ACCEPTABLE);
+                    Project thisProject = new Project(Integer.parseInt(request.getParameter("projectID")));
+                    Group g = new Group(thisProject.getGroupID());
+                    if (g.isAdmin(thisUser.getUID())) {
+                        g.remove(newUser.getUID());
+                    } else {
+                        // if user is not admin, return unauthorized.
+                        response.getWriter().print(SC_UNAUTHORIZED);
                     }
-                }else{
-                    //if there is no uname
+                } else {
+                    // if there is no uname
                     response.getWriter().print(SC_NOT_ACCEPTABLE);
                 }
             } catch (SQLException ex) {
                 getLogger(DelUserFromProjectServlet.class.getName()).log(SEVERE, null, ex);
             }
-        }else{
-            //if user doesn't log in, return unauthorized. 
+        } else {
+            // if user doesn't log in, return unauthorized.
             response.getWriter().print(SC_UNAUTHORIZED);
         }          
     }

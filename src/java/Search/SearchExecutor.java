@@ -46,7 +46,7 @@ public class SearchExecutor {
     String[] stubs;
     String line;
     String def;
-    private Boolean error = false;
+    private final Boolean error = false;
     private int totalHits;
     private int totalPages;
 
@@ -57,14 +57,14 @@ public class SearchExecutor {
     public SearchExecutor() throws IOException {
         fileData = "";
         directory = FSDirectory.getDirectory("/usr/web/tosend/indexENAP", false);
-        //Read this location from an XML config file
+        // Read this location from an XML config file
         analyser = new StandardAnalyzer();
-
 
     }
 
     /**
      * get the number of search hits
+     * 
      * @return the number of search hits
      */
     public int getTotalHits() {
@@ -73,6 +73,7 @@ public class SearchExecutor {
 
     /**
      * get the number of pages of hits given the speciified paging scheme
+     * 
      * @return number of pages of hits given the speciified paging scheme
      */
     public int getTotalPages() {
@@ -80,8 +81,10 @@ public class SearchExecutor {
     }
 
     /**
-     * Search user generated transcriptions. Results contain embedded images. Results are restricted to those the user usrID has
-     * permissing to view the transcription
+     * Search user generated transcriptions. Results contain embedded images.
+     * Results are restricted to those the user usrID has permissing to view the
+     * transcription
+     * 
      * @param searchWord
      * @param language
      * @param order
@@ -91,40 +94,47 @@ public class SearchExecutor {
      * @return
      * @throws Exception
      */
-    public Stack<Transcription> transcriptionSearch(String searchWord, String language, int order, Boolean paged, int pageNumber, String usrID) throws Exception {
-        Boolean wildcard = true;
-        final int pageSize = 20; //Number of results per page, could be made a parm one day
-        final int maxResults = 1000; //No matter what dont return more than this many results from Lucene. This is ok because result filtering occurs before this limitation is applied
+    public Stack<Transcription> transcriptionSearch(final String searchWord, final String language, final int order,
+            final Boolean paged, final int pageNumber, String usrID) throws Exception {
+        final Boolean wildcard = true;
+        final int pageSize = 20; // Number of results per page, could be made a parm one day
+        final int maxResults = 1000; // No matter what dont return more than this many results from Lucene. This is
+                                     // ok because result filtering occurs before this limitation is applied
         String returnStringArray = "";
-        //we dont currently worry about language filtering, but ENAP did, so we could do it if we wanted to
+        // we dont currently worry about language filtering, but ENAP did, so we could
+        // do it if we wanted to
         if (language != null && language.length() > 1) {
-            //searchWord=searchWord+" AND lang:"+language;
+            // searchWord=searchWord+" AND lang:"+language;
         }
-        /**@TODO the location should be a param*/
-        IndexSearcher is = new IndexSearcher("/usr/indexTranscriptions");
-        QueryParser parser = new QueryParser("text", analyser);
+        /** @TODO the location should be a param */
+        final IndexSearcher is = new IndexSearcher("/usr/indexTranscriptions");
+        final QueryParser parser = new QueryParser("text", analyser);
         Sort newsort;
-        Query query = parser.parse(searchWord);
+        final Query query = parser.parse(searchWord);
         is.rewrite(parser.parse(searchWord));
-        QueryScorer queryScorer = new QueryScorer(query);
+        final QueryScorer queryScorer = new QueryScorer(query);
         ScoreDoc[] hits;
-        //If the person wasnt logged in, give them only public comments. comment owner
+        // If the person wasnt logged in, give them only public comments. comment owner
         if (usrID.compareTo("") == 0) {
             usrID = "0";
         }
-        Query secQuery = parser.parse("security:private OR creator:" + usrID);
-        //This will filter search results so only comments owned by the user and public comments will be returned
-        QueryFilter secFilter = new QueryFilter(query);
-        //If a sort was specified, use it, otherwise use the default sorting which is by hit quality
+        final Query secQuery = parser.parse("security:private OR creator:" + usrID);
+        // This will filter search results so only comments owned by the user and public
+        // comments will be returned
+        final QueryFilter secFilter = new QueryFilter(query);
+        // If a sort was specified, use it, otherwise use the default sorting which is
+        // by hit quality
         if (order > 0) {
-            //order=1 means sort by line number, first line of the text is first.
-            //order=2 means inverse sort by line number, last line of the text is first.
-            //Java, the Nanny language, doesn't want to let me use newsort even if I ensure its not a null pointer
-            //So if were going to use a filter, set the filter to type 1, then check to see if it should be something else.
+            // order=1 means sort by line number, first line of the text is first.
+            // order=2 means inverse sort by line number, last line of the text is first.
+            // Java, the Nanny language, doesn't want to let me use newsort even if I ensure
+            // its not a null pointer
+            // So if were going to use a filter, set the filter to type 1, then check to see
+            // if it should be something else.
 
             try {
                 hits = is.search(query, secFilter, maxResults).scoreDocs;
-            } catch (org.apache.lucene.search.BooleanQuery.TooManyClauses e) {
+            } catch (final org.apache.lucene.search.BooleanQuery.TooManyClauses e) {
                 return null;
             }
         } else {
@@ -132,31 +142,35 @@ public class SearchExecutor {
                 newsort = new Sort("creator", false);
                 hits = is.search(query, secFilter, maxResults, newsort).scoreDocs;
 
-            } catch (org.apache.lucene.search.BooleanQuery.TooManyClauses e) {
+            } catch (final org.apache.lucene.search.BooleanQuery.TooManyClauses e) {
                 return null;
             }
         }
-        //Start at the hit that belongs at the top of the page they requested. For page 2, that is 19
-        //Ensure we do not print more than pageNumber hits, or go beyond the end of the hit list
+        // Start at the hit that belongs at the top of the page they requested. For page
+        // 2, that is 19
+        // Ensure we do not print more than pageNumber hits, or go beyond the end of the
+        // hit list
         String link = "";
         int ctr = 1;
-        Stack<Transcription> results = new Stack();
-        SimpleHTMLFormatter formatter = new SimpleHTMLFormatter("<span class=\"highlight\">", "</span>");
-        Highlighter highlighter = new Highlighter(formatter, queryScorer);
+        final Stack<Transcription> results = new Stack();
+        final SimpleHTMLFormatter formatter = new SimpleHTMLFormatter("<span class=\"highlight\">", "</span>");
+        new Highlighter(formatter, queryScorer);
 
         if (pageSize * (pageNumber - 1) < hits.length) {
-            returnStringArray += "Your search for \"<b>" + searchWord + "</b>\" returned " + hits.length + " results.<br/>";
-            for (int i = pageSize * (pageNumber - 1); i < hits.length && i - (pageSize * (pageNumber - 1)) < pageSize; i++) {
+            returnStringArray += "Your search for \"<b>" + searchWord + "</b>\" returned " + hits.length
+                    + " results.<br/>";
+            for (int i = pageSize * (pageNumber - 1); i < hits.length
+                    && i - (pageSize * (pageNumber - 1)) < pageSize; i++) {
 
-                Document hitDoc = is.doc(hits[i].doc);
+                final Document hitDoc = is.doc(hits[i].doc);
 
                 field = hitDoc.getField("line");
-                Transcription t = new Transcription(String.valueOf(Integer.parseInt(hitDoc.getField("id").stringValue())));
+                final Transcription t = new Transcription(Integer.parseInt(hitDoc.getField("id").stringValue()));
                 results.add(t);
                 String paragraph = field.stringValue();
                 String pageno = "";
                 String creator = hitDoc.getField("creator").stringValue();
-                user.User u = new User(Integer.parseInt(creator));
+                final user.User u = new User(Integer.parseInt(creator));
                 creator = "" + u.getLname() + " " + u.getFname();
                 if (isInteger(paragraph)) {
 
@@ -169,14 +183,16 @@ public class SearchExecutor {
                         paragraph = "hola null";
                     }
                 } else {
-                    String folio = "";
-                    Folio f = new Folio(Integer.parseInt(folio));
-                    link = "&nbsp;&nbsp;&nbsp;<a href=transcriptionImageTest.jsp?p=" + folio + ">" + field.stringValue() + "(Archive:" + f.getArchive() + " Shelfmark:" + f.getCollectionName() + " page:" + folio + ")</a>";
+                    final String folio = "";
+                    final Folio f = new Folio(Integer.parseInt(folio));
+                    link = "&nbsp;&nbsp;&nbsp;<a href=transcriptionImageTest.jsp?p=" + folio + ">" + field.stringValue()
+                            + "(Archive:" + f.getArchive() + " Shelfmark:" + f.getCollectionName() + " page:" + folio
+                            + ")</a>";
                 }
                 returnStringArray = returnStringArray + (ctr + ". " + link + "<br/>");
                 ctr++;
             }
-        } else /*we dont have any results for the page/search they gave us*/ {
+        } else /* we dont have any results for the page/search they gave us */ {
             returnStringArray = "No results to display.";
         }
         totalHits = hits.length;
@@ -193,14 +209,15 @@ public class SearchExecutor {
 
     /**
      * Does the input String parse to an integer without error?
+     * 
      * @param input A string you think is a number
      * @return
      */
-    private boolean isInteger(String input) {
+    private boolean isInteger(final String input) {
         try {
             Integer.parseInt(input);
             return true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return false;
         }
     }

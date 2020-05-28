@@ -17,14 +17,12 @@
 package match;
 
 import detectimages.blob;
-import static detectimages.blob.getBlobs;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import static java.lang.Integer.parseInt;
 import java.sql.SQLException;
 import java.util.Vector;
-import static textdisplay.Folio.getRbTok;
 import textdisplay.Manuscript;
+import tokens.TokenManager;
 
 /**
  *
@@ -40,8 +38,8 @@ public class allBlobDivs {
    public allBlobDivs(String pageIdentifier) throws FileNotFoundException, IOException, SQLException {
       String onMouseOver = "";
       divs = "";
-      Vector<blob> allblobs = getBlobs("/usr/data/" + pageIdentifier + ".txt");
-      matchLocater m = new matchLocater(parseInt(pageIdentifier), 0, true);
+      Vector<blob> allblobs = blob.getBlobs("/usr/data/" + pageIdentifier + ".txt");
+      matchLocater m = new matchLocater(Integer.parseInt(pageIdentifier), 0, true);
       //Connection j=dbWrapper.getConnection();
       for (int i = 0; i < allblobs.size(); i++) {
          //if(allblobs.get(i).getSize()>=50)
@@ -57,7 +55,8 @@ public class allBlobDivs {
    public allBlobDivs(int folioNum) throws FileNotFoundException, IOException, SQLException {
       StringBuilder newBlobs = new StringBuilder("");
       Manuscript ms = new Manuscript(folioNum);
-      Vector<blob> allblobs = getBlobs(getRbTok("PALEODATADIR") + "/" + ms.getID() + "/" + folioNum + ".txt");
+      TokenManager man = new TokenManager();
+      Vector<blob> allblobs = blob.getBlobs(man.getProperties().getProperty("PALEODATADIR") + "/" + ms.getID() + "/" + folioNum + ".txt");
       matchLocater m = new matchLocater(folioNum, 0, "sup");
       //Connection j=dbWrapper.getConnection();
       for (int i = 0; i < allblobs.size(); i++) {
@@ -82,7 +81,8 @@ public class allBlobDivs {
    public allBlobDivs(int folioNum, int matchLevel) throws FileNotFoundException, IOException, SQLException {
       StringBuilder newBlobs = new StringBuilder("");
       Manuscript ms = new Manuscript(folioNum);
-      Vector<blob> allblobs = getBlobs(getRbTok("PALEODATADIR") + "/" + ms.getID() + "/" + folioNum + ".txt");
+      TokenManager man = new TokenManager();
+      Vector<blob> allblobs = blob.getBlobs(man.getProperties().getProperty("PALEODATADIR") + "/" + ms.getID() + "/" + folioNum + ".txt");
       matchLocater m = new matchLocater(folioNum, 0, "sup", matchLevel);
       //Connection j=dbWrapper.getConnection();
       for (int i = 0; i < allblobs.size(); i++) {

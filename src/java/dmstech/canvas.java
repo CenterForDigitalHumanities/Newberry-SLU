@@ -33,47 +33,45 @@ public class canvas {
         return title;
     }
     
-    private String canvas;
-    private String title;
+    private final String canvas;
+    private final String title;
     private ImageChoice[] imageURL;
     private int position;
-    private int height;
-    private int width;
-    
-    public void setImageURL(ImageChoice[] c)
-    {
-        this.imageURL=c;
+    private final int height;
+    private final int width;
+
+    public void setImageURL(final ImageChoice[] c) {
+        this.imageURL = c;
     }
-    
+
     public int getHeight() {
         return height;
     }
-    
+
     public int getWidth() {
         return width;
     }
-    
-    public canvas(String canvas, String title, ImageChoice[] img,int position)
-    {
-        this.canvas=canvas;
-        this.title=title;
-        this.imageURL=img;
-        this.position=position;
-        height=0;
-        width=0;
+
+    public canvas(final String canvas, final String title, final ImageChoice[] img, final int position) {
+        this.canvas = canvas;
+        this.title = title;
+        this.imageURL = img;
+        this.position = position;
+        height = 0;
+        width = 0;
     }
-    
-    public canvas(String canvas, String title, ImageChoice[] img,int position, int width, int height)
-    {
-        this.canvas=canvas;
-        this.title=title;
-        this.imageURL=img;
-        this.position=position;
-        this.width=width;
-        this.height=height;
+
+    public canvas(final String canvas, final String title, final ImageChoice[] img, final int position, final int width,
+            final int height) {
+        this.canvas = canvas;
+        this.title = title;
+        this.imageURL = img;
+        this.position = position;
+        this.width = width;
+        this.height = height;
     }
-    
-    public void setPosition(int position){
+
+    public void setPosition(final int position) {
         this.position = position;
     }
     

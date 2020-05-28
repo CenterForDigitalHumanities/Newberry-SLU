@@ -5,25 +5,22 @@
  */
 package edu.slu.tpen.servlet;
 
-import edu.slu.tpen.entity.transcription.Annotation;
-import static edu.slu.tpen.servlet.Constant.ANNOTATION_SERVER_ADDR;
+import com.mongodb.util.JSONParseException;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import static java.lang.Integer.parseInt;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import static java.net.URLEncoder.encode;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.json.JSONObject;
-import static net.sf.json.JSONObject.fromObject;
+import tokens.TokenManager;
 
 /**
  * This servlet is used for IIIF store (rerum.io). It saves new trans-line to rerum.io. 
@@ -31,62 +28,97 @@ import static net.sf.json.JSONObject.fromObject;
  * @author hanyan
  */
 public class SaveNewTransLineServlet extends HttpServlet {
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        int codeOverwrite = 500;
+        resp.setHeader("Content-Type", "application/json; charset=utf-8");
+        resp.setCharacterEncoding("UTF-8");
         if(null != req.getSession().getAttribute("UID")){
-            int UID = parseInt(req.getSession().getAttribute("UID").toString());
-            Annotation anno = new Annotation();
-            anno.setContent(req.getParameter("content"));
-            JSONObject jo = fromObject(anno.getContent());
-            jo.element("oa:createdBY", req.getLocalName() + "/" + UID);
-            anno.setContent(jo.toString());
+            int UID = (Integer) req.getSession().getAttribute("UID");
+            //The TPEN_NL js still wraps requests to these proxies wrapping in content:{}.  We can unwrap it from the .js if we would like since RERUM no longer imposes this.  
+            String content = req.getParameter("content");         
+            StringBuilder sb = new StringBuilder();
+            JSONObject jo = JSONObject.fromObject(content);
+            jo.element("oa:createdBy", req.getLocalName() + "/" + UID);
+            URL postUrl = new URL(Constant.ANNOTATION_SERVER_ADDR + "/create.action");
+            HttpURLConnection connection = (HttpURLConnection) postUrl.openConnection();
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.setRequestMethod("POST");
+            connection.setUseCaches(false);
+            connection.setInstanceFollowRedirects(true);
+            connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
             try {
-                URL postUrl = new URL(ANNOTATION_SERVER_ADDR + "/anno/saveNewAnnotation.action");
-                HttpURLConnection connection = (HttpURLConnection) postUrl.openConnection();
-                // Output to the connection. Default is
-                // false, set to true because post
-                // method must write something to the
-                // connection
-                connection.setDoOutput(true);
-                // Read from the connection. Default is true.
-                connection.setDoInput(true);
-                // Set the post method. Default is GET
-                connection.setRequestMethod("POST");
-                // Post cannot use caches
-                connection.setUseCaches(false);
-                connection.setInstanceFollowRedirects(true);
-                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                //System.out.println("TPEN Try to save new line...");
+                TokenManager man = new TokenManager();
+                String pubTok = man.getAccessToken();
+                boolean expired = man.checkTokenExpiry();
+                if(expired){
+                    System.out.println("TPEN_NL detected an expired token, auto getting and setting a new one...");
+                    pubTok = man.generateNewAccessToken();
+                }
+                //TESTING FLAG CONTROL
+                jo.element("TPEN_NL_TESTING", man.getProperties().getProperty("TESTING"));
+                connection.setRequestProperty("Authorization", "Bearer "+pubTok);
+                //System.out.println("TPEN is connected to RERUM create.action");
                 connection.connect();
-                try (DataOutputStream out = new DataOutputStream(connection.getOutputStream())) {
-                    out.writeBytes("content=" + encode(anno.getContent(), "utf-8"));
-                    out.flush();
-                    // flush and close
-                }
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(),"utf-8"));
+                DataOutputStream out = new DataOutputStream(connection.getOutputStream()); 
+                byte[] toWrite = jo.toString().getBytes("UTF-8");
+                out.write(toWrite);
+                out.flush();
+                out.close(); // flush and 
+//                System.out.println("Gathering buffered reader for connection");
+                //Throws exception if not a 2xx.  This has a 400 if @id is in body of anno...handle differently?
+                //Can't get message in body back from RERUM if this throws exception here. 
+                codeOverwrite = connection.getResponseCode();
+                BufferedReader reader;
                 String line="";
-                StringBuilder sb = new StringBuilder();
-    //            System.out.println("=============================");  
-    //            System.out.println("Contents of post request");  
-    //            System.out.println("=============================");  
+                
+                reader = new BufferedReader(new InputStreamReader(connection.getInputStream(),"utf-8"));
                 while ((line = reader.readLine()) != null){  
-                    //line = new String(line.getBytes(), "utf-8");  
-                    //System.out.println(line);
                     sb.append(line);
-                }
-    //            System.out.println("=============================");  
-    //            System.out.println("Contents of post request ends");  
-    //            System.out.println("=============================");  
+                } 
                 reader.close();
+                resp.setStatus(codeOverwrite);
+                //FIXME connection is coming out as 200 w/o Location header sometimes on successful RERUM create calls.  WHY?
+                resp.setHeader("Location", connection.getHeaderField("Location"));
                 connection.disconnect();
                 resp.getWriter().print(sb.toString());
-            } catch (UnsupportedEncodingException ex) {
-                getLogger(SaveNewTransLineServlet.class.getName()).log(SEVERE, null, ex);
+            } 
+            catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(SaveNewTransLineServlet.class.getName()).log(Level.SEVERE, null, ex);
+                connection.disconnect();
+                resp.setStatus(codeOverwrite);
+                resp.getWriter().print(ex);
+            } catch (JSONParseException ex){
+                Logger.getLogger(SaveNewTransLineServlet.class.getName()).log(Level.SEVERE, null, ex);
+                connection.disconnect();
+                resp.setStatus(codeOverwrite);
+                resp.getWriter().print(ex);
             } catch (IOException ex) {
-                getLogger(SaveNewTransLineServlet.class.getName()).log(SEVERE, null, ex);
+                //Buffered readers wrongly throw this exception for the gambit of restful responses.  Still read the error stream
+                //from the connection to return to the front end so it doesn't get the generic exception and usese RERUM's response instead. 
+                BufferedReader error = new BufferedReader(new InputStreamReader(connection.getErrorStream(),"utf-8"));
+                String errorLine = "";
+                while ((errorLine = error.readLine()) != null){  
+                    sb.append(errorLine);
+                } 
+                error.close();
+                Logger.getLogger(SaveNewTransLineServlet.class.getName()).log(Level.SEVERE, null, ex);
+                connection.disconnect();
+                resp.setStatus(codeOverwrite);
+                resp.getWriter().print(sb.toString());
+               
+            } catch (Exception ex) {
+                Logger.getLogger(SaveNewTransLineServlet.class.getName()).log(Level.SEVERE, null, ex);
+                connection.disconnect();
+                resp.setStatus(codeOverwrite);
+                resp.getWriter().print(ex);
             }
         }else{
+            resp.setStatus(401);
             resp.getWriter().print("You didn't log in. ");
+            
         }
     }
 

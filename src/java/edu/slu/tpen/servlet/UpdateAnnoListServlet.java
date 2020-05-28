@@ -5,7 +5,6 @@
  */
 package edu.slu.tpen.servlet;
 
-import static edu.slu.tpen.servlet.Constant.ANNOTATION_SERVER_ADDR;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -13,13 +12,16 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import static java.net.URLEncoder.encode;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.sf.json.JSONObject;
+import tokens.TokenManager;
 
 /**
  * Update annotation list from rerum.io. 
@@ -29,40 +31,79 @@ import javax.servlet.http.HttpServletResponse;
 public class UpdateAnnoListServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int codeOverwrite = 500;
+        response.setHeader("Content-Type", "application/json; charset=utf-8");
+        response.setCharacterEncoding("UTF-8");
+        URL postUrl = new URL(Constant.ANNOTATION_SERVER_ADDR + "/patch.action");
+        HttpURLConnection connection = (HttpURLConnection) postUrl.openConnection();
+        connection.setDoOutput(true);
+        connection.setDoInput(true);
+        //https://stackoverflow.com/questions/25163131/httpurlconnection-invalid-http-method-patch
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
+        connection.setUseCaches(false);
+        connection.setInstanceFollowRedirects(true);
+        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+        String line="";
+        StringBuilder sb = new StringBuilder();
         try {
-            URL postUrl = new URL(ANNOTATION_SERVER_ADDR + "/anno/updateAnnotation.action");
-            HttpURLConnection connection = (HttpURLConnection) postUrl.openConnection();
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            connection.setRequestMethod("POST");
-            connection.setUseCaches(false);
-            connection.setInstanceFollowRedirects(true);
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            connection.connect();
-            //value to save
-            try (DataOutputStream out = new DataOutputStream(connection.getOutputStream())) {
-                //value to save
-                out.writeBytes("content=" + encode(request.getParameter("content"), "utf-8"));
-                out.flush();
-                // flush and close
+            //We will only ever be altering the resources property here, no need to PUT update.  Just PATCH.  
+            TokenManager man = new TokenManager();
+            String pubTok = man.getAccessToken();
+            boolean expired = man.checkTokenExpiry();
+            if(expired){
+                System.out.println("TPEN_NL detected an expired token, auto getting and setting a new one...");
+                pubTok = man.generateNewAccessToken();
             }
+            connection.setRequestProperty("Authorization", "Bearer "+pubTok);
+            JSONObject updateObject = new JSONObject();
+            String content = request.getParameter("content");
+            updateObject = JSONObject.fromObject(content);
+            updateObject.element("TPEN_NL_TESTING", man.getProperties().getProperty("TESTING"));
+            connection.connect();
+            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+            //value to save
+            //The TPEN_NL javascript is stil handing to the proxy API wrapped in content:{}.  We can unwrap as RERUM no longer imposes this. 
+            byte[] toWrite = updateObject.toString().getBytes("UTF-8");
+            out.write(toWrite);
+            //out.writeBytes(updateObject.toString());
+            out.flush();
+            out.close(); // flush and close
+            codeOverwrite = connection.getResponseCode();
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(),"utf-8"));
-            String line="";
-            StringBuilder sb = new StringBuilder();
+            
             while ((line = reader.readLine()) != null){
-                //line = new String(line.getBytes(), "utf-8");  
-//                System.out.println(line);
                 sb.append(line);
             }
             reader.close();
+            response.setStatus(codeOverwrite);
+            response.setHeader("Location", connection.getHeaderField("Location"));
             connection.disconnect();
-            response.setHeader("Content-Location", "absoluteURI");
             response.getWriter().print(sb.toString());
         } catch (UnsupportedEncodingException ex) {
-            getLogger(UpdateAnnoListServlet.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(UpdateAnnoListServlet.class.getName()).log(Level.SEVERE, null, ex);
+            connection.disconnect();
+            response.setStatus(codeOverwrite);
+            response.getWriter().print(ex);
         } catch (IOException ex) {
-            getLogger(UpdateAnnoListServlet.class.getName()).log(SEVERE, null, ex);
+            BufferedReader error = new BufferedReader(new InputStreamReader(connection.getErrorStream(),"utf-8"));
+            String errorLine = "";
+            while ((errorLine = error.readLine()) != null){  
+                sb.append(errorLine);
+            } 
+            error.close();
+            Logger.getLogger(UpdateAnnoListServlet.class.getName()).log(Level.SEVERE, null, ex);
+            connection.disconnect();
+            response.setStatus(codeOverwrite);
+            response.getWriter().print(sb.toString());
+        } catch (Exception ex) {
+            System.out.println("TPEN_NL update anno list could not generate a new access token.  This may result in a 403.");
+            Logger.getLogger(UpdateAnnoListServlet.class.getName()).log(Level.SEVERE, null, ex);
+            connection.disconnect();
+            response.setStatus(codeOverwrite);
+            response.getWriter().print(ex);
         }
+        
     }
 
     @Override

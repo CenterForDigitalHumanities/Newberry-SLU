@@ -14,10 +14,6 @@
  */
 package edu.slu.tpen.servlet;
 
-import static edu.slu.tpen.servlet.Constant.ANNOTATION_SERVER_ADDR;
-import static edu.slu.tpen.servlet.util.CreateAnnoListUtil.createEmptyAnnoList;
-import static edu.slu.util.ServletUtils.getDBConnection;
-import static edu.slu.util.ServletUtils.getUID;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -25,33 +21,34 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
-import static java.lang.System.out;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import static java.net.URLEncoder.encode;
-import static java.nio.charset.Charset.forName;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import edu.slu.tpen.servlet.util.CreateAnnoListUtil;
+import edu.slu.util.ServletUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import static net.sf.json.JSONObject.fromObject;
 import servlets.createManuscript;
 import textdisplay.Folio;
-import static textdisplay.Folio.createFolioRecordFromManifest;
-import static textdisplay.Folio.getRbTok;
-import textdisplay.Metadata;
 import textdisplay.Project;
+import tokens.TokenManager;
 import user.Group;
+import user.User;
 
 /**
  * Create a manuscript, folio and project for New Berry. This part is a transformation of tpen function to web service. 
@@ -62,17 +59,21 @@ public class CreateProjectServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try (PrintWriter writer = response.getWriter()) {
-            writer.print(creatManuscriptFolioProject(request, response));
+        PrintWriter writer = response.getWriter();
+        try {
+            writer.print(creatManuscriptFolioProject(request, response)); //To change body of generated methods, choose Tools | Templates.
+        } catch (Exception ex) {
+            Logger.getLogger(CreateProjectServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+//        super.doGet(request, response); //To change body of generated methods, choose Tools | Templates.
         this.doPost(request, response);
     }
     
-     private static String readAll(Reader rd) throws IOException {
+    private static String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
         int cp;
         while ((cp = rd.read()) != -1) {
@@ -83,11 +84,11 @@ public class CreateProjectServlet extends HttpServlet {
 
     
     private JSONObject resolveManifestURL(String url) throws MalformedURLException, IOException {
-        out.println("Resolve URL "+url);
+        System.out.println("Resolve URL "+url);
         try (InputStream is = new URL(url).openStream()) {
           BufferedReader rd = new BufferedReader(new InputStreamReader(is, forName("UTF-8")));
           String jsonText = readAll(rd);
-          JSONObject json = fromObject(jsonText);   
+          JSONObject json = JSONObject.fromObject(jsonText);   
           return json;
         }
     }
@@ -95,29 +96,47 @@ public class CreateProjectServlet extends HttpServlet {
     /**
      * Create manuscript, folio and project using given json data.
      *
-     * @param request
-     * @param response
-     * @return 
-     * @throws javax.servlet.ServletException 
-     * @throws java.io.IOException 
+     * @param repository (optional)
+     * @param archive (optional)
+     * @param city (optional)
+     * @param collection (optional)
+     * @param title (optional)
+     * @param urls
+     * @param names
      */
     public String creatManuscriptFolioProject(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, Exception {
         /*if(null != request.getSession().getAttribute("UID")){
          UID = (Integer) request.getSession().getAttribute("UID");
          }*/
         try {
-            //receive parameters.
-            String repository = "unknown";
-            String archive = "unknown";
+            System.out.println("CREATE PROJECT");
+            HttpSession session = request.getSession();
+            Object role = "unknown";
+            int UID = 0;
+            /*if(null != request.getSession().getAttribute("UID")){
+             UID = (Integer) request.getSession().getAttribute("UID");
+             }*/
+            UID = ServletUtils.getUID(request, response);
+            boolean isTPENAdmin = (new User(UID)).isAdmin();
+            if(null!=session.getAttribute("role")){
+                role = session.getAttribute("role");
+                if (role.toString().equals("1")) {
+                    isTPENAdmin = true;
+                }
+            }
+            if(!isTPENAdmin){
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                PrintWriter out = response.getWriter();
+                out.print(HttpServletResponse.SC_UNAUTHORIZED);
+                return "You must be an administrator to create a master project.";
+            }
+            String archive = "";
             String city = "unknown";
-            String collection = "unknown";
-            String label = "unknown";
-
             city = request.getParameter("city");
-//            if (null == city) {
-//                city = "fromWebService";
-//            }
+            if (null == city) {
+                city = "fromWebService";
+            }
             textdisplay.Manuscript m = null;
 //            System.out.println("msID ============= " + m.getID());
 //            String urls = request.getParameter("urls");
@@ -125,24 +144,15 @@ public class CreateProjectServlet extends HttpServlet {
 //            String names = request.getParameter("names");
 //            String [] seperatedNames = names.split(",");
 
-            String str_manifest = request.getParameter("scmanifest");
-            List<Integer> ls_folios_keys = new ArrayList();
+            String str_manifest = request.getParameter("scmanifest"); //This will be a URL
+            List<Integer> ls_folios_keys = new ArrayList<Integer>();
             if (null != str_manifest) {
                 JSONObject jo = resolveManifestURL(str_manifest);
-                if(jo.has("@id")){
-                    archive = jo.getString("@id");
-                }
-                else{
-                    return "500: Malformed Manifest";
-                }
-                if(jo.has("label")){
-                    label = jo.getString("label");
-                }
-                
+                archive = jo.getString("@id");
                 //create a manuscript
-                m = new textdisplay.Manuscript("TPEN 2.8", archive, city, city, -999);
+                m = new textdisplay.Manuscript("Newberry", archive, city, city, -900);
                 JSONArray sequences = (JSONArray) jo.get("sequences");
-                List<String> ls_pageNames = new LinkedList();
+                List<String> ls_pageNames = new LinkedList<String>();
                 for (int i = 0; i < sequences.size(); i++) {
                     JSONObject inSequences = (JSONObject) sequences.get(i);
                     JSONArray canvases = inSequences.getJSONArray("canvases");
@@ -156,7 +166,7 @@ public class CreateProjectServlet extends HttpServlet {
                                     JSONObject image = images.getJSONObject(n);
                                     JSONObject resource = image.getJSONObject("resource");
                                     String imageName = resource.getString("@id");
-                                    int folioKey = createFolioRecordFromManifest(city, canvas.getString("label"), imageName.replace('_', '&'), archive, m.getID(), 0);
+                                    int folioKey = textdisplay.Folio.createFolioRecordFromNewberry(city, canvas.getString("label"), imageName, archive, m.getID(), 0); //why imageName.replace('_', '&')
                                     ls_folios_keys.add(folioKey);
                                 }
                             }
@@ -169,66 +179,53 @@ public class CreateProjectServlet extends HttpServlet {
             }
 
             //create a project
-            int UID = 0;
-            /*if(null != request.getSession().getAttribute("UID")){
-             UID = (Integer) request.getSession().getAttribute("UID");
-             }*/
-            UID = getUID(request, response);
+            
             String tmpProjName = m.getShelfMark() + " project";
             if (request.getParameter("title") != null) {
                 tmpProjName = request.getParameter("title");
             }
-            try (Connection conn = getDBConnection()) {
+            try (Connection conn = ServletUtils.getDBConnection()) {
                 conn.setAutoCommit(false);
+                //This creates a master transcription, so the creating user is the leader so they can parse.
                 Group newgroup = new Group(conn, tmpProjName, UID);
                 Project newProject = new Project(conn, tmpProjName, newgroup.getGroupID());
                 Folio[] array_folios = new Folio[ls_folios_keys.size()];
+                TokenManager man = new TokenManager();
+                String pubTok = man.getAccessToken();
+                boolean expired = man.checkTokenExpiry();
+                if(expired){
+                    System.out.println("TPEN_NL Token Manager detected an expired token, auto getting and setting a new one...");
+                    pubTok = man.generateNewAccessToken();
+                }
                 if (ls_folios_keys.size() > 0) {
                     for (int i = 0; i < ls_folios_keys.size(); i++) {
                         Folio folio = new Folio(ls_folios_keys.get(i));
                         array_folios[i] = folio;
-                        Integer msID = folio.getMSID();
-                        String msID_str = msID.toString();
-                        //This needs to be the same one the JSON Exporter creates and needs to be unique and unchangeable.
-                        String canvasID_check = folio.getCanvas();
-                        String canvasID = "";
-                        String str_folioNum = getRbTok("SERVERURL")+"canvas/"+folio.getFolioNumber();
-                        if("".equals(canvasID_check)){
-                            canvasID = str_folioNum;
-                        }
-                        else{
-                            canvasID = canvasID_check;
-                        }
-                        //Create anno list for canvas.
-                        JSONObject annoList = createEmptyAnnoList(newProject.getProjectID(), canvasID, new JSONArray());
-                        URL postUrl = new URL(ANNOTATION_SERVER_ADDR + "/anno/saveNewAnnotation.action");
+                        //Parse folio.getImageURL() to retrieve paleography pid, and then generate new canvas id
+                        String imageURL = folio.getImageURL();
+                        // use regex to extract paleography pid
+                        String canvasID = man.getProperties().getProperty("PALEO_CANVAS_ID_PREFIX") + imageURL.replaceAll("^.*(paleography[^/]+).*$", "$1");
+                        //String canvasID = man.getProperties().getProperty("SERVERURL") + tmpProjName + "/canvas/" + URLEncoder.encode(folio.getPageName(), "UTF-8"); // for slu testing
+
+                        //create anno list for original canvas
+                        JSONObject annoList = CreateAnnoListUtil.createEmptyAnnoList(newProject.getProjectID(), canvasID, man.getProperties().getProperty("TESTING"), new JSONArray(), UID, request.getLocalName() );
+                        URL postUrl = new URL(Constant.ANNOTATION_SERVER_ADDR + "/create.action");
                         HttpURLConnection uc = (HttpURLConnection) postUrl.openConnection();
                         uc.setDoInput(true);
                         uc.setDoOutput(true);
                         uc.setRequestMethod("POST");
                         uc.setUseCaches(false);
                         uc.setInstanceFollowRedirects(true);
-                        uc.addRequestProperty("content-type", "application/x-www-form-urlencoded");
+                        uc.addRequestProperty("Content-Type", "application/json; charset=utf-8");
+                        uc.setRequestProperty("Authorization", "Bearer "+pubTok);
                         uc.connect();
-                        try (DataOutputStream dataOut = new DataOutputStream(uc.getOutputStream())) {
-                            dataOut.writeBytes("content=" + encode(annoList.toString(), "utf-8"));
-                            dataOut.flush();
-                        }
-                        try (BufferedReader reader = new BufferedReader(new InputStreamReader(uc.getInputStream(), "utf-8"))){
-//                      String line="";
-//                      StringBuilder sb = new StringBuilder();
-//                      System.out.println("=============================");  
-//                      System.out.println("Contents of post request");  
-//                      System.out.println("=============================");  
-//                      while ((line = reader.readLine()) != null){  
-//                      line = new String(line.getBytes(), "utf-8");  
-//                           System.out.println(line);
-//                           sb.append(line);
-//                      }
-//                      System.out.println("=============================");  
-//                      System.out.println("Contents of post request ends");  
-//                      System.out.println("=============================");                              
-                        }
+                        DataOutputStream dataOut = new DataOutputStream(uc.getOutputStream());
+                        byte[] toWrite = annoList.toString().getBytes("UTF-8");
+                        dataOut.write(toWrite);
+                        dataOut.flush();
+                        dataOut.close();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(uc.getInputStream(), "utf-8"));
+                        reader.close();
                         uc.disconnect();
                     }
                 }
@@ -236,20 +233,14 @@ public class CreateProjectServlet extends HttpServlet {
                 newProject.addLogEntry(conn, "<span class='log_manuscript'></span>Added manuscript " + m.getShelfMark(), UID);
                 int projectID = newProject.getProjectID();
                 newProject.importData(UID);
-                Metadata metadata = new Metadata(projectID);
-                metadata.setTitle(label);
-                metadata.setMsRepository(repository);
-                metadata.setMsCollection(collection);
-                Integer manID = m.getID();
-                String manID_str = manID.toString();
-                metadata.setMsIdNumber(manID_str);
                 conn.commit();
-                //String propVal = Folio.getRbTok("CREATE_PROJECT_RETURN_DOMAIN");
+                
+                String propVal = man.getProperties().getProperty("CREATE_PROJECT_RETURN_DOMAIN");
                 //return trimed project url
                 return "/project/" + projectID;
             }
         } catch (SQLException ex) {
-            getLogger(createManuscript.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(createManuscript.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "500";
     }

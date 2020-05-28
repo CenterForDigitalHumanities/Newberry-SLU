@@ -27,12 +27,11 @@ public class ImageChoice {
     }
     
     
-    private int height;
-    private int width;
-    private String imageURL;
-    
-    
-    public ImageChoice(String imageURL,  int w, int h)
+    private final int height;
+    private final int width;
+    private final String imageURL;
+
+    public ImageChoice(final String imageURL, final int w, final int h)
     {
         this.height=h;
         this.width=w;

@@ -126,8 +126,8 @@ public class FullTextIndexer {
     *
     * @param text array of words
     */
-   public static Hashtable<String, Stack<Integer>> getMashup(String[] text) {
-      Hashtable<String, Stack<Integer>> toret = new Hashtable();
+   public static Hashtable<String, Stack<Integer>> getMashup(final String[] text) {
+      final Hashtable<String, Stack<Integer>> toret = new Hashtable();
 /*      for (int i = 0; i < text.length; i++) {
          if (toret.containsKey(text[i])) {
             Stack cur = toret.get(text[i]);

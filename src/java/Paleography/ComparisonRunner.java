@@ -46,51 +46,56 @@ public class ComparisonRunner {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public ComparisonRunner(Manuscript m) throws SQLException, FileNotFoundException, IOException {
-        //get the folios from this Manuscript that have existing character data suitable for comparison
-        TokenManager man = new TokenManager();
-        String query = "select * from folios where msID=? and paleography!='0000-00-00 00:00:00' order by sequence,pageName";
+    public ComparisonRunner(final Manuscript m) throws SQLException, FileNotFoundException, IOException {
+        // get the folios from this Manuscript that have existing character data
+        // suitable for comparison
+        final TokenManager man = new TokenManager();
+        final String query = "select * from folios where msID=? and paleography!='0000-00-00 00:00:00' order by sequence,pageName";
         Connection j = null;
         PreparedStatement ps = null;
-        String fileLocation = man.getProperties().getProperty("PALEODATADIR") + "/" + m.getID() + "/";
-        blobManager bm = new blobManager();
+        final String fileLocation = man.getProperties().getProperty("PALEODATADIR") + "/" + m.getID() + "/";
+        final blobManager bm = new blobManager();
         try {
             j = DatabaseWrapper.getConnection();
             ps = j.prepareStatement(query);
             ps.setInt(1, m.getID());
-            ResultSet rs = ps.executeQuery();
-            Vector<Integer> folioIDs = new Vector();
-            File outputLoc = new File(man.getProperties().getProperty("PALEOTEMPDIR") + fileLocation);
+            final ResultSet rs = ps.executeQuery();
+            final Vector<Integer> folioIDs = new Vector();
+            final File outputLoc = new File(man.getProperties().getProperty("PALEOTEMPDIR") + fileLocation);
             if (!outputLoc.exists()) {
                 outputLoc.mkdirs();
             }
-            File[] existingData = outputLoc.listFiles();
+            final File[] existingData = outputLoc.listFiles();
             for (int ctr = 0; ctr < existingData.length; ctr++) {
                 existingData[ctr].delete();
             }
             while (rs.next()) {
                 folioIDs.add(rs.getInt("pageNumber"));
             }
-            //Compare every image to every other image
+            // Compare every image to every other image
             for (int i = 0; i < folioIDs.size(); i++) {
                 for (int k = i + 1; k < folioIDs.size(); k++) {
 
-                    String[] assignment = new String[2];
+                    final String[] assignment = new String[2];
                     assignment[0] = fileLocation + folioIDs.get(i) + ".txt";
                     assignment[1] = fileLocation + folioIDs.get(k) + ".txt";
                     System.out.print(assignment[0] + " : " + assignment[1] + "\n");
                     Vector<blob> blobs = bm.get(fileLocation + folioIDs.get(i) + ".txt");
                     if (blobs == null) {
-                        bm.add(blob.getBlobs(fileLocation + folioIDs.get(i) + ".txt"), fileLocation + folioIDs.get(i) + ".txt");
+                        bm.add(blob.getBlobs(fileLocation + folioIDs.get(i) + ".txt"),
+                                fileLocation + folioIDs.get(i) + ".txt");
                         blobs = blobs = bm.get(fileLocation + folioIDs.get(i) + ".txt");
                     }
-                    pageComparer comparer = new pageComparer(blobs, fileLocation + folioIDs.get(k) + ".txt", assignment, bm);
+                    final pageComparer comparer = new pageComparer(blobs, fileLocation + folioIDs.get(k) + ".txt",
+                            assignment, bm);
                     comparer.setOutputLocation(man.getProperties().getProperty("PALEOTEMPDIR"));
                     comparer.call();
                 }
             }
-            overloadLoader n = new overloadLoader(new File(man.getProperties().getProperty("PALEOTEMPDIR") + fileLocation), new Hashtable(), new Hashtable(), true);
-            //overloadLoader.setCharCounts();
+            final overloadLoader n = new overloadLoader(
+                    new File(man.getProperties().getProperty("PALEOTEMPDIR") + fileLocation), new Hashtable(),
+                    new Hashtable(), true);
+            // overloadLoader.setCharCounts();
         } finally {
             DatabaseWrapper.closeDBConnection(j);
             DatabaseWrapper.closePreparedStatement(ps);
@@ -98,58 +103,63 @@ public class ComparisonRunner {
     }
 
     /**
-     * Runs comparisons of the specified folio against all other available images in the manuscript. Much quicker than doing a full manuscript run if you dont need that.
+     * Runs comparisons of the specified folio against all other available images in
+     * the manuscript. Much quicker than doing a full manuscript run if you dont
+     * need that.
+     * 
      * @param f the folio to run
      * @throws SQLException
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public ComparisonRunner(Folio f) throws SQLException, FileNotFoundException, IOException {
-        //get the folios from this Manuscript that have existing character data suitable for comparison
-        TokenManager man = new TokenManager();
-        String query = "select * from folios where msID=? and paleography!='0000-00-00 00:00:00' order by sequence,pageName";
+    public ComparisonRunner(final Folio f) throws SQLException, FileNotFoundException, IOException {
+        // get the folios from this Manuscript that have existing character data
+        // suitable for comparison
+        final TokenManager man = new TokenManager();
+        final String query = "select * from folios where msID=? and paleography!='0000-00-00 00:00:00' order by sequence,pageName";
         Connection j = null;
         PreparedStatement ps = null;
-        Manuscript m = new Manuscript(f.getFolioNumber());
-        String fileLocation = man.getProperties().getProperty("PALEODATADIR") + "/" + m.getID() + "/";
-        blobManager bm = new blobManager();
+        final Manuscript m = new Manuscript(f.getFolioNumber());
+        final String fileLocation = man.getProperties().getProperty("PALEODATADIR") + "/" + m.getID() + "/";
+        final blobManager bm = new blobManager();
         try {
             j = DatabaseWrapper.getConnection();
             ps = j.prepareStatement(query);
             ps.setInt(1, m.getID());
-            ResultSet rs = ps.executeQuery();
-            Vector<Integer> folioIDs = new Vector();
-            File outputLoc = new File(man.getProperties().getProperty("PALEOTEMPDIR") + fileLocation);
+            final ResultSet rs = ps.executeQuery();
+            final Vector<Integer> folioIDs = new Vector();
+            final File outputLoc = new File(man.getProperties().getProperty("PALEOTEMPDIR") + fileLocation);
             if (!outputLoc.exists()) {
                 outputLoc.mkdirs();
             }
-            File[] existingData = outputLoc.listFiles();
+            final File[] existingData = outputLoc.listFiles();
             for (int ctr = 0; ctr < existingData.length; ctr++) {
-              //  existingData[ctr].delete();
-            //}
-            if(existingData[ctr].getName().contains(""+f.getFolioNumber()))
-            {
-                return;
+                // existingData[ctr].delete();
+                // }
+                if (existingData[ctr].getName().contains("" + f.getFolioNumber())) {
+                    return;
+                }
             }
-            }
-            
+
             while (rs.next()) {
                 folioIDs.add(rs.getInt("pageNumber"));
             }
-            //Compare every image to every other image
+            // Compare every image to every other image
             for (int i = 0; i < folioIDs.size(); i++) {
                 if (folioIDs.get(i) == f.getFolioNumber()) {
                     for (int k = i + 1; k < folioIDs.size(); k++) {
-                        String[] assignment = new String[2];
+                        final String[] assignment = new String[2];
                         assignment[0] = fileLocation + folioIDs.get(i) + ".txt";
                         assignment[1] = fileLocation + folioIDs.get(k) + ".txt";
                         System.out.print(assignment[0] + " : " + assignment[1] + "\n");
                         Vector<blob> blobs = bm.get(fileLocation + folioIDs.get(i) + ".txt");
                         if (blobs == null) {
-                            bm.add(blob.getBlobs(fileLocation + folioIDs.get(i) + ".txt"), fileLocation + folioIDs.get(i) + ".txt");
+                            bm.add(blob.getBlobs(fileLocation + folioIDs.get(i) + ".txt"),
+                                    fileLocation + folioIDs.get(i) + ".txt");
                             blobs = blobs = bm.get(fileLocation + folioIDs.get(i) + ".txt");
                         }
-                        pageComparer comparer = new pageComparer(blobs, fileLocation + folioIDs.get(k) + ".txt", assignment, bm);
+                        final pageComparer comparer = new pageComparer(blobs, fileLocation + folioIDs.get(k) + ".txt",
+                                assignment, bm);
                         comparer.setOutputLocation(man.getProperties().getProperty("PALEOTEMPDIR"));
                         comparer.call();
                     }

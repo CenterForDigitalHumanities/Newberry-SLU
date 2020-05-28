@@ -14,122 +14,123 @@
  */
 package edu.slu.tpen.servlet;
 
-import static edu.slu.tpen.servlet.Constant.ANNOTATION_SERVER_ADDR;
-import static edu.slu.tpen.servlet.util.CreateAnnoListUtil.createEmptyAnnoList;
-import static edu.slu.util.ServletUtils.getDBConnection;
-import static edu.slu.util.ServletUtils.getUID;
-import java.io.BufferedReader;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import static java.lang.Integer.parseInt;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import static java.net.URLEncoder.encode;
 import java.sql.Connection;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+
+import edu.slu.tpen.servlet.util.CreateAnnoListUtil;
+import edu.slu.util.ServletUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import textdisplay.Folio;
-import static textdisplay.Folio.getRbTok;
 import textdisplay.PartnerProject;
 import textdisplay.Project;
+import tokens.TokenManager;
 
 /**
- * Copy project from a template project(or called standard project) which is created by NewBerry. 
- * Clear all transcription data from project and connect the new project 
- * to the template project on switch board. 
- * This is a transformation of tpen function to web service. It's using tpen MySQL database. 
+ * Copy project from a template project(or called standard project) which is
+ * created by NewBerry. Clear all transcription data from project and connect
+ * the new project to the template project on switch board.
+ * 
  * @author hanyan
  */
 public class CopyProjectForPracticerServlet extends HttpServlet {
-    
+
     @Override
     /**
      * @param projectID
      * @param uID
      */
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         String result = "";
-        int uID = getUID(request, response);
-        if(null != request.getParameter("projectID") && uID != -1){
-            Integer projectID = parseInt(request.getParameter("projectID"));
+        int uID = ServletUtils.getUID(request, response);
+        if (null != request.getParameter("projectID") && uID != -1) {
+            Integer projectID = Integer.parseInt(request.getParameter("projectID"));
 
             try {
-                //find original project and copy to a new project. 
+                // find original project and copy to a new project.
                 Project templateProject = new Project(projectID);
-                Connection conn = getDBConnection();
+                Connection conn = ServletUtils.getDBConnection();
                 conn.setAutoCommit(false);
-                //in this method, it copies everything about the project.
-                if(null != templateProject.getProjectName())
-                {
+                // in this method, it copies everything about the project.
+                if (null != templateProject.getProjectName()) {
+                    TokenManager man = new TokenManager();
+                    String pubTok = man.getAccessToken();
+                    boolean expired = man.checkTokenExpiry();
+                    if (expired) {
+                        System.out.println(
+                                "TPEN_NL Token Manager detected an expired token, auto getting and setting a new one...");
+                        pubTok = man.generateNewAccessToken();
+                    }
                     Project thisProject = new Project(templateProject.copyProjectWithoutTranscription(conn, uID));
-                    //set partener project. It is to make a connection on switch board. 
+                    // set partener project. It is to make a connection on switch board.
                     thisProject.setAssociatedPartnerProject(projectID);
                     PartnerProject theTemplate = new PartnerProject(projectID);
                     thisProject.copyButtonsFromProject(conn, theTemplate.getTemplateProject());
                     thisProject.copyHotkeysFromProject(conn, theTemplate.getTemplateProject());
                     conn.commit();
                     Folio[] folios = thisProject.getFolios();
-                    if(null != folios && folios.length > 0)
-                    {
-                        for (Folio folio : folios) {
-                            Integer msID = folio.getMSID();
-                            String msID_str = msID.toString();
-                            //This needs to be the same one the JSON Exporter creates and needs to be unique and unchangeable.
-                            String canvasID_check = folio.getCanvas();
-                            String canvasID = "";
-                            String str_folioNum = getRbTok("SERVERURL") + "canvas/" + folio.getFolioNumber();
-                            if(canvasID_check == ""){
-                                canvasID = str_folioNum;
-                            }
-                            else{
-                                canvasID = canvasID_check;
-                            }
-                            //String canvasID = Folio.getRbTok("SERVERURL") + templateProject.getProjectName() + "/canvas/" + URLEncoder.encode(folio.getPageName(), "UTF-8"); // for slu testing
-                            //create canvas list for original canvas
-                            JSONObject annoList = createEmptyAnnoList(thisProject.getProjectID(), canvasID, new JSONArray());
-                            URL postUrl = new URL(ANNOTATION_SERVER_ADDR + "/anno/getAnnotationByProperties.action");
+                    if (null != folios && folios.length > 0) {
+                        for (int i = 0; i < folios.length; i++) {
+                            Folio folio = folios[i];
+                            // Parse folio.getImageURL() to retrieve paleography pid, and then generate new
+                            // canvas id
+                            String imageURL = folio.getImageURL();
+                            // use regex to extract paleography pid
+                            String canvasID = man.getProperties().getProperty("PALEO_CANVAS_ID_PREFIX")
+                                    + imageURL.replaceAll("^.*(paleography[^/]+).*$", "/$1");
+                            // create canvas list for original canvas
+                            // String canvasID = man.getProperties().getProperty("SERVERURL") +
+                            // templateProject.getProjectName() + "/canvas/" +
+                            // URLEncoder.encode(folio.getPageName(), "UTF-8"); // for slu testing
+
+                            String testingProp = "true";
+                            JSONObject annoList = CreateAnnoListUtil.createEmptyAnnoList(thisProject.getProjectID(),
+                                    canvasID, testingProp, new JSONArray(), uID, request.getLocalName());
+                            URL postUrl = new URL(Constant.ANNOTATION_SERVER_ADDR + "/create.action");
                             HttpURLConnection uc = (HttpURLConnection) postUrl.openConnection();
                             uc.setDoInput(true);
                             uc.setDoOutput(true);
                             uc.setRequestMethod("POST");
                             uc.setUseCaches(false);
                             uc.setInstanceFollowRedirects(true);
-                            uc.addRequestProperty("content-type", "application/x-www-form-urlencoded");
+                            uc.addRequestProperty("Content-Type", "application/json; charset=utf-8");
+                            uc.setRequestProperty("Authorization", "Bearer " + pubTok);
                             uc.connect();
                             DataOutputStream dataOut = new DataOutputStream(uc.getOutputStream());
-                            dataOut.writeBytes("content=" + encode(annoList.toString(), "utf-8"));
+                            dataOut.writeBytes(annoList.toString());
                             dataOut.flush();
                             dataOut.close();
-                            BufferedReader reader = new BufferedReader(new InputStreamReader(uc.getInputStream(),"utf-8"));
-                            //                                String line="";
-//                                StringBuilder sb = new StringBuilder();
-//                                System.out.println("=============================");
-//                                System.out.println("Contents of post request");
-//                                System.out.println("=============================");
-//                                while ((line = reader.readLine()) != null){
-//                                    //line = new String(line.getBytes(), "utf-8");  
-//                                    System.out.println(line);
-//                                    sb.append(line);
-//                                }
-//                                System.out.println("=============================");
-//                                System.out.println("Contents of post request ends");
-//                                System.out.println("=============================");
-reader.close();
-uc.disconnect();
+                            // BufferedReader reader = new BufferedReader(new
+                            // InputStreamReader(uc.getInputStream(),"utf-8"));
+                            // String line="";
+                            // StringBuilder sb = new StringBuilder();
+                            // while ((line = reader.readLine()) != null){
+                            // //We are not doing anything with the response to this save.
+                            // System.out.println(line);
+                            // sb.append(line);
+                            // }
+                            // reader.close();
+                            uc.disconnect();
                         }
                     }
-                    //String propVal = textdisplay.Folio.getRbTok("CREATE_PROJECT_RETURN_DOMAIN"); 
+
                     result = "/project/" + thisProject.getProjectID();
                 }
-            } catch(Exception e){
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }else{
+        } else {
             result = "" + SC_FORBIDDEN;
         }
         response.getWriter().print(result);

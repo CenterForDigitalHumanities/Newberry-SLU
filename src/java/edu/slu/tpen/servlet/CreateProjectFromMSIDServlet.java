@@ -32,10 +32,10 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import servlets.createManuscript;
 import textdisplay.Folio;
-import static textdisplay.Folio.getRbTok;
 import textdisplay.Manuscript;
 import textdisplay.Metadata;
 import textdisplay.Project;
+import tokens.TokenManager;
 import user.Group;
 
 /**
@@ -110,13 +110,14 @@ public class CreateProjectFromMSIDServlet extends HttpServlet {
                 conn.setAutoCommit(false);
                 Group newgroup = new Group(conn, tmpProjName, UID);
                 Project newProject = new Project(conn, tmpProjName, newgroup.getGroupID());
-                man.setArchive(getRbTok("SERVERURL") + "/project/" + newProject.getProjectID());
+                TokenManager m = new TokenManager();
+                man.setArchive(m.getProperties().getProperty("SERVERURL") + "/project/" + newProject.getProjectID());
                 if (array_folios.length > 0) {
                     for (Folio folio : array_folios) {
                         //This needs to be the same one the JSON Exporter creates and needs to be unique and unchangeable.
                         String canvasID_check = folio.getCanvas();
                         String canvasID = "";
-                        String str_folioNum = getRbTok("SERVERURL") + "canvas/" + folio.getFolioNumber();
+                        String str_folioNum = m.getProperties().getProperty("SERVERURL") + "canvas/" + folio.getFolioNumber();
                         if ("".equals(canvasID_check)) {
                             canvasID = str_folioNum;
                         } else {
@@ -154,7 +155,7 @@ public class CreateProjectFromMSIDServlet extends HttpServlet {
                 metadata.setMsCollection(collection);
                 metadata.setMsIdNumber(msID_str);
                 conn.commit();
-                //String propVal = Folio.getRbTok("CREATE_PROJECT_RETURN_DOMAIN");
+                //String propVal = man.getProperties().getProperty.("CREATE_PROJECT_RETURN_DOMAIN");
                 return "project/" + projectID_return; //TODO: Make this the resolvable project url?
             }
         } catch (SQLException ex) {

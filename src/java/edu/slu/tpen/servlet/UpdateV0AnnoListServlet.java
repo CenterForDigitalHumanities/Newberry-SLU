@@ -43,6 +43,7 @@ public class UpdateV0AnnoListServlet extends HttpServlet {
         response.setHeader("Content-Type", "application/json; charset=utf-8");
         response.setCharacterEncoding("UTF-8");
         URL postUrl = new URL(Constant.ANNOTATION_SERVER_ADDR + "/update.action");
+        // I won't change this, but anno/updateAnnotation.action is the v0 action
             HttpURLConnection connection = (HttpURLConnection) postUrl.openConnection();
         connection.setDoOutput(true);
         connection.setDoInput(true);

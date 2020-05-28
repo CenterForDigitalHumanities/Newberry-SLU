@@ -15,15 +15,14 @@
 package edu.slu.tpen.servlet;
 
 import java.io.IOException;
-import static java.lang.Integer.parseInt;
 import java.sql.SQLException;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static utils.Tool.saveTool;
+import utils.Tool;
 
 /**
  * Attach user tools to user. This is a transformation of tpen function to web service. 
@@ -32,18 +31,20 @@ import static utils.Tool.saveTool;
  */
 public class AddUserToolServlet extends HttpServlet {
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
+            throws ServletException, IOException {
         try {
-            saveTool(request.getParameter("toolName"), parseInt(request.getParameter("uid")));
+            Tool.saveTool(request.getParameter("toolName"), Integer.parseInt(request.getParameter("uid")));
             response.getWriter().print("1");
-        } catch (SQLException ex) {
-            getLogger(AddUserToolServlet.class.getName()).log(SEVERE, null, ex);
+        } catch (final SQLException ex) {
+            Logger.getLogger(AddUserToolServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ServletException, IOException {
         this.doPost(req, resp); 
     }
 }

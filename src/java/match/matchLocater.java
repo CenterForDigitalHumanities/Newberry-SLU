@@ -37,8 +37,8 @@ import java.util.regex.Pattern;
 import static java.util.regex.Pattern.compile;
 import static textdisplay.DatabaseWrapper.getConnection;
 import textdisplay.Folio;
-import static textdisplay.Folio.getRbTok;
 import textdisplay.Manuscript;
+import tokens.TokenManager;
 
 /**
  *
@@ -86,7 +86,8 @@ public class matchLocater {
       }
       textdisplay.Folio fol = new textdisplay.Folio(img1);
       Manuscript ms = new Manuscript(img1);
-      File f = new File(getRbTok("PALEOTEMPDIR") + getRbTok("PALEODATADIR") + "/" + ms.getID() + "/" + img1 + ".txt .txt");
+      TokenManager man = new TokenManager();
+      File f = new File(man.getProperties().getProperty("PALEOTEMPDIR") + man.getProperties().getProperty("PALEODATADIR") + "/" + ms.getID() + "/" + img1 + ".txt .txt");
         try (BufferedReader b = new BufferedReader(new FileReader(f))) {
             String[] lines = readFileIntoArray(f.getAbsolutePath());
             String oldpage = "";
@@ -129,7 +130,8 @@ public class matchLocater {
       }
       textdisplay.Folio fol = new textdisplay.Folio(img1);
       Manuscript ms = new Manuscript(img1);
-      File f = new File(getRbTok("PALEOTEMPDIR") + getRbTok("PALEODATADIR") + "/" + ms.getID() + "/" + img1 + ".txt .txt");
+      TokenManager man = new TokenManager();
+      File f = new File(man.getProperties().getProperty("PALEOTEMPDIR") + man.getProperties().getProperty("PALEODATADIR") + "/" + ms.getID() + "/" + img1 + ".txt .txt");
         try (BufferedReader b = new BufferedReader(new FileReader(f))) {
             String[] lines = readFileIntoArray(f.getAbsolutePath());
             String oldpage = "";
@@ -176,7 +178,8 @@ public class matchLocater {
       }
       textdisplay.Folio fol = new textdisplay.Folio(img1);
       Manuscript ms = new Manuscript(img1);
-      File f = new File(getRbTok("PALEOTEMPDIR") + getRbTok("PALEODATADIR") + "/" + ms.getID() + "/" + img1 + ".txt .txt");
+      TokenManager man = new TokenManager();
+      File f = new File(man.getProperties().getProperty("PALEOTEMPDIR") + man.getProperties().getProperty("PALEODATADIR") + "/" + ms.getID() + "/" + img1 + ".txt .txt");
         try (BufferedReader b = new BufferedReader(new FileReader(f))) {
             String oldpage = "";
             while (b.ready()) {
@@ -219,7 +222,8 @@ public class matchLocater {
       }
       textdisplay.Folio fol = new textdisplay.Folio(img1);
       Manuscript ms = new Manuscript(img1);
-      File f = new File(getRbTok("PALEOTEMPDIR") + getRbTok("PALEODATADIR") + "/" + ms.getID() + "/" + img1 + ".txt .txt");
+      TokenManager man = new TokenManager();
+      File f = new File(man.getProperties().getProperty("PALEOTEMPDIR") + man.getProperties().getProperty("PALEODATADIR") + "/" + ms.getID() + "/" + img1 + ".txt .txt");
         try (BufferedReader b = new BufferedReader(new FileReader(f))) {
             String oldpage = "";
             int maxLevel = 0;

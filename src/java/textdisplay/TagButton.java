@@ -45,13 +45,13 @@ import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XsltTransformer;
+import tokens.TokenManager;
+
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 import static org.owasp.esapi.ESAPI.encoder;
 import static textdisplay.DatabaseWrapper.closeDBConnection;
 import static textdisplay.DatabaseWrapper.closePreparedStatement;
 import static textdisplay.DatabaseWrapper.getConnection;
-import static textdisplay.Folio.getRbTok;
-
 
 /**
  * A button for inserting an XML tag into a transcription
@@ -957,11 +957,14 @@ public class TagButton {
 
    /**
     * run the schema tag extraction xsl on the schema the stream points to
+    * 
+    * @throws IOException
     */
-   public static String xslRunner(StreamSource xml) throws SaxonApiException {
+   public static String xslRunner(StreamSource xml) throws SaxonApiException, IOException {
       Processor proc = new Processor(false);
       XsltCompiler comp = proc.newXsltCompiler();
-      XsltExecutable exp = comp.compile(new StreamSource(new File(getRbTok("XSLTLOCATION") + "schema2.xsl")));
+      TokenManager man = new TokenManager();
+      XsltExecutable exp = comp.compile(new StreamSource(new File(man.getProperties().getProperty("XSLTLOCATION") + "schema2.xsl")));
       XdmNode source = proc.newDocumentBuilder().build(xml);
       Serializer out = new Serializer();
       StringWriter w = new StringWriter();

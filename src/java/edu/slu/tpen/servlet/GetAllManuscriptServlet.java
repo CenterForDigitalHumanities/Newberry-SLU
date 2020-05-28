@@ -25,8 +25,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.json.JSONObject;
-import static textdisplay.Manuscript.getAllCities;
-import static textdisplay.Manuscript.getAllRepositories;
+import textdisplay.Manuscript;
 
 /**
  * Get all manuscripts in database. 
@@ -43,13 +42,13 @@ public class GetAllManuscriptServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            String[] allCities = getAllCities();
-            String[] allRepositories = getAllRepositories();
+            String[] allCities = Manuscript.getAllCities();
+            String[] allRepositories = Manuscript.getAllRepositories();
             JSONObject jo = new JSONObject();
             jo.element("cities", allCities);
             jo.element("repositories", allRepositories);
             try (PrintWriter out = response.getWriter()) {
-                out.print(jo);
+            out.print(jo);
             }
         } catch (SQLException ex) {
             getLogger(GetAllManuscriptServlet.class.getName()).log(SEVERE, null, ex);

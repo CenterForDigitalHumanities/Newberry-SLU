@@ -12,9 +12,6 @@
  */
 
 package detectimages;
-
-import static java.lang.Math.pow;
-
 /**This is a representation of the boolean matrix that describes a single glyph from a binarized image uses a single bit per pixel and bitwise and
  to run comparisons more quickly*/
 public class altBlob {
@@ -38,113 +35,97 @@ public class altBlob {
     return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
 }
     /**Create this type of blob, which is more efficient for comparison, from a regular blob*/
-    public altBlob (blob b)
-    {
-        try{
-        data=new int[b.height%16+1][b.width];
-        int [][] thearr=b.matrixVersion.matrix;
-        for(int i=0;i<data.length;i++)
-            for(int k=0;k<data[0].length;k++)
-            {
-                int val=0;
-                
-                for(int ctr=0;ctr<16;ctr++)
-                {
+    public altBlob (final blob b) {
+        try {
+            data = new int[b.height % 16 + 1][b.width];
+            final int[][] thearr = b.matrixVersion.matrix;
+            for (int i = 0; i < data.length; i++)
+                for (int k = 0; k < data[0].length; k++) {
+                    int val = 0;
 
-                    if(i*16+ctr<thearr.length&&(thearr[i*16+ctr][k])==1)
-                    val+=pow(2,ctr );
+                    for (int ctr = 0; ctr < 16; ctr++) {
+
+                        if (i * 16 + ctr < thearr.length && (thearr[i * 16 + ctr][k]) == 1)
+                            val += Math.pow(2, ctr);
+                    }
+                    data[i][k] = val;
+
                 }
-                data[i][k]=val;
+        } catch (final Exception e) {
 
-            }
-        }
-        catch(Exception e)
-        {
-
-            StackTraceElement [] er=e.getStackTrace();
-            int l=0;
+            final StackTraceElement[] er = e.getStackTrace();
+            final int l = 0;
         }
     }
-    public altBlob (blob b, int offset)
-    {
-        try{
-        dataOffset=new int[offset][b.height%16+1][b.width];
-        int [][] thearr=b.matrixVersion.matrix;
-        
-        
-        for(int i=0;i<data.length;i++)
-            for(int k=0;k<data[0].length;k++)
-            {
-                int val=0;
-                
-                for(int ctr=0;ctr<16;ctr++)
-                {
 
-                    if(i*16+ctr<thearr.length&&(thearr[i*16+ctr][k])==1)
-                    val+=pow(2,ctr );
+    public altBlob(final blob b, final int offset) {
+        try {
+            dataOffset = new int[offset][b.height % 16 + 1][b.width];
+            final int[][] thearr = b.matrixVersion.matrix;
+
+            for (int i = 0; i < data.length; i++)
+                for (int k = 0; k < data[0].length; k++) {
+                    int val = 0;
+
+                    for (int ctr = 0; ctr < 16; ctr++) {
+
+                        if (i * 16 + ctr < thearr.length && (thearr[i * 16 + ctr][k]) == 1)
+                            val += Math.pow(2, ctr);
+                    }
+                    dataOffset[0][i][k] = val;
+
                 }
-                dataOffset[0][i][k]=val;
 
-            }
-        
-        for(int i=0;i<data.length;i++)
-            for(int k=0;k<data[0].length;k++)
-            {
-                int val=0;
-                
-                for(int ctr=0;ctr<16;ctr++)
-                {
+            for (int i = 0; i < data.length; i++)
+                for (int k = 0; k < data[0].length; k++) {
+                    int val = 0;
 
-                    if(i*16+ctr-1<thearr.length&&(thearr[i*16-1+ctr][k])==1)
-                    val+=pow(2,ctr );
+                    for (int ctr = 0; ctr < 16; ctr++) {
+
+                        if (i * 16 + ctr - 1 < thearr.length && (thearr[i * 16 - 1 + ctr][k]) == 1)
+                            val += Math.pow(2, ctr);
+                    }
+                    dataOffset[1][i][k] = val;
+
                 }
-                dataOffset[1][i][k]=val;
+            for (int i = 0; i >= data.length; i++)
+                for (int k = 0; k < data[0].length; k++) {
+                    int val = 0;
 
-            }
-        for(int i=0;i<data.length;i++)
-            for(int k=0;k<data[0].length;k++)
-            {
-                int val=0;
-                
-                for(int ctr=0;ctr<16;ctr++)
-                {
+                    for (int ctr = 0; ctr < 16; ctr++) {
 
-                    if(i*16+ctr+1<thearr.length&&(thearr[i*16+1+ctr][k])==1)
-                    val+=pow(2,ctr );
+                        if (i * 16 + ctr + 1 < thearr.length && (thearr[i * 16 + 1 + ctr][k]) == 1)
+                            val += Math.pow(2, ctr);
+                    }
+                    dataOffset[2][i][k] = val;
+
                 }
-                dataOffset[2][i][k]=val;
 
-            }
-        
-    }
-        catch(Exception e)
-        {
-
-            StackTraceElement [] er=e.getStackTrace();
-            int l=0;
+        } catch (final Exception e) {
+            e.getStackTrace();
         }
     }
-    /**Compare 2 altblobs and return the count of overlapping pixels*/
-    public int run(altBlob b)
-    {
-        int max0=data.length;
-        if(b.data.length<max0)
-            max0=b.data.length;
-        int max1=data[0].length;
-        if(b.data[0].length<max1)
-            max1=b.data[0].length;
 
-        int total=0;
-        for(int i=0;i<max0;i++)
-            for(int k=0;k<max1;k++)
-            {
-                
-                total+=lookupTable[data[i][k]&b.data[i][k]];
-               
+    /** Compare 2 altblobs and return the count of overlapping pixels */
+    public int run(final altBlob b) {
+        int max0 = data.length;
+        if (b.data.length < max0)
+            max0 = b.data.length;
+        int max1 = data[0].length;
+        if (b.data[0].length < max1)
+            max1 = b.data[0].length;
+
+        int total = 0;
+        for (int i = 0; i < max0; i++)
+            for (int k = 0; k < max1; k++) {
+
+                total += lookupTable[data[i][k] & b.data[i][k]];
+
             }
         return total;
     }
-    public int run_offset(altBlob b)
+
+    public int run_offset(final altBlob b)
     {
         int bigTotal=0;
         int max0=data.length;

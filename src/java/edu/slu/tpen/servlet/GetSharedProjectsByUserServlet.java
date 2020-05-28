@@ -11,17 +11,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import static textdisplay.DatabaseWrapper.getConnection;
-import static user.Group.roles.Contributor;
+import textdisplay.DatabaseWrapper;
+import user.Group;
 
 /**
  * Retrieve all a user's shared projects. 
@@ -43,11 +45,11 @@ public class GetSharedProjectsByUserServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) {
         String uName = request.getParameter("username");
         String query = "select p.id, p.name from groupmembers as gm, groups as g, project as p, users as u where gm.UID = u.UID and g.GID=gm.GID and p.grp=g.GID AND u.Uname = ? AND gm.role = ?";
-        Connection conn = getConnection();
+        Connection conn = DatabaseWrapper.getConnection();
         try {
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setString(1, uName);
-            ps.setString(2, Contributor.toString());
+            ps.setString(2, Group.roles.Contributor.toString());
             ResultSet rs = ps.executeQuery();
             JSONArray ja = new JSONArray();
             JSONObject jp = new JSONObject();
@@ -60,8 +62,10 @@ public class GetSharedProjectsByUserServlet extends HttpServlet {
             jp.element("projects", ja);
             PrintWriter out = response.getWriter();
             out.print(jp);
-        } catch (SQLException | IOException ex) {
-            getLogger(GetSharedProjectsByUserServlet.class.getName()).log(SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(GetSharedProjectsByUserServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(GetSharedProjectsByUserServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }

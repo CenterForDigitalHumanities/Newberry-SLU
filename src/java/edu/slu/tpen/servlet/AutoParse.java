@@ -30,10 +30,10 @@ import static net.sf.json.JSONArray.fromObject;
 import net.sf.json.JSONObject;
 import static org.owasp.esapi.ESAPI.encoder;
 import textdisplay.Folio;
-import static textdisplay.Folio.getRbTok;
 import textdisplay.Line;
 import textdisplay.Project;
 import textdisplay.Transcription;
+import tokens.TokenManager;
 
 /**
  *
@@ -55,13 +55,14 @@ public class AutoParse extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
         int projectID = parseInt(request.getParameter("projectID"));
         int folioNumber = parseInt(request.getParameter("folioNumber"));
-        Stack<Transcription> orderedTranscriptions = new Stack();
+        Stack<Transcription> orderedTranscriptions = new Stack<Transcription>();
         JSONObject annotationList = new JSONObject();
         JSONArray resources_array;
         List<Object> resources = new ArrayList<>();
         String dateString;
-        String annoListID = getRbTok("SERVERURL") + "project/" + projectID + "/annotations/" + folioNumber;
-        String canvasID = getRbTok("SERVERURL") + "canvas/" + folioNumber;
+        final TokenManager man = new TokenManager();
+        String annoListID = man.getProperties().getProperty("SERVERURL") + "project/" + projectID + "/annotations/" + folioNumber;
+        String canvasID = man.getProperties().getProperty("SERVERURL") + "canvas/" + folioNumber;
         //create Transcription(s) based on Project settings and Line parsing
         Project p = new Project(projectID);
         Project.imageBounding preferedBounding = p.getProjectImageBounding();
@@ -130,7 +131,7 @@ public class AutoParse extends HttpServlet {
                 int lineID = orderedTranscriptions.get(i).getLineID();
                 Map<String, Object> lineAnnot = new LinkedHashMap<>();
                 String lineURI = "line/" + lineID;
-                String annoLineID = getRbTok("SERVERURL") + "line/" + lineID;
+                String annoLineID = man.getProperties().getProperty("SERVERURL") + "line/" + lineID;
                 lineAnnot.put("@id", annoLineID);
                 lineAnnot.put("_tpen_line_id", lineURI);
                 lineAnnot.put("@type", "oa:Annotation");

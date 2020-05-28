@@ -14,17 +14,14 @@
  */
 package detectimages;
 
-import static edu.slu.util.ImageUtils.cloneImage;
 import java.awt.image.*;
 import java.io.BufferedWriter;
 import static java.lang.Math.abs;
-import static java.lang.System.out;
 import java.util.*;
-import static java.util.logging.Level.FINE;
-import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.WARNING;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
+import static edu.slu.util.ImageUtils.cloneImage;
+//import static edu.slu.util.ImageUtils.writeDebugImage;
 
 /**
  * This is the column and line detector. It is old, so it has a fair amount of legacy code and some really
@@ -70,7 +67,7 @@ public class Detector {
    public String debugLabel = "";
    public static final int WHITE = 0xffffff;
 
-   public Detector(BufferedImage img, BufferedImage bin) {
+   public Detector(final BufferedImage img, final BufferedImage bin) {
       columnExclusionDist = 0;
       linectr = 0;
       hsmearDist = 5;
@@ -96,12 +93,12 @@ public class Detector {
    /**
     * Add an additional line to the lines in goodLines
     */
-   public void addline(int newline) {
+   public void addline(final int newline) {
       int j, i;
-        out.println(found);
+      System.out.println(found);
       for (i = 0; i < found; i++) {
          if (goodLines[i] == 0) {
-                out.println("error:line " + i + " is zero");
+            System.out.println("error:line " + i + " is zero");
          }
          if (goodLines[i] >= newline) {
             for (j = found; j >= i; j--) {
@@ -148,18 +145,19 @@ public class Detector {
             colLinesStartPos[i] = 0;
             colHeight[i] = 0;
          }
-      } catch (Exception e) {
+      } catch (final Exception e) {
       }
    }
 
    /**
-    * Smear the image horizontally, any areas with pixels close together horizontally (within max_dist
-    * pixels of each other) will have the space between them filled in with black.
+    * Smear the image horizontally, any areas with pixels close together
+    * horizontally (within max_dist pixels of each other) will have the space
+    * between them filled in with black.
     */
-   public void smear(int max_dist) {
-      //if(true)return 1;
+   public void smear(final int max_dist) {
+      // if(true)return 1;
       smeared = cloneImage(bin);
-      int thresh = -1700000;
+      final int thresh = -1700000;
       Boolean found_partner;
       for (int j = 0; j < bin.getHeight(); j++) {
          for (int i = 0; i < img.getWidth() - max_dist; i++) {
@@ -177,7 +175,7 @@ public class Detector {
                      i += k;
                      k = 0;
                   }
-                  //If this pixel didnt get smeared, WHITE it out.
+                  // If this pixel didnt get smeared, WHITE it out.
                   if (!found_partner) {
                      smeared.setRGB(i, j, WHITE);
                      i = i + max_dist - 1;
@@ -186,17 +184,17 @@ public class Detector {
             }
          }
       }
-//      writeDebugImage(smeared, "smear");
+      // writeDebugImage(smeared, "smear");
    }
 
    /**
-    * Smear the image vertically, any areas with pixels close together horizontally (within max_dist pixels
-    * of each other) will have the space between them filled in with black.
+    * Smear the image vertically, any areas with pixels close together horizontally
+    * (within max_dist pixels of each other) will have the space between them
+    * filled in with black.
     */
-   public void vsmear(int max_dist, BufferedImage onlySmearedPortions) {
+   public void vsmear(final int max_dist, final BufferedImage onlySmearedPortions) {
       smeared = cloneImage(bin);
-      int thresh = -1700000;
-
+      final int thresh = -1700000;
 
       Boolean found_partner;
       for (int i = 0; i < img.getWidth(); i++) {
@@ -216,7 +214,7 @@ public class Detector {
                      j += k;
                   }
                }
-               //If this pixel didnt get smeared, WHITE it out.
+               // If this pixel didnt get smeared, WHITE it out.
                if (!found_partner) {
                   smeared.setRGB(i, j, WHITE);
                   onlySmearedPortions.setRGB(i, j, WHITE);
@@ -225,21 +223,26 @@ public class Detector {
             }
          }
       }
-//      writeDebugImage(smeared, "vsmear.smeared");
+      // writeDebugImage(smeared, "vsmear.smeared");
    }
 
    /**
-    * Use this findLines method to subdivide the image that is passed in into subdivisions pieces, find
-    * lines in each of them, then join the findings into one set of lines that don't duplicate any lines.
-    * thisImage must be binarized but not smeared
+    * Use this findLines method to subdivide the image that is passed in into
+    * subdivisions pieces, find lines in each of them, then join the findings into
+    * one set of lines that don't duplicate any lines. thisImage must be binarized
+    * but not smeared
     */
-   public BufferedImage findLines(int subdivisions, BufferedImage thisImage) {
-      BufferedImage toreturn = cloneImage(thisImage);
-      int[][] results = new int[subdivisions][100];
+   public BufferedImage findLines(final int subdivisions, final BufferedImage thisImage) {
+      final BufferedImage toreturn = cloneImage(thisImage);
+      final int[][] results = new int[subdivisions][100];
       int dist = 0;
 
       for (int i = 0; i < subdivisions; i++) {
-         Detector j = new Detector(toreturn.getSubimage(toreturn.getWidth() / subdivisions * i, 0, toreturn.getWidth() / subdivisions, toreturn.getHeight()), toreturn.getSubimage(toreturn.getWidth() / subdivisions * i, 0, toreturn.getWidth() / subdivisions, toreturn.getHeight()));
+         final Detector j = new Detector(
+               toreturn.getSubimage(toreturn.getWidth() / subdivisions * i, 0, toreturn.getWidth() / subdivisions,
+                     toreturn.getHeight()),
+               toreturn.getSubimage(toreturn.getWidth() / subdivisions * i, 0, toreturn.getWidth() / subdivisions,
+                     toreturn.getHeight()));
          j.hsmearDist = hsmearDist;
          j.vsmearDist = vsmearDist;
          j.findLines();
@@ -261,27 +264,29 @@ public class Detector {
    }
 
    /**
-    * This handles searching for lines within the image, and removes lines that are too close together or
-    * too far away to be reasonable. Calculates the mean distance between elements as well.
+    * This handles searching for lines within the image, and removes lines that are
+    * too close together or too far away to be reasonable. Calculates the mean
+    * distance between elements as well.
     */
    public void findLines() {
-      BufferedImage onlySmearedPortions = cloneImage(bin);
-        for (int i = 1; i < smeared.getWidth() - 1; i++) {
-           for (int j = 0; j < smeared.getHeight() - 1; j++) {
-              onlySmearedPortions.setRGB(i, j, WHITE);
-           }
-        }
+      final BufferedImage onlySmearedPortions = cloneImage(bin);
+      for (int i = 1; i < smeared.getWidth() - 1; i++) {
+         for (int j = 0; j < smeared.getHeight() - 1; j++) {
+            onlySmearedPortions.setRGB(i, j, WHITE);
+         }
+      }
       smear(hsmearDist);
       vsmear(vsmearDist, onlySmearedPortions);
       smear(hsmearDist);
       int i, j;
-      long[] means = new long[smeared.getHeight()];
+      final long[] means = new long[smeared.getHeight()];
       long meanTabulator;
       found = 0;
-      int[] foundLines = new int[smeared.getHeight()];
+      final int[] foundLines = new int[smeared.getHeight()];
       linesTop = new int[smeared.getHeight()];
       long meanOfMeans = 0;
-      //Findnegative indicates whether we are looking for a dark area right now or a light area. true=light. Once we find one, start looking for the other
+      // Findnegative indicates whether we are looking for a dark area right now or a
+      // light area. true=light. Once we find one, start looking for the other
       Boolean findingNegative = true;
       for (i = 1; i < smeared.getHeight() - 1; i++) {
          meanTabulator = 0;
@@ -291,16 +296,17 @@ public class Detector {
          means[i] = meanTabulator / smeared.getWidth();
          meanOfMeans += means[i];
       }
-      meanOfMeans = meanOfMeans / i; //mean line height
+      meanOfMeans = meanOfMeans / i; // mean line height
       for (i = 1; i < smeared.getHeight() - 3; i++) {
          if (findingNegative && means[i] < meanOfMeans && means[i + 1] < meanOfMeans && means[i + 2] < meanOfMeans) {
             findingNegative = !findingNegative;
             linesTop[found] = i;
-         } else if (!findingNegative && means[i] > meanOfMeans && means[i + 1] > meanOfMeans && means[i + 2] > meanOfMeans) {
-            //If we are looking for a dark area, and this is one, this is a line of text.
+         } else if (!findingNegative && means[i] > meanOfMeans && means[i + 1] > meanOfMeans
+               && means[i + 2] > meanOfMeans) {
+            // If we are looking for a dark area, and this is one, this is a line of text.
             foundLines[found] = i;
             found++;
-            //Just inverts findingNegative
+            // Just inverts findingNegative
             findingNegative = !findingNegative;
          }
       }
@@ -313,19 +319,21 @@ public class Detector {
          mean_dist /= found;
          found = 0;
          for (i = 0; i < smeared.getWidth() && foundLines[i] != 0; i++) {
-            //use this if to attempt to exclude lines that are very different in height from the norm.
-            //if (lines[i + 1] - lines[i] < 4 * mean_dist && lines[i + 1] - lines[i] > mean_dist * .5) {
+            // use this if to attempt to exclude lines that are very different in height
+            // from the norm.
+            // if (lines[i + 1] - lines[i] < 4 * mean_dist && lines[i + 1] - lines[i] >
+            // mean_dist * .5) {
             goodLines[found] = foundLines[i];
             linesTop[found] = linesTop[i];
             found++;
-            //} else {
-            //Can be used to monitor the lines that were excluded by the above criterea
-            //System.out.print("skipping "+i+"\n");
-            //}
+            // } else {
+            // Can be used to monitor the lines that were excluded by the above criterea
+            // System.out.print("skipping "+i+"\n");
+            // }
          }
-         //        goodLines[found] = (int) (lines[i]);
-         //       linesTop[found] = linesTop[i];
-         //found++;
+         // goodLines[found] = (int) (lines[i]);
+         // linesTop[found] = linesTop[i];
+         // found++;
       } else {
          LOG.info("No lines found in column.");
       }
@@ -334,19 +342,19 @@ public class Detector {
    /**
     * Run line and column detection
     */
-   public void detect(boolean forceSingle) {
+   public void detect(final boolean forceSingle) {
       // Create a copy of bin that wont be modified during the column search,
       // so the line search has a clean copy to work on
-      BufferedImage onlySmearedPortions = cloneImage(bin);
+      final BufferedImage onlySmearedPortions = cloneImage(bin);
       for (int i = 1; i < smeared.getWidth() - 1; i++) {
          for (int j = 0; j < smeared.getHeight() - 1; j++) {
             onlySmearedPortions.setRGB(i, j, WHITE);
          }
       }
 
-//      writeDebugImage(bin, "detect.bin");
-//      writeDebugImage(onlySmearedPortions, "detect.onlySmearedPortions");
-      binstor = cloneImage(bin);//imageHelpers.binaryThreshold(img, 0);
+      // writeDebugImage(bin, "detect.bin");
+      // writeDebugImage(onlySmearedPortions, "detect.onlySmearedPortions");
+      binstor = cloneImage(bin);// imageHelpers.binaryThreshold(img, 0);
 
       findingCols = true;
       vsmear(vsmearColDist * 2, bin);
@@ -356,15 +364,16 @@ public class Detector {
       goodCols = new int[2000];
       colsStart = new int[2000];
       int i, j;
-      long[] means = new long[smeared.getWidth()];
+      final long[] means = new long[smeared.getWidth()];
       long meanTabulator;
       found = 0;
       colsStart = new int[smeared.getHeight()];
       long meanOfMeans = 0;
 
-      //Findnegative indicates whether we are looking for a dark area right now or a light area. true=light. Once we find one, start looking for the other
+      // Findnegative indicates whether we are looking for a dark area right now or a
+      // light area. true=light. Once we find one, start looking for the other
       Boolean findingNegative = true;
-      //this all calculates the mean pixel color for each hortizonal position
+      // this all calculates the mean pixel color for each hortizonal position
 
       for (i = 1; i < smeared.getWidth() - 1; i++) {
 
@@ -378,50 +387,50 @@ public class Detector {
       meanOfMeans = meanOfMeans / i;
       line l = new line();
       for (i = 1; i < smeared.getWidth() - 3; i++) {
-         if (findingNegative && means[i] < meanOfMeans) { //&& means[i + 1] < meanOfMeans
+         if (findingNegative && means[i] < meanOfMeans) { // && means[i + 1] < meanOfMeans
             findingNegative = !findingNegative;
             colsStart[found] = i;
             l = new line();
             l.setStartHorizontal(i);
          } else if (!findingNegative && means[i] > meanOfMeans) {
-            //If we are looking for a dark area, and this is one, this is a line of text.
+            // If we are looking for a dark area, and this is one, this is a line of text.
             found++;
             l.setWidth(i - l.getStartHorizontal());
             l.setStartVertical(0);
             l.setDistance(bin.getHeight());
             if (l.getWidth() * 5 > bin.getWidth()) {
-               //if the col is more than 20% of the image width
+               // if the col is more than 20% of the image width
                columns.add(l);
-               LOG.log(INFO, "Added column {4} for line @ {0},{1},{2},{3}", new Object[]{l.getStartHorizontal(), l.getWidth(), l.getStartVertical(), l.getDistance(), columns.size() });
+               LOG.log(Level.INFO, "Added column {4} for line @ {0},{1},{2},{3}", new Object[] { l.getStartHorizontal(),
+                     l.getWidth(), l.getStartVertical(), l.getDistance(), columns.size() });
             }
-            //Just inverts findingNegative
+            // Just inverts findingNegative
             findingNegative = !findingNegative;
          }
       }
       /*
-       * Is there a column on the left or on the right that is consistent with
-       * a portion of the previous or next page being included in the image?
-       * If so, crop out that column in both img and bin, and rerun this
-       * process.
+       * Is there a column on the left or on the right that is consistent with a
+       * portion of the previous or next page being included in the image? If so, crop
+       * out that column in both img and bin, and rerun this process.
        */
-      //TODO add border column removal
+      // TODO add border column removal
 
       linectr = 0;
 
-      //if no columns were found, treat the image as 1 big column
+      // if no columns were found, treat the image as 1 big column
       Boolean makeSingleCol = false;
       if (columns.isEmpty()) {
          makeSingleCol = true;
-         LOG.log(WARNING, "Column detection doesn't pass sanity check, forcing single column.");
+         LOG.log(Level.WARNING, "Column detection doesn't pass sanity check, forcing single column.");
       }
       if (forceSingle) {
          makeSingleCol = true;
-         LOG.log(INFO, "Forcing single column by user request.");
+         LOG.log(Level.INFO, "Forcing single column by user request.");
       }
       if (makeSingleCol) {
 
          columns = new ArrayList<>();
-         line tmpLine = new line();
+         final line tmpLine = new line();
          tmpLine.setStartVertical(0);
          tmpLine.setStartHorizontal(0);
          tmpLine.setWidth(bin.getWidth());
@@ -433,42 +442,44 @@ public class Detector {
       /*
        * columns = new Vector();
        *
-       * for(int i=0;i<potentialColumns.size();i++) { line tmpLine = new
-       * line(); rectangle r=potentialColumns.elementAt(i);
-       * tmpLine.setStartHorizontal(r.x); tmpLine.setStartVertical(r.y);
-       * tmpLine.setWidth(r.x1-r.x); tmpLine.setDistance(r.y1-r.y);
-       * columns.add(tmpLine);
-       }
+       * for(int i=0;i<potentialColumns.size();i++) { line tmpLine = new line();
+       * rectangle r=potentialColumns.elementAt(i); tmpLine.setStartHorizontal(r.x);
+       * tmpLine.setStartVertical(r.y); tmpLine.setWidth(r.x1-r.x);
+       * tmpLine.setDistance(r.y1-r.y); columns.add(tmpLine); }
        */
-      //line l=new line();
+      // line l=new line();
       for (int ctr = 0; ctr < columns.size(); ctr++) {
          l = columns.get(ctr);
-         //is this a good column or a page margin?
-         //if width is > height or the column width is less than 1/8 of the page width exclude it
+         // is this a good column or a page margin?
+         // if width is > height or the column width is less than 1/8 of the page width
+         // exclude it
          if (l.getWidth() < l.getDistance() && l.getWidth() > bin.getWidth() / 8) {
-            //System.out.print("column is:" + l.getStartHorizontal() + "," + l.getWidth() + "," + l.getStartVertical() + "," + l.getDistance() + "\n");
-            BufferedImage thisColumnOnly = img.getSubimage(l.getStartHorizontal(), l.getStartVertical(), l.getWidth(), l.getDistance());
-            BufferedImage thisColumnOnlyBin = binstor.getSubimage(l.getStartHorizontal(), l.getStartVertical(), l.getWidth(), l.getDistance());
-//            writeDebugImage(thisColumnOnlyBin, debugLabel + "_col" + ctr + ".jpg");
-            Detector colLines = new Detector(thisColumnOnly, thisColumnOnlyBin);
+            // System.out.print("column is:" + l.getStartHorizontal() + "," + l.getWidth() +
+            // "," + l.getStartVertical() + "," + l.getDistance() + "\n");
+            final BufferedImage thisColumnOnly = img.getSubimage(l.getStartHorizontal(), l.getStartVertical(),
+                  l.getWidth(), l.getDistance());
+            final BufferedImage thisColumnOnlyBin = binstor.getSubimage(l.getStartHorizontal(), l.getStartVertical(),
+                  l.getWidth(), l.getDistance());
+            // writeDebugImage(thisColumnOnlyBin, debugLabel + "_col" + ctr + ".jpg");
+            final Detector colLines = new Detector(thisColumnOnly, thisColumnOnlyBin);
             colLines.hsmearDist = this.hsmearDist;
             colLines.vsmearDist = this.vsmearDist;
             colLines.findLines(3, thisColumnOnlyBin);
-            //System.out.print("found "+ colLines.lines.size()+" lines\n" );
+            // System.out.print("found "+ colLines.lines.size()+" lines\n" );
 
-            Iterator<line> e = colLines.lines.iterator();
+            final Iterator<line> e = colLines.lines.iterator();
             if (colLines.lines.size() >= minLinesPerCol) {
                for (int k = 0; k < colLines.lines.size(); k++) {
-                  line thisLine = colLines.lines.get(k);
+                  final line thisLine = colLines.lines.get(k);
                   thisLine.setStartHorizontal(thisLine.getStartHorizontal() + l.getStartHorizontal());
                   thisLine.setStartVertical(thisLine.getStartVertical() + l.getStartVertical());
-                  //System.out.print(thisLine.getWidth()+"\n");
+                  // System.out.print(thisLine.getWidth()+"\n");
                   lines.add(thisLine);
                }
             }
          }
       }
-//      writeDebugImage(bin, debugLabel + "_last_step.jpg");
+      // writeDebugImage(bin, debugLabel + "_last_step.jpg");
 
       colLinesWithWidth = new int[2000];
       findingCols = false;
@@ -476,21 +487,21 @@ public class Detector {
    }
 
    /**
-    * Take the lines from the 3 subcolumns and combines them to create a single array of lines, without
-    * duplicates
+    * Take the lines from the 3 subcolumns and combines them to create a single
+    * array of lines, without duplicates
     */
-   private int[] mergeColumnPortions(int[] a, int[] b, int[] c, int colwidth) {
-      int[] newListing = new int[2000];
+   private int[] mergeColumnPortions(final int[] a, final int[] b, final int[] c, final int colwidth) {
+      final int[] newListing = new int[2000];
       int finalLineCount = 0;
       int nexta = 0;
       int nextb = 0;
       int nextc = 0;
-      float slope_insanity_num = (float) 75.0;
+      final float slope_insanity_num = (float) 75.0;
       /*
-       * The lowest number for vertical position is definitely the next line.
-       * The trick after finding it, is to determine whether the other 2
-       * current line positions are part of the same line, part of a different
-       * line, or the entirety of a different line.
+       * The lowest number for vertical position is definitely the next line. The
+       * trick after finding it, is to determine whether the other 2 current line
+       * positions are part of the same line, part of a different line, or the
+       * entirety of a different line.
        *
        */
       while (a[nexta] > 0 || b[nextb] > 0 || c[nextc] > 0) {
@@ -504,64 +515,67 @@ public class Detector {
          if (lowest > c[nextc] && c[nextc] > 0) {
             lowest = c[nextc];
          }
-         //calculate the slope the line would have to have for lowest and each of the other 2 points to be on the same line
-         //If the slope is silly, dont drop that point when writing this line to the final listing, because it is part of anther line.
+         // calculate the slope the line would have to have for lowest and each of the
+         // other 2 points to be on the same line
+         // If the slope is silly, dont drop that point when writing this line to the
+         // final listing, because it is part of anther line.
 
          if (lowest == a[nexta]) {
-            //slope from a to b is the height difference between a and b divided by the length of a, which is colwidth
-            float slopeb = (a[nexta] - b[nextb]) / (float) colwidth;
+            // slope from a to b is the height difference between a and b divided by the
+            // length of a, which is colwidth
+            final float slopeb = (a[nexta] - b[nextb]) / (float) colwidth;
 
-            float slopec = (a[nexta] - c[nextc]) / ((float) colwidth * 2);
+            final float slopec = (a[nexta] - c[nextc]) / ((float) colwidth * 2);
 
             if (abs(slopeb) < slope_insanity_num) {
-               LOG.log(FINE, "skipping a b");
+               LOG.log(Level.FINE, "skipping a b");
                nextb++;
             } else {
-               LOG.log(FINE, "{0}pres", abs(slopeb));
+               LOG.log(Level.FINE, "{0}pres", abs(slopeb));
             }
             if (abs(slopec) < slope_insanity_num) {
                nextc++;
-               LOG.log(FINE, "skipping a c");
+               LOG.log(Level.FINE, "skipping a c");
             } else {
-               LOG.log(FINE, "{0}pres", abs(slopec));
+               LOG.log(Level.FINE, "{0}pres", abs(slopec));
             }
             newListing[finalLineCount] = a[nexta];
             finalLineCount++;
             nexta++;
          } else if (lowest == b[nextb]) {
-            float slopea = (b[nextb] - a[nexta]) / (float) colwidth;
+            final float slopea = (b[nextb] - a[nexta]) / (float) colwidth;
 
-            float slopec = (b[nextb] - c[nextc]) / ((float) colwidth);
+            final float slopec = (b[nextb] - c[nextc]) / ((float) colwidth);
 
             if (abs(slopea) < slope_insanity_num) {
                nexta++;
             } else {
-               LOG.log(FINE, "{0}inb", abs(slopea));
+               LOG.log(Level.FINE, "{0}inb", abs(slopea));
             }
 
             if (abs(slopec) < slope_insanity_num) {
                nextc++;
             } else {
-               LOG.log(FINE, "{0}inb", abs(slopec));
+               LOG.log(Level.FINE, "{0}inb", abs(slopec));
             }
             newListing[finalLineCount] = b[nextb];
             finalLineCount++;
             nextb++;
          } else {
-            float slopea = (c[nextc] - a[nexta]) / ((float) colwidth * 2);
+            final float slopea = (c[nextc] - a[nexta]) / ((float) colwidth * 2);
 
-            float slopeb = (c[nextc] - b[nextb]) / ((float) colwidth);
+            final float slopeb = (c[nextc] - b[nextb]) / ((float) colwidth);
 
 
             if (abs(slopea) < slope_insanity_num) {
                nexta++;
             } else {
-               LOG.log(FINE, "{0}inc", abs(slopea));
+               LOG.log(Level.FINE, "{0}inc", abs(slopea));
             }
             if (abs(slopeb) < slope_insanity_num) {
                nextb++;
             } else {
-               LOG.log(FINE, "{0}inc", abs(slopeb));
+               LOG.log(Level.FINE, "{0}inc", abs(slopeb));
             }
             newListing[finalLineCount] = c[nextc];
             finalLineCount++;
@@ -571,5 +585,5 @@ public class Detector {
       return newListing;
    }
 
-   private static final Logger LOG = getLogger(Detector.class.getName());
+   private static final Logger LOG = Logger.getLogger(Detector.class.getName());
 }

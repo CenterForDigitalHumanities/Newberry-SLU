@@ -15,7 +15,6 @@
 package edu.slu.tpen.servlet;
 
 import edu.slu.tpen.entity.transcription.Annotation;
-import static edu.slu.tpen.servlet.Constant.ANNOTATION_SERVER_ADDR;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -23,8 +22,8 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +41,7 @@ public class UpdateTransLineServlet extends HttpServlet {
         Annotation anno = new Annotation();
         anno.setContent(req.getParameter("content"));
         try {
-            URL postUrl = new URL(ANNOTATION_SERVER_ADDR + "annotationstore/annotation/updateAnnotation");
+            URL postUrl = new URL(Constant.ANNOTATION_SERVER_ADDR + "/update.action");
             HttpURLConnection connection = (HttpURLConnection) postUrl
                 .openConnection();  
             // Output to the connection. Default is  
@@ -57,14 +56,13 @@ public class UpdateTransLineServlet extends HttpServlet {
             // Post cannot use caches  
             connection.setUseCaches(false);  
             connection.setInstanceFollowRedirects(true);  
-            connection.setRequestProperty("Content-Type",  
-                    "application/x-www-form-urlencoded");
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             connection.connect();  
             try (DataOutputStream out = new DataOutputStream(connection  
                     .getOutputStream())) {
-                String content = anno.toString();
-                out.writeBytes(content);
-                out.flush();
+            String content = anno.toString();
+            out.writeBytes(content);
+            out.flush();  
                 // flush and close
             }
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(),"utf-8"));
@@ -85,9 +83,9 @@ public class UpdateTransLineServlet extends HttpServlet {
             connection.disconnect();
             resp.getWriter().print(sb.toString());
         } catch (UnsupportedEncodingException ex) {
-            getLogger(SaveNewTransLineServlet.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(SaveNewTransLineServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            getLogger(SaveNewTransLineServlet.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(SaveNewTransLineServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

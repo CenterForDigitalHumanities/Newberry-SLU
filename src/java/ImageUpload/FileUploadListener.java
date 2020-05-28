@@ -10,7 +10,7 @@ import org.apache.commons.fileupload.ProgressListener;
 			super();
 		}
 
-		public void update(long aBytesRead, long aContentLength, int anItem) {
+		public void update(final long aBytesRead, final long aContentLength, final int anItem) {
 			bytesRead = aBytesRead;
 			contentLength = aContentLength;
 			item = anItem;

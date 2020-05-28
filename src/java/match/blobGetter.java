@@ -20,13 +20,15 @@ import detectimages.blob;
 import static detectimages.blob.getBlob;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.out;
+
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import static textdisplay.DatabaseWrapper.getConnection;
-import static textdisplay.Folio.getRbTok;
 import textdisplay.Manuscript;
+import tokens.TokenManager;
 
 /**
  *
@@ -36,23 +38,22 @@ public class blobGetter {
 
    int h, y, x, w;
 
-   public static blob getRawBlob(int folio, int blob) throws SQLException {
+   public static blob getRawBlob(int folio, int blob) throws SQLException, IOException {
 
       Manuscript ms = new Manuscript(folio);
+      TokenManager man = new TokenManager();
       blob b;
-      String path = getRbTok("PALEODATADIR") + "/" + ms.getID() + "/";
+      String path = man.getProperties().getProperty("PALEODATADIR") + "/" + ms.getID() + "/";
       b = getBlob(path, folio + ".txt", blob);
       return b;
-
    }
 
-   public blobGetter(String img, int blob) throws SQLException {
-      Connection j = null;
+   public blobGetter(String img, int blob) throws SQLException, IOException {
       int folioNum = parseInt(img.split("\\.")[0]);
       Manuscript ms = new Manuscript(folioNum);
-      String path = getRbTok("PALEODATADIR") + "/" + ms.getID() + "/";
-      try {
-         j = getConnection();
+      TokenManager man = new TokenManager();
+      String path = man.getProperties().getProperty("PALEODATADIR") + "/" + ms.getID() + "/";
+      try (Connection j = getConnection()) {
 
          String selectQuery = "select * from `blobs` where `img`=? and `blob`=?";
          PreparedStatement select = j.prepareStatement(selectQuery);
@@ -85,8 +86,6 @@ public class blobGetter {
             h = b.getHeight();
             w = b.getWidth();
          }
-      } finally {
-         j.close();
       }
 
    }

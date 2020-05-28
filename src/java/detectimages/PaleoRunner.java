@@ -18,15 +18,14 @@ import java.io.File;
 
 public class PaleoRunner
 {
-    public static void main(String [] args)
-    {
-        //process a folder full of images, generating data files in the specified data folder, using the same file structure as we found in the images folder
-        if(args[0].compareTo("processImages")==0)
-        {
-            String imagePath=args[1];
-            File imageFolder=new File(imagePath);
-            File [] dirs=imageFolder.listFiles();
-            for(File dir:dirs)
+    public static void main(final String[] args) {
+        // process a folder full of images, generating data files in the specified data
+        // folder, using the same file structure as we found in the images folder
+        if (args[0].compareTo("processImages") == 0) {
+            final String imagePath = args[1];
+            final File imageFolder = new File(imagePath);
+            final File[] dirs = imageFolder.listFiles();
+            for (final File dir : dirs)
             {
                 //process this dir
                 

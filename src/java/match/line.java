@@ -28,7 +28,7 @@ public class line
         {
             zoom=true;
         }
-        public line(int left, int right, int top, int bottom)
+        public line(final int left, final int right, final int top, final int bottom)
         {
             this.left=left;
             this.right=right;

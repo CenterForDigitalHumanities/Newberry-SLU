@@ -15,31 +15,27 @@
 
 package edu.slu.tpen.servlet;
 
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-import static java.lang.Integer.parseInt;
 import java.sql.SQLException;
-import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+
 import net.sf.json.JSONObject;
 import textdisplay.ProjectPermissions;
 import user.Group.roles;
-import static user.Group.roles.Contributor;
-import static user.Group.roles.Editor;
-import static user.Group.roles.Leader;
-import static user.Group.roles.None;
-import static user.Group.roles.Suspended;
 
 /**
- * Change user permission in a project (group). This is a transformation of tpen function to web service. 
- * It's using tpen MySQL database. 
+ * Change user permission in a project (group). This is a transformation of tpen
+ * function to web service. It's using tpen MySQL database.
+ * 
  * @author hanyan
  */
 public class ChangeUserPermissionServlet extends HttpServlet {
@@ -49,6 +45,7 @@ public class ChangeUserPermissionServlet extends HttpServlet {
     @Override
     /**
      * The parameter format: projectid=12&uid=123&act=changerole&role=leader
+     * 
      * @param projectid
      * @param uid
      * @param act
@@ -66,116 +63,135 @@ public class ChangeUserPermissionServlet extends HttpServlet {
      * @param allowPublicReadTranscription
      * @return 10000: projectid is null
      */
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         int result = 0;
         if (request.getParameter("projectID") != null && null != request.getSession().getAttribute("UID")) {
-            //System.out.println("UID !!!!!!!!!!!!!!!!!!!!");
-            //System.out.println(request.getSession().getAttribute("UID"));
-            int currentUserId = parseInt(request.getSession().getAttribute("UID") + "");
-            int projectId = new Integer(request.getParameter("projectID"));
-            if(null != request.getParameter("uid")){
-                //change user permission for other user
-                int uid = new Integer(request.getParameter("uid"));
-                if(null != request.getParameter("act"))switch (request.getParameter("act")) {
-                    case "add":
-                        result = addUserToProject(projectId, uid);
-                        break;
-                    case "rm":
-                        result = removeUserFromProject(projectId, uid, currentUserId);
-                        break;
-                    case "changerole":
-                        if (null == request.getParameter("role")) {
-                            //if non of above, send back not accepttable. The role name is not acceptable.
-                            result = SC_NOT_ACCEPTABLE;
-                        } else {
-                            switch (request.getParameter("role")) {
-                                case "leader":
-                                    result = changeUserRole(projectId, uid, currentUserId, Leader);
-                                    break;
-                                case "editor":
-                                    result = changeUserRole(projectId, uid, currentUserId, Editor);
-                                    break;
-                                case "contributor":
-                                    result = changeUserRole(projectId, uid, currentUserId, Contributor);
-                                    break;
-                                case "suspended":
-                                    result = changeUserRole(projectId, uid, currentUserId, Suspended);
-                                    break;
-                                case "none":
-                                    result = changeUserRole(projectId, uid, currentUserId, None);
-                                    break;
-                                default:
-                                    //if non of above, send back not accepttable. The role name is not acceptable.
-                                    result = response.SC_NOT_ACCEPTABLE;
-                                    break;
+            System.out.println("UID !!!!!!!!!!!!!!!!!!!!");
+            System.out.println(request.getSession().getAttribute("UID"));
+            int currentUserId = Integer.parseInt(request.getSession().getAttribute("UID") + "");
+            int projectId = Integer.parseInt(request.getParameter("projectID"));
+            if (null != request.getParameter("uid")) {
+                // change user permission for other user
+                int uid = Integer.parseInt(request.getParameter("uid"));
+                if (null != request.getParameter("act"))
+                    switch (request.getParameter("act")) {
+                        case "add":
+                            result = addUserToProject(projectId, uid);
+                            break;
+                        case "rm":
+                            result = removeUserFromProject(projectId, uid, currentUserId);
+                            break;
+                        case "changerole":
+                            if (null == request.getParameter("role")) {
+                                // if non of above, send back not accepttable. The role name is not acceptable.
+                                result = SC_NOT_ACCEPTABLE;
+                            } else {
+                                switch (request.getParameter("role")) {
+                                    case "leader":
+                                        result = changeUserRole(projectId, uid, currentUserId, Leader);
+                                        break;
+                                    case "editor":
+                                        result = changeUserRole(projectId, uid, currentUserId, Editor);
+                                        break;
+                                    case "contributor":
+                                        result = changeUserRole(projectId, uid, currentUserId, Contributor);
+                                        break;
+                                    case "suspended":
+                                        result = changeUserRole(projectId, uid, currentUserId, Suspended);
+                                        break;
+                                    case "none":
+                                        result = changeUserRole(projectId, uid, currentUserId, None);
+                                        break;
+                                    default:
+                                        // if non of above, send back not accepttable. The role name is not acceptable.
+                                        result = SC_NOT_ACCEPTABLE;
+                                        break;
+                                }
                             }
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                            break;
+                        default:
+                            break;
+                    }
             }
-            if(null != request.getParameter("act") && "cpm".equals(request.getParameter("act"))){
-                //change current user (in session) permission
+            if (null != request.getParameter("act") && "cpm".equals(request.getParameter("act"))) {
+                // change current user (in session) permission
                 try {
-                    //change permission, cpm=change permission, p=permission
+                    // change permission, cpm=change permission, p=permission
                     ProjectPermissions pp = new ProjectPermissions(projectId);
-                    if(null != request.getParameter("allowOACRead") 
-                            && (request.getParameter("allowOACRead").equals("true") || request.getParameter("allowOACRead").equals("false"))){
-                        pp.setAllow_OAC_read(new Boolean(request.getParameter("allowOACRead")));
+                    if (null != request.getParameter("allowOACRead")
+                            && (request.getParameter("allowOACRead").equals("true")
+                                    || request.getParameter("allowOACRead").equals("false"))) {
+                        pp.setAllow_OAC_read(Boolean.parseBoolean(request.getParameter("allowOACRead")));
                         result = 1;
-                    }else if(null != request.getParameter("allowOACWrite") 
-                            && (request.getParameter("allowOACWrite").equals("true") || request.getParameter("allowOACWrite").equals("false"))){
-                        pp.setAllow_OAC_write(new Boolean(request.getParameter("allowOACWrite")));
+                    } else if (null != request.getParameter("allowOACWrite")
+                            && (request.getParameter("allowOACWrite").equals("true")
+                                    || request.getParameter("allowOACWrite").equals("false"))) {
+                        pp.setAllow_OAC_write(Boolean.parseBoolean(request.getParameter("allowOACWrite")));
                         result = 1;
-                    }else if(null != request.getParameter("allowExport") 
-                            && (request.getParameter("allowExport").equals("true") || request.getParameter("allowExport").equals("false"))){
-                        pp.setAllow_export(new Boolean(request.getParameter("allowExport")));
+                    } else if (null != request.getParameter("allowExport")
+                            && (request.getParameter("allowExport").equals("true")
+                                    || request.getParameter("allowExport").equals("false"))) {
+                        pp.setAllow_export(Boolean.parseBoolean(request.getParameter("allowExport")));
                         result = 1;
-                    }else if(null != request.getParameter("allowPulicCopy") 
-                            && (request.getParameter("allowPulicCopy").equals("true") || request.getParameter("allowPulicCopy").equals("false"))){
-                        pp.setAllow_public_copy(new Boolean(request.getParameter("allowPulicCopy")));
+                    } else if (null != request.getParameter("allowPulicCopy")
+                            && (request.getParameter("allowPulicCopy").equals("true")
+                                    || request.getParameter("allowPulicCopy").equals("false"))) {
+                        pp.setAllow_public_copy(Boolean.parseBoolean(request.getParameter("allowPulicCopy")));
                         result = 1;
-                    }else if(null != request.getParameter("allowPublicModify") 
-                            && (request.getParameter("allowPublicModify").equals("true") || request.getParameter("allowPublicModify").equals("false"))){
-                        pp.setAllow_public_modify(new Boolean(request.getParameter("allowPublicModify")));
+                    } else if (null != request.getParameter("allowPublicModify")
+                            && (request.getParameter("allowPublicModify").equals("true")
+                                    || request.getParameter("allowPublicModify").equals("false"))) {
+                        pp.setAllow_public_modify(Boolean.parseBoolean(request.getParameter("allowPublicModify")));
                         result = 1;
-                    }else if(null != request.getParameter("allowPublicModifyAnnotation") 
-                            && (request.getParameter("allowPublicModifyAnnotation").equals("true") || request.getParameter("allowPublicModifyAnnotation").equals("false"))){
-                        pp.setAllow_public_modify_annotation(new Boolean(request.getParameter("allowPublicModifyAnnotation")));
+                    } else if (null != request.getParameter("allowPublicModifyAnnotation")
+                            && (request.getParameter("allowPublicModifyAnnotation").equals("true")
+                                    || request.getParameter("allowPublicModifyAnnotation").equals("false"))) {
+                        pp.setAllow_public_modify_annotation(
+                                Boolean.parseBoolean(request.getParameter("allowPublicModifyAnnotation")));
                         result = 1;
-                    }else if(null != request.getParameter("allowPublicModifyButtons") 
-                            && (request.getParameter("allowPublicModifyButtons").equals("true") || request.getParameter("allowPublicModifyButtons").equals("false"))){ 
-                        pp.setAllow_public_modify_buttons(new Boolean(request.getParameter("allowPublicModifyButtons")));
+                    } else if (null != request.getParameter("allowPublicModifyButtons")
+                            && (request.getParameter("allowPublicModifyButtons").equals("true")
+                                    || request.getParameter("allowPublicModifyButtons").equals("false"))) {
+                        pp.setAllow_public_modify_buttons(
+                                Boolean.parseBoolean(request.getParameter("allowPublicModifyButtons")));
                         result = 1;
-                    }else if(null != request.getParameter("allowPublicModifyLineParsing") 
-                            && (request.getParameter("allowPublicModifyLineParsing").equals("true") || request.getParameter("allowPublicModifyLineParsing").equals("false"))){
-                        pp.setAllow_public_modify_line_parsing(new Boolean(request.getParameter("allowPublicModifyLineParsing")));
+                    } else if (null != request.getParameter("allowPublicModifyLineParsing")
+                            && (request.getParameter("allowPublicModifyLineParsing").equals("true")
+                                    || request.getParameter("allowPublicModifyLineParsing").equals("false"))) {
+                        pp.setAllow_public_modify_line_parsing(
+                                Boolean.parseBoolean(request.getParameter("allowPublicModifyLineParsing")));
                         result = 1;
-                    }else if(null != request.getParameter("allowPublicModifyMetadata") 
-                            && (request.getParameter("allowPublicModifyMetadata").equals("true") || request.getParameter("allowPublicModifyMetadata").equals("false"))){
-                        pp.setAllow_public_modify_metadata(new Boolean(request.getParameter("allowPublicModifyMetadata")));
+                    } else if (null != request.getParameter("allowPublicModifyMetadata")
+                            && (request.getParameter("allowPublicModifyMetadata").equals("true")
+                                    || request.getParameter("allowPublicModifyMetadata").equals("false"))) {
+                        pp.setAllow_public_modify_metadata(
+                                Boolean.parseBoolean(request.getParameter("allowPublicModifyMetadata")));
                         result = 1;
-                    }else if(null != request.getParameter("allowPublicModifyNotess") 
-                            && (request.getParameter("allowPublicModifyNotess").equals("true") || request.getParameter("allowPublicModifyNotess").equals("false"))){
-                        pp.setAllow_public_modify_notes(new Boolean(request.getParameter("allowPublicModifyNotess")));
+                    } else if (null != request.getParameter("allowPublicModifyNotess")
+                            && (request.getParameter("allowPublicModifyNotess").equals("true")
+                                    || request.getParameter("allowPublicModifyNotess").equals("false"))) {
+                        pp.setAllow_public_modify_notes(
+                                Boolean.parseBoolean(request.getParameter("allowPublicModifyNotess")));
                         result = 1;
-                    }else if(null != request.getParameter("allowPublicReadTranscription") 
-                            && (request.getParameter("allowPublicReadTranscription").equals("true") || request.getParameter("allowPublicReadTranscription").equals("false"))){
-                        pp.setAllow_public_read_transcription(new Boolean(request.getParameter("allowPublicReadTranscription")));
+                    } else if (null != request.getParameter("allowPublicReadTranscription")
+                            && (request.getParameter("allowPublicReadTranscription").equals("true")
+                                    || request.getParameter("allowPublicReadTranscription").equals("false"))) {
+                        pp.setAllow_public_read_transcription(
+                                Boolean.parseBoolean(request.getParameter("allowPublicReadTranscription")));
                         result = 1;
-                    }else{
-                        //if non of above, send back not accepttable. The permission is not acceptable. 
+                    } else {
+                        // if non of above, send back not accepttable. The permission is not acceptable.
                         result = SC_NOT_ACCEPTABLE;
                     }
                 } catch (SQLException ex) {
-                    getLogger(ChangeUserPermissionServlet.class.getName()).log(SEVERE, null, ex);
-                } catch (ClassCastException cce){
-                    out.println("Type error of project user permission. ");
-                    getLogger(ChangeUserPermissionServlet.class.getName()).log(INFO, null, cce);
+                    Logger.getLogger(ChangeUserPermissionServlet.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (ClassCastException cce) {
+                    System.out.println("Type error of project user permission. ");
+                    Logger.getLogger(ChangeUserPermissionServlet.class.getName()).log(Level.INFO, null, cce);
                 }
             }
-        }else{
+        } else {
             result = SC_FORBIDDEN;
         }
         out = response.getWriter();
@@ -199,8 +215,6 @@ public class ChangeUserPermissionServlet extends HttpServlet {
             //get project by project id
             textdisplay.Project thisProject = new textdisplay.Project(projectdId);
             user.Group thisGroup = new user.Group(thisProject.getGroupID());
-            //get user by user id
-            user.User thisUser = new user.User(uid);
             //test if the user has aleady in the group
             if (!thisGroup.isMember(uid)) {
                 //if the user is not a member, add user to the group
@@ -211,7 +225,7 @@ public class ChangeUserPermissionServlet extends HttpServlet {
                 result = 11;
             }
         } catch (SQLException ex) {
-            getLogger(ChangeUserPermissionServlet.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(ChangeUserPermissionServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
         return result;
     }
@@ -229,9 +243,7 @@ public class ChangeUserPermissionServlet extends HttpServlet {
             //get project by project id
             textdisplay.Project thisProject = new textdisplay.Project(projectdId);
             user.Group thisGroup = new user.Group(thisProject.getGroupID());
-            //get user by user id
-            user.User thisUser = new user.User(uid);
-            //test if the user has aleady in the group
+            // test if the user has aleady in the group
             if (!thisGroup.isMember(uid)) {
                 //if the user is not a member, return 0
                 result = 0;
@@ -244,7 +256,7 @@ public class ChangeUserPermissionServlet extends HttpServlet {
                 result = 1;
             }
         } catch (SQLException ex) {
-            getLogger(ChangeUserPermissionServlet.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(ChangeUserPermissionServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
         return result;
     }
@@ -263,9 +275,7 @@ public class ChangeUserPermissionServlet extends HttpServlet {
             //get project by project id
             textdisplay.Project thisProject = new textdisplay.Project(projectdId);
             user.Group thisGroup = new user.Group(thisProject.getGroupID());
-            //get user by user id
-            user.User thisUser = new user.User(uid);
-            //test if the user has aleady in the group
+            // test if the user has aleady in the group
             if (!thisGroup.isMember(uid)) {
                 //if the user is not a member, return 0
                 result = 0;
@@ -278,7 +288,7 @@ public class ChangeUserPermissionServlet extends HttpServlet {
                 result = 1;
             }
         } catch (SQLException ex) {
-            getLogger(ChangeUserPermissionServlet.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(ChangeUserPermissionServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
         return result;
     }

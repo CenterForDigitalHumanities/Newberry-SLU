@@ -48,8 +48,7 @@ import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import textdisplay.Archive;
 import static textdisplay.Archive.connectionType.local;
 import textdisplay.Folio;
-import static textdisplay.Folio.getRbTok;
-
+import tokens.TokenManager;
 
 /**
  * A servlet to resize an image from an Archive to a size requested.
@@ -91,7 +90,8 @@ public class ImageResize extends HttpServlet {
                response.sendError(403);
                return;
             }
-            if (request.getParameter("code").compareTo(getRbTok("imageCode")) != 0) {
+            TokenManager man = new TokenManager();
+            if (request.getParameter("code").compareTo(man.getProperties().getProperty("imageCode")) != 0) {
                response.sendError(403);
                return;
             }

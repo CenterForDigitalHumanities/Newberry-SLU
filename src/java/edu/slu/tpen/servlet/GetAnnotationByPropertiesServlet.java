@@ -5,14 +5,13 @@
  */
 package edu.slu.tpen.servlet;
 
-import static edu.slu.tpen.servlet.Constant.ANNOTATION_SERVER_ADDR;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import static java.net.URLEncoder.encode;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -26,20 +25,23 @@ public class GetAnnotationByPropertiesServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        URL postUrl = new URL(ANNOTATION_SERVER_ADDR + "/anno/getAnnotationByProperties.action");
+        System.out.println("Get annotation by properties internal servlet params below...");
+        System.out.println(request.getParameter("content"));
+        URL postUrl = new URL(Constant.ANNOTATION_SERVER_ADDR + "/getByProperties.action");
         HttpURLConnection connection = (HttpURLConnection) postUrl.openConnection();
         connection.setDoOutput(true);
         connection.setDoInput(true);
         connection.setRequestMethod("POST");
         connection.setUseCaches(false);
         connection.setInstanceFollowRedirects(true);
-        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
         connection.connect();
         //value to save
         try (DataOutputStream out = new DataOutputStream(connection.getOutputStream())) {
-            //value to save
-            out.writeBytes("content=" + encode(request.getParameter("content"), "utf-8"));
-            out.flush();
+        //value to save
+        System.out.println("write");
+        out.writeBytes(request.getParameter("content"));
+        out.flush();
             // flush and close
         }
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(),"utf-8"));

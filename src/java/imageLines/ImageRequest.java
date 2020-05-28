@@ -16,24 +16,20 @@
  */
 package imageLines;
 
-import static java.lang.System.currentTimeMillis;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.MessagingException;
-import static textdisplay.DatabaseWrapper.closeDBConnection;
-import static textdisplay.DatabaseWrapper.closePreparedStatement;
-import static textdisplay.DatabaseWrapper.getConnection;
+import textdisplay.DatabaseWrapper;
 import textdisplay.Folio;
-import static textdisplay.Folio.getRbTok;
 import textdisplay.Manuscript;
 import textdisplay.mailer;
+import tokens.TokenManager;
 import user.User;
-import static user.User.getAdmins;
 
 /**
  * Handles logging of image requests, tracking of success and failure as well as load times, so we can set
@@ -54,16 +50,16 @@ public class ImageRequest {
     * @throws SQLException
     */
    public ImageRequest(int folioNumber, int UID) throws SQLException {
-      //System.out.print("saving record for " + folioNumber + " " + UID + "\n");
-      startTime = currentTimeMillis();
+      System.out.print("saving record for " + folioNumber + " " + UID + "\n");
+      startTime = System.currentTimeMillis();
       Folio f = new Folio(folioNumber);
       cacheHit = f.isCached();
       String query = "insert into imagerequest(UID,folio,cacheHit,elapsedTime,date,succeeded,msg) values (?,?,?,?,NOW(),?,?)";
       Connection j = null;
       PreparedStatement ps = null;
       try {
-         j = getConnection();
-         ps = j.prepareStatement(query, RETURN_GENERATED_KEYS);
+         j = DatabaseWrapper.getConnection();
+         ps = j.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
          ps.setInt(1, UID);
          ps.setInt(2, folioNumber);
          ps.setBoolean(3, cacheHit);
@@ -74,12 +70,13 @@ public class ImageRequest {
          ResultSet rs = ps.getGeneratedKeys();
          if (rs.next()) {
             this.id = rs.getInt(1);
-         } else {
+         } 
+         else {
             this.id = -1;
          }
       } finally {
-            closeDBConnection(j);
-            closePreparedStatement(ps);
+         DatabaseWrapper.closeDBConnection(j);
+         DatabaseWrapper.closePreparedStatement(ps);
       }
    }
 
@@ -90,8 +87,8 @@ public class ImageRequest {
     */
    public void completeSuccess() throws SQLException {
       if (id > 0) {
-         long timeElapsed = currentTimeMillis() - startTime;
-         try (Connection j = getConnection()) {
+         long timeElapsed = System.currentTimeMillis() - startTime;
+         try (Connection j = DatabaseWrapper.getConnection()) {
             try (PreparedStatement ps = j.prepareStatement("update imagerequest set elapsedTime=?, succeeded=true, msg='' where id=?")) {
                ps.setInt(1, (int)timeElapsed);
                ps.setInt(2, id);
@@ -114,9 +111,9 @@ public class ImageRequest {
          msg = "null msg";
       }
       if (id > 0) {
-         long timeElapsed = currentTimeMillis() - startTime;
+         long timeElapsed = System.currentTimeMillis() - startTime;
          String query = "update imagerequest set elapsedTime=?, succeeded=false, msg=? where id=?";
-         try (Connection j = getConnection()) {
+         try (Connection j = DatabaseWrapper.getConnection()) {
             try (PreparedStatement ps = j.prepareStatement(query)) {
                ps.setInt(1, (int) timeElapsed);
                ps.setString(2, msg);
@@ -142,7 +139,7 @@ public class ImageRequest {
       Connection j = null;
       PreparedStatement ps = null;
       try {
-         j = getConnection();
+         j = DatabaseWrapper.getConnection();
          ps = j.prepareStatement(query);
          ps.setString(1, archive);
          ResultSet rs = ps.executeQuery();
@@ -157,14 +154,14 @@ public class ImageRequest {
          }
          return sum / count;
       } finally {
-            closeDBConnection(j);
-            closePreparedStatement(ps);
+         DatabaseWrapper.closeDBConnection(j);
+         DatabaseWrapper.closePreparedStatement(ps);
       }
    }
 
-   public static void EmailReport(int minutes) throws SQLException {
+   public static void EmailReport(int minutes) throws SQLException, IOException {
       minutes++;
-      try (Connection j = getConnection()) {
+      try (Connection j = DatabaseWrapper.getConnection()) {
          try (PreparedStatement ps = j.prepareStatement("select distinct(folio) from imagerequest where succeeded=false and date>DATE_SUB(now(), INTERVAL ? MINUTE) and date<DATE_SUB(now(), INTERVAL 1 MINUTE )")) {
             ps.setInt(1, minutes);
             ResultSet rs = ps.executeQuery();
@@ -179,13 +176,14 @@ public class ImageRequest {
                return;
             }
             body = "The following images failed to load in the last " + minutes + " minutes.\n" + body;
-            User[] admins = getAdmins();
+            User[] admins = user.User.getAdmins();
             mailer m = new mailer();
+            TokenManager man = new TokenManager();
             for (User i : admins) {
                try {
-                  m.sendMail(getRbTok("EMAILSERVER"), "TPEN@t-pen.org", i.getUname(), "TPEN image issue", body);
+                  m.sendMail(man.getProperties().getProperty("EMAILSERVER"), "TPEN@t-pen.org", i.getUname(), "TPEN image issue", body);
                } catch (MessagingException ex) {
-                        getLogger(ImageRequest.class.getName()).log(SEVERE, null, ex);
+                  Logger.getLogger(ImageRequest.class.getName()).log(Level.SEVERE, null, ex);
                }
             }
          }
