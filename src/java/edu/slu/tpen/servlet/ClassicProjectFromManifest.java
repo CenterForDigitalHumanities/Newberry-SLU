@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import static net.sf.json.JSONObject.fromObject;
-import static textdisplay.Folio.createFolioRecordFromManifest;
+import textdisplay.Folio;
 import textdisplay.Project;
 import user.Group;
 import user.User;
@@ -71,14 +71,14 @@ public class ClassicProjectFromManifest extends HttpServlet {
            throws ServletException, IOException, SQLException {
             int UID = parseInt(request.getSession().getAttribute("UID").toString());
             int projectID = 0;
-            textdisplay.Project thisProject = null;
+            textdisplay.Project thisProject;
             if(request.getParameter("manifest")==null){
                 return "You must provide a manifest ID via ?manifest={ID}";
             }
             if (UID > 0 && request.getParameter("manifest")!=null) {
                JSONObject theManifest = resolveID(request.getParameter("manifest")); 
                String repository = "unknown";
-                String archive = "unknown";
+                String archive;
                 String city = "unknown";
                 String collection = "unknown";
                 String label = "unknown"; 
@@ -116,7 +116,7 @@ public class ClassicProjectFromManifest extends HttpServlet {
                                     JSONObject image = images.getJSONObject(n);
                                     JSONObject resource = image.getJSONObject("resource");
                                     String imageName = resource.getString("@id");
-                                    int folioKey = createFolioRecordFromManifest(city, canvas.getString("label"), imageName.replace('_', '&'), archive, mss.getID(), 0);
+                                    int folioKey = Folio.createFolioRecordFromManifest(city, canvas.getString("label"), imageName.replace('_', '&'), archive, mss.getID(), 0);
                                     ls_folios_keys.add(folioKey);
                                 }
                             }

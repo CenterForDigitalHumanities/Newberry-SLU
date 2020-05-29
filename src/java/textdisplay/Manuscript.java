@@ -169,6 +169,9 @@ public class Manuscript {
       }
    }
 
+   public void setArchive(String archive_str) {
+      this.archive= archive_str;
+   }
    public String getArchive() {
       return archive;
    }
@@ -225,6 +228,36 @@ public class Manuscript {
             }
          }
       }
+   }
+   
+   
+   /**
+    * Check user's projects to see if any of them were made off of this MSID
+    */
+   public Integer checkExistingProjects(Integer msID, Integer UID) throws SQLException {
+            if(msID<0){
+                // bad MS, no project possible
+                return -1;
+            }
+            Manuscript man = new Manuscript(msID, true);
+            Integer projectID = -1;
+            int [] msIDs=new int[0];
+            User u = new User(UID);
+            Project[] p = u.getUserProjects();
+            msIDs = new int[p.length];
+            for (int i = 0; i < p.length; i++) {
+                try {
+                    msIDs[i] = new textdisplay.Manuscript(p[i].firstPage()).getID();
+                } catch (Exception e) {
+                    msIDs[i] = -1;
+                }
+            }
+            for (int l = 0; l < msIDs.length; l++) {
+                if (msIDs[l] == man.getID()) {
+                    projectID=p[l].getProjectID();
+                }
+            }
+            return projectID;
    }
 
    /**

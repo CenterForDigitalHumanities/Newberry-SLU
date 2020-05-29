@@ -15,8 +15,6 @@
 
 package edu.slu.tpen.servlet;
 
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import static java.util.logging.Level.SEVERE;
@@ -25,8 +23,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import javax.servlet.http.HttpSession;
 import textdisplay.Project;
 import user.Group;

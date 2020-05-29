@@ -5,7 +5,7 @@
  */
 package edu.slu.tpen.servlet;
 
-import static edu.slu.tpen.entity.Image.Canvas.bulkUpdateTranscriptlets;
+import edu.slu.tpen.entity.Image.Canvas;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -44,7 +44,7 @@ public class BulkUpdateAnnos extends HttpServlet {
             response.setHeader("Access-Control-Allow-Origin", "*");
             return;
         }
-        JSONArray updatedAnnos = bulkUpdateTranscriptlets(annotations);
+        JSONArray updatedAnnos = Canvas.bulkUpdateTranscriptlets(annotations);
         try (PrintWriter out = response.getWriter()) {
             out.println(updatedAnnos);
         }

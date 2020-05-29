@@ -7,15 +7,18 @@ import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import static java.lang.Integer.parseInt;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Logger.getLogger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import javax.servlet.http.HttpSession;
-import org.owasp.esapi.ESAPI;
+import static org.owasp.esapi.ESAPI.encoder;
 import textdisplay.Project;
 import textdisplay.Transcription;
 import user.Group;
@@ -42,7 +45,7 @@ public class UpdateLine extends HttpServlet {
 
             if (request.getParameter("text") == null) {
 
-                response.sendError(response.SC_BAD_REQUEST);
+                response.sendError(SC_BAD_REQUEST);
                 return;
             }
             final String text = request.getParameter("text");
@@ -54,27 +57,27 @@ public class UpdateLine extends HttpServlet {
 
             final int FORBIDDEN = SC_FORBIDDEN;
             if (session.getAttribute("UID") == null || request.getParameter("projectID") == null) {
-                response.sendError(response.scForbidden);
+                response.sendError(SC_FORBIDDEN);
                 return;
             }
-            final int uid = Integer.parseInt(session.getAttribute("UID").toString());
+            final int uid = parseInt(session.getAttribute("UID").toString());
             if (request.getParameter("line") == null) {
 
                 if (request.getParameter("projectID") != null) {
-                    final int projectID = Integer.parseInt(request.getParameter("projectID"));
+                    final int projectID = parseInt(request.getParameter("projectID"));
                     try {
                         final Project thisProject = new Project(projectID);
                         if (new Group(thisProject.getGroupID()).isMember(uid)) {
                             thisProject.setLinebreakText(text);
                         }
-                    } catch (final Exception e) {
+                    } catch (final SQLException e) {
                     }
                 }
             }
 
             if (request.getParameter("projectID") != null) {
-                final int projectID = Integer.parseInt(request.getParameter("projectID"));
-                final int line = Integer.parseInt(request.getParameter("line"));
+                final int projectID = parseInt(request.getParameter("projectID"));
+                final int line = parseInt(request.getParameter("line"));
                 try {
                     final Project thisProject = new Project(projectID);
                     if (new Group(thisProject.getGroupID()).isMember(uid)) {
@@ -84,7 +87,7 @@ public class UpdateLine extends HttpServlet {
                         t.setComment(comment);
                         t.setCreator(uid);
 
-                        out.print(ESAPI.encoder().decodeForHTML(new Transcription(line).getText()));
+                        out.print(encoder().decodeForHTML(new Transcription(line).getText()));
                         return;
                     } else {
                         response.sendError(FORBIDDEN);
@@ -92,10 +95,10 @@ public class UpdateLine extends HttpServlet {
                     }
                 } catch (final SQLException ex) {
                     // Logger.getLogger(UpdateLine.class.getName()).log(Level.SEVERE, null, ex);
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    response.sendError(SC_INTERNAL_SERVER_ERROR);
                 }
             } else {
-                final int line = Integer.parseInt(request.getParameter("line"));
+                final int line = parseInt(request.getParameter("line"));
 
                 Transcription t;
                 try {
@@ -106,7 +109,7 @@ public class UpdateLine extends HttpServlet {
                     out.print("success");
                     return;
                 } catch (final SQLException ex) {
-                    Logger.getLogger(UpdateLine.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(UpdateLine.class.getName()).log(SEVERE, null, ex);
                 }
 
             }

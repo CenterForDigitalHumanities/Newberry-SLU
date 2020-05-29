@@ -14,22 +14,19 @@
  */
 package edu.slu.tpen.servlet;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import static edu.slu.util.ServletUtils.getBaseContentType;
+import static edu.slu.util.ServletUtils.reportInternalError;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import static edu.slu.util.ServletUtils.getBaseContentType;
-import static edu.slu.util.ServletUtils.reportInternalError;
 import user.User;
 
 

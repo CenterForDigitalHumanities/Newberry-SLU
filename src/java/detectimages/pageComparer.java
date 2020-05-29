@@ -58,10 +58,8 @@ public class pageComparer implements Callable
 
                 }
 
-            } catch (final Exception ex) {
-                ex.printStackTrace();
+            } catch (final IOException ex) {
             }
-        final FileWriter w = null;
         final blob[] b1 = new blob[blobs.size()];
 
         for (int i = 0; i < b1.length; i++) {
@@ -74,18 +72,19 @@ public class pageComparer implements Callable
             b2[i] = blobs2.get(i);
 
         }
-        try (w = (new FileWriter(this.outputLocation + assignment[0] + " " + ".txt", true))) {
+        try (final FileWriter w = (new FileWriter(this.outputLocation + assignment[0] + " " + ".txt", true))) {
             int matches = 0;
             final int matches2 = 0;
             final StringBuilder res = new StringBuilder("");
-            for (int i = 0; i < b1.length; i++) {
-                for (int j = 0; j < b2.length; j++) {
-                    int biggest = 0;
-                    if (b1[i].size > b2[j].size)
-                        biggest = b1[i].size;
-                    else
-                        biggest = b2[j].size;
-                    if (b1[i].size > 25 && b2[j].size > 25 && (Math.abs(b1[i].size - b2[j].size) < biggest * .3)) {
+            for (blob b11 : b1) {
+                for (blob b21 : b2) {
+                    int biggest;
+                    if (b11.size > b21.size) {
+                        biggest = b11.size;
+                    } else {
+                        biggest = b21.size;
+                    }
+                    if (b11.size > 25 && b21.size > 25 && (Math.abs(b11.size - b21.size) < biggest * .3)) {
                         // blobComparer b = new blobComparer(b1[i], b2[j]);
                         // double tmp = b.run();
                         // altBlob a=b1[i].altVersion;
@@ -94,46 +93,49 @@ public class pageComparer implements Callable
                         // double tmp=b1[i].altVersion.run(b2[j].altVersion);
                         double tmp;
                         final double tmp2;
-
-                        if (true || (b1[i].matrixVersion.matrix.length - b2[j].matrixVersion.matrix.length > 3
-                                || b2[j].matrixVersion.matrix.length - b1[i].matrixVersion.matrix.length > 3)) {
-                            if (b1[i].matrixVersion.matrix.length < b2[j].matrixVersion.matrix.length) {
+                        if (true || (b11.matrixVersion.matrix.length - b21.matrixVersion.matrix.length > 3 || b21.matrixVersion.matrix.length - b11.matrixVersion.matrix.length > 3)) {
+                            if (b11.matrixVersion.matrix.length < b21.matrixVersion.matrix.length) {
                                 // tmp=b1[i].matrixVersion.compareWithScaling(b2[j].matrixVersion);
                                 // tmp=b1[i].matrixVersion.compareToWithAdjust(b2[j].matrixVersion.scaleMatrixBlob(b2[j],b1[i].matrixVersion.matrix.length));
-                                tmp = b1[i].matrixVersion.compareToWithAdjust(b2[j].matrixVersion);
-                            } else
+                                tmp = b11.matrixVersion.compareToWithAdjust(b21.matrixVersion);
+                            } else {
                                 // tmp=b1[i].matrixVersion.compareWithScaling(b2[j].matrixVersion);
                                 // tmp=b1[i].matrixVersion.scaleMatrixBlob(b1[i],b2[j].matrixVersion.matrix.length).compareToWithAdjust(b2[j].matrixVersion);
-                                tmp = b1[i].matrixVersion.compareToWithAdjust(b2[j].matrixVersion);
+                                tmp = b11.matrixVersion.compareToWithAdjust(b21.matrixVersion);
+                            }
                             {
                             }
                         }
+                        // tmp=0.0;
+                        // tmp=b1[i].matrixVersion.compareWithScaling(b2[j].matrixVersion);
+                        // tmp=b1[i].matrixVersion.compareToWithAdjust(b2[j].matrixVersion); //
+                        // tmp2=b1[i].altVersion.run(b2[j].altVersion);
+                        // tmp2=(double) tmp2 /biggest;
+                        // tmp=0.0;
+                        // tmp=b1[i].matrixVersion.compareWithScaling(b2[j].matrixVersion);
+                        // tmp=b1[i].matrixVersion.compareToWithAdjust(b2[j].matrixVersion); //
+                        // tmp2=b1[i].altVersion.run(b2[j].altVersion);
+                        // tmp2=(double) tmp2 /biggest;
                         // else
                         {
-                            // tmp=0.0;
-                            // tmp=b1[i].matrixVersion.compareWithScaling(b2[j].matrixVersion);
-                            // tmp=b1[i].matrixVersion.compareToWithAdjust(b2[j].matrixVersion); //
-                            // tmp2=b1[i].altVersion.run(b2[j].altVersion);
-
-                            // tmp2=(double) tmp2 /biggest;
-
-                        }
-
-                        // tmp=(double) tmp / biggest;
+                        // tmp=0.0;
+                        // tmp=b1[i].matrixVersion.compareWithScaling(b2[j].matrixVersion);
+                        // tmp=b1[i].matrixVersion.compareToWithAdjust(b2[j].matrixVersion); //
+                        // tmp2=b1[i].altVersion.run(b2[j].altVersion);
+                        
+                        // tmp2=(double) tmp2 /biggest;
+                        
+                    }   // tmp=(double) tmp / biggest;
                         // tmp=tmp2;
-
                         // tmp=tmp2;
                         if (tmp > 0.7) {
                             matches++;
-
                             try {
                                 // b1[i].matrixVersion.writeGlyph(assignment[0]+assignment[1]+i+j+"a",
                                 // b2[j].matrixVersion);
                                 // System.out.print("tmp:"+tmp+"\n");
                             } catch (final Exception e) {
-                                e.printStackTrace();
                             }
-
                             // imageHelpers.writeImage(toret,
                             // "/usr/glyphs/"+assignment[0]+assignment[1]+i+j+".jpg");
                             // blob.writeMatchResults(b1[i].id, b2[j].id, assignment, w);
@@ -144,8 +146,7 @@ public class pageComparer implements Callable
                             // String a="\""+assignment[0] + "\",\"" + b1[i].id + "\",\"" + assignment[1] +
                             // "\",\"" + b2[j].id + "\"\n";
                             final int tmpInt = (int) (tmp * 100);
-                            final String a = (assignment[0] + ":" + b1[i].id + ";" + assignment[1] + ":" + b2[j].id
-                                    + "/" + tmpInt + "\n");
+                            final String a = assignment[0] + ":" + b11.id + ";" + assignment[1] + ":" + b21.id + "/" + tmpInt + "\n";
                             res.append(a);
                             // blob.writeMatchResults(i, j, assignment, w);
                         } else {
@@ -156,22 +157,20 @@ public class pageComparer implements Callable
                          * System.out.print("old val "+tmp+" new val "+tmp2+"\n"); if(tmp<=0.7 &&
                          * tmp2>0.7) System.out.print("foundnew old val "+tmp+" new val "+tmp2+"\n");
                          */
-
                     }
                 }
-
                 // if the overlap of the 2 images is more than 70%, it is a good match
                 // if the overlap of the 2 images is more than 70%, it is a good match
             }
             blob.writeMatchResults(res.toString(), w);
             w.flush();
-            w.close();
             System.out.print(assignment[0] + ":" + assignment[1] + ":" + matches + "\n");
             return assignment[0] + ":" + assignment[1] + ":" + matches + "\n";
         } catch (final IOException ex) {
             System.out.print("caught error\n");
             Logger.getLogger(pageComparer.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return null;
     }
 
 }

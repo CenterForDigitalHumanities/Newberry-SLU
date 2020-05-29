@@ -8,11 +8,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import static java.lang.Integer.parseInt;
+import static java.lang.Integer.parseInt;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
+import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +25,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
 import org.apache.commons.io.output.DeferredFileOutputStream;
 
 /**
@@ -45,12 +50,12 @@ public class UploadTextfile extends HttpServlet {
             textdisplay.Project thisProject = null;
             if (request.getParameter("projectID") != null) {
                 String location = "";
-                projectID = Integer.parseInt(request.getParameter("projectID"));
-                location = (Integer.parseInt(request.getParameter("p")) > 0)
+                projectID = parseInt(request.getParameter("projectID"));
+                location = (parseInt(request.getParameter("p")) > 0)
                         ? "?projectID=" + projectID + "&p=" + request.getParameter("p")
                         : "?projectID=" + projectID;
                 thisProject = new textdisplay.Project(projectID);
-                if (ServletFileUpload.isMultipartContent(request)) {
+                if (isMultipartContent(request)) {
                     final ServletFileUpload servletFileUpload = new ServletFileUpload(new DiskFileItemFactory());
                     final List fileItemsList = servletFileUpload.parseRequest(request);
 
@@ -100,10 +105,8 @@ public class UploadTextfile extends HttpServlet {
             throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (final SQLException ex) {
-            Logger.getLogger(UploadTextfile.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (final FileUploadException ex) {
-            Logger.getLogger(UploadTextfile.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (final SQLException | FileUploadException ex) {
+            getLogger(UploadTextfile.class.getName()).log(SEVERE, null, ex);
         }
     }
 
@@ -120,12 +123,9 @@ public class UploadTextfile extends HttpServlet {
             throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (final SQLException ex) {
-            Logger.getLogger(UploadTextfile.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (final FileUploadException ex)
-            {
-            Logger.getLogger(UploadTextfile.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (final SQLException | FileUploadException ex) {
+            getLogger(UploadTextfile.class.getName()).log(SEVERE, null, ex);
+        }
     }
 
     /** 

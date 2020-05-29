@@ -14,21 +14,18 @@
  */
 package edu.slu.tpen.servlet;
 
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
-
+import edu.slu.tpen.servlet.util.CreateAnnoListUtil;
+import edu.slu.util.ServletUtils;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Connection;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import edu.slu.tpen.servlet.util.CreateAnnoListUtil;
-import edu.slu.util.ServletUtils;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import textdisplay.Folio;

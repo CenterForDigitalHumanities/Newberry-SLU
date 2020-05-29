@@ -15,9 +15,6 @@
 
 package edu.slu.tpen.servlet;
 
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -27,7 +24,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
 import net.sf.json.JSONObject;
 import textdisplay.ProjectPermissions;
 import user.Group.roles;
@@ -89,19 +87,19 @@ public class ChangeUserPermissionServlet extends HttpServlet {
                             } else {
                                 switch (request.getParameter("role")) {
                                     case "leader":
-                                        result = changeUserRole(projectId, uid, currentUserId, Leader);
+                                        result = changeUserRole(projectId, uid, currentUserId, user.Group.roles.Leader);
                                         break;
                                     case "editor":
-                                        result = changeUserRole(projectId, uid, currentUserId, Editor);
+                                        result = changeUserRole(projectId, uid, currentUserId, user.Group.roles.Editor);
                                         break;
                                     case "contributor":
-                                        result = changeUserRole(projectId, uid, currentUserId, Contributor);
+                                        result = changeUserRole(projectId, uid, currentUserId, user.Group.roles.Contributor);
                                         break;
                                     case "suspended":
-                                        result = changeUserRole(projectId, uid, currentUserId, Suspended);
+                                        result = changeUserRole(projectId, uid, currentUserId, user.Group.roles.Suspended);
                                         break;
                                     case "none":
-                                        result = changeUserRole(projectId, uid, currentUserId, None);
+                                        result = changeUserRole(projectId, uid, currentUserId, user.Group.roles.None);
                                         break;
                                     default:
                                         // if non of above, send back not accepttable. The role name is not acceptable.

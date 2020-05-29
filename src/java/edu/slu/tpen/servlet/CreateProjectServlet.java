@@ -14,6 +14,8 @@
  */
 package edu.slu.tpen.servlet;
 
+import edu.slu.tpen.servlet.util.CreateAnnoListUtil;
+import edu.slu.util.ServletUtils;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -24,7 +26,6 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -32,15 +33,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import edu.slu.tpen.servlet.util.CreateAnnoListUtil;
-import edu.slu.util.ServletUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import servlets.createManuscript;
@@ -86,7 +83,7 @@ public class CreateProjectServlet extends HttpServlet {
     private JSONObject resolveManifestURL(String url) throws MalformedURLException, IOException {
         System.out.println("Resolve URL "+url);
         try (InputStream is = new URL(url).openStream()) {
-          BufferedReader rd = new BufferedReader(new InputStreamReader(is, forName("UTF-8")));
+          BufferedReader rd = new BufferedReader(new InputStreamReader(is, java.nio.charset.Charset.forName("UTF-8")));
           String jsonText = readAll(rd);
           JSONObject json = JSONObject.fromObject(jsonText);   
           return json;
@@ -96,13 +93,8 @@ public class CreateProjectServlet extends HttpServlet {
     /**
      * Create manuscript, folio and project using given json data.
      *
-     * @param repository (optional)
-     * @param archive (optional)
-     * @param city (optional)
-     * @param collection (optional)
-     * @param title (optional)
-     * @param urls
-     * @param names
+     * @throws javax.servlet.ServletException
+     * @throws java.io.IOException
      */
     public String creatManuscriptFolioProject(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, Exception {
@@ -112,8 +104,8 @@ public class CreateProjectServlet extends HttpServlet {
         try {
             System.out.println("CREATE PROJECT");
             HttpSession session = request.getSession();
-            Object role = "unknown";
-            int UID = 0;
+            Object role;
+            int UID;
             /*if(null != request.getSession().getAttribute("UID")){
              UID = (Integer) request.getSession().getAttribute("UID");
              }*/
@@ -131,13 +123,13 @@ public class CreateProjectServlet extends HttpServlet {
                 out.print(HttpServletResponse.SC_UNAUTHORIZED);
                 return "You must be an administrator to create a master project.";
             }
-            String archive = "";
-            String city = "unknown";
+            String archive;
+            String city;
             city = request.getParameter("city");
             if (null == city) {
                 city = "fromWebService";
             }
-            textdisplay.Manuscript m = null;
+            textdisplay.Manuscript m;
 //            System.out.println("msID ============= " + m.getID());
 //            String urls = request.getParameter("urls");
 //            String [] seperatedURLs = urls.split(";");
@@ -145,14 +137,14 @@ public class CreateProjectServlet extends HttpServlet {
 //            String [] seperatedNames = names.split(",");
 
             String str_manifest = request.getParameter("scmanifest"); //This will be a URL
-            List<Integer> ls_folios_keys = new ArrayList<Integer>();
+            List<Integer> ls_folios_keys = new ArrayList<>();
             if (null != str_manifest) {
                 JSONObject jo = resolveManifestURL(str_manifest);
                 archive = jo.getString("@id");
                 //create a manuscript
                 m = new textdisplay.Manuscript("Newberry", archive, city, city, -900);
                 JSONArray sequences = (JSONArray) jo.get("sequences");
-                List<String> ls_pageNames = new LinkedList<String>();
+                List<String> ls_pageNames = new LinkedList<>();
                 for (int i = 0; i < sequences.size(); i++) {
                     JSONObject inSequences = (JSONObject) sequences.get(i);
                     JSONArray canvases = inSequences.getJSONArray("canvases");
@@ -166,7 +158,7 @@ public class CreateProjectServlet extends HttpServlet {
                                     JSONObject image = images.getJSONObject(n);
                                     JSONObject resource = image.getJSONObject("resource");
                                     String imageName = resource.getString("@id");
-                                    int folioKey = textdisplay.Folio.createFolioRecordFromNewberry(city, canvas.getString("label"), imageName, archive, m.getID(), 0); //why imageName.replace('_', '&')
+                                    int folioKey = textdisplay.Folio.createFolioRecordFromNewBerry(city, canvas.getString("label"), imageName, archive, m.getID(), 0); //why imageName.replace('_', '&')
                                     ls_folios_keys.add(folioKey);
                                 }
                             }
@@ -219,11 +211,11 @@ public class CreateProjectServlet extends HttpServlet {
                         uc.addRequestProperty("Content-Type", "application/json; charset=utf-8");
                         uc.setRequestProperty("Authorization", "Bearer "+pubTok);
                         uc.connect();
-                        DataOutputStream dataOut = new DataOutputStream(uc.getOutputStream());
-                        byte[] toWrite = annoList.toString().getBytes("UTF-8");
-                        dataOut.write(toWrite);
-                        dataOut.flush();
-                        dataOut.close();
+                        try (DataOutputStream dataOut = new DataOutputStream(uc.getOutputStream())) {
+                            byte[] toWrite = annoList.toString().getBytes("UTF-8");
+                            dataOut.write(toWrite);
+                            dataOut.flush();
+                        }
                         BufferedReader reader = new BufferedReader(new InputStreamReader(uc.getInputStream(), "utf-8"));
                         reader.close();
                         uc.disconnect();

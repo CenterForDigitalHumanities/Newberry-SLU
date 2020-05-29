@@ -6,7 +6,6 @@
 package edu.slu.tpen.servlet;
 
 import static edu.slu.tpen.servlet.Constant.ANNOTATION_SERVER_ADDR;
-import static edu.slu.tpen.servlet.util.CreateAnnoListUtil.createEmptyAnnoList;
 import static edu.slu.util.ServletUtils.getDBConnection;
 import static edu.slu.util.ServletUtils.getUID;
 import java.io.BufferedReader;
@@ -94,7 +93,7 @@ public class CreateProjectFromMSIDServlet extends HttpServlet {
             if (existing_projID > 1) { //-1 if no project existed for this user with this MSID.  
                 return "existing project/" + existing_projID.toString();
             }
-            Folio[] array_folios = null;
+            Folio[] array_folios;
 
             city = man.getCity();
             collection = man.getCollection();
@@ -116,7 +115,7 @@ public class CreateProjectFromMSIDServlet extends HttpServlet {
                     for (Folio folio : array_folios) {
                         //This needs to be the same one the JSON Exporter creates and needs to be unique and unchangeable.
                         String canvasID_check = folio.getCanvas();
-                        String canvasID = "";
+                        String canvasID;
                         String str_folioNum = m.getProperties().getProperty("SERVERURL") + "canvas/" + folio.getFolioNumber();
                         if ("".equals(canvasID_check)) {
                             canvasID = str_folioNum;
@@ -124,7 +123,7 @@ public class CreateProjectFromMSIDServlet extends HttpServlet {
                             canvasID = canvasID_check;
                         }
                         //create anno list for original canvas
-                        JSONObject annoList = createEmptyAnnoList(newProject.getProjectID(), canvasID, new JSONArray());
+                        JSONObject annoList = edu.slu.tpen.servlet.util.CreateAnnoListUtil.createEmptyAnnoList(newProject.getProjectID(), canvasID, new JSONArray());
                         URL postUrl = new URL(ANNOTATION_SERVER_ADDR + "/anno/saveNewAnnotation.action");
                         HttpURLConnection uc = (HttpURLConnection) postUrl.openConnection();
                         uc.setDoInput(true);

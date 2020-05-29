@@ -5,11 +5,7 @@
  */
 package edu.slu.tpen.servlet;
 
-import edu.slu.tpen.servlet.util.EncryptUtil;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;

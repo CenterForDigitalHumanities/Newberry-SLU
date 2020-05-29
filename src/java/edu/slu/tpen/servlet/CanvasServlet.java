@@ -7,13 +7,11 @@ package edu.slu.tpen.servlet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import static edu.slu.tpen.entity.image.Canvas.getAnnotationListsForProject;
 import static edu.slu.util.LangUtils.buildQuickMap;
 import static imageLines.ImageCache.getImageDimension;
 import java.awt.Dimension;
 import java.io.IOException;
 import static java.lang.Integer.parseInt;
-import static java.lang.String.format;
 import java.sql.SQLException;
 import java.util.Map;
 import static java.util.logging.Level.SEVERE;
@@ -29,9 +27,8 @@ import net.sf.json.JSONObject;
 import static net.sf.json.JSONObject.fromObject;
 import textdisplay.Folio;
 import textdisplay.FolioDims;
-import tokens.TokenManager;
-
 import static textdisplay.FolioDims.createFolioDimsRecord;
+import tokens.TokenManager;
 
 
 /**
@@ -103,7 +100,7 @@ public class CanvasServlet extends HttpServlet{
       String msID_str = msID.toString();
       final TokenManager man = new TokenManager();
       String canvasID = man.getProperties().getProperty("SERVERURL")+"canvas/"+f.getFolioNumber();  
-      String[] otherContent;
+      JSONArray otherContent;
       FolioDims pageDim = new FolioDims(f.getFolioNumber(), true);
       Dimension storedDims = null;
       int canvasWidth = 0;
@@ -158,7 +155,7 @@ public class CanvasServlet extends HttpServlet{
       imageAnnot.element("on", canvasID);
       images.add(imageAnnot);
       //FIXME this looks for data on anno store.  Cannot build list this way for canvas servlet while not looking to anno store.  
-      otherContent = getAnnotationListsForProject(-1, canvasID, 0);
+      otherContent = edu.slu.tpen.entity.Image.Canvas.getAnnotationListsForProject(-1, canvasID, 0);
       //otherContent = Canvas.getLinesForProject(projID, canvasID, f.getFolioNumber(), u.getUID());
       //it seems like it wants me to do Arrays.toString(otherContent), but then it is not formatted correctly.  
       result.element("otherContent", fromObject(otherContent));

@@ -20,14 +20,17 @@ import java.io.OutputStream;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import imageLines.ImageCache;
+import static imageLines.ImageCache.getImage;
+import static java.lang.Integer.parseInt;
+import static java.lang.System.currentTimeMillis;
+import static java.lang.System.out;
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Logger.getLogger;
+import static javax.imageio.ImageIO.write;
 import match.blobGetter;
 import tokens.TokenManager;
 
@@ -44,8 +47,10 @@ public class characterImage extends HttpServlet {
 
 	/** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * @param milliSeconds
      * @param request servlet request
      * @param response servlet response
+     * @return 
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
@@ -57,7 +62,7 @@ public static String getGMTTimeString(final long milliSeconds) {
     protected void processRequest(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException, SQLException {
         response.addHeader("Cache-Control", "max-age=3600");
-        final long relExpiresInMillis = System.currentTimeMillis() + (1000 * 2600);
+        final long relExpiresInMillis = currentTimeMillis() + (1000 * 2600);
         response.addHeader("Expires", getGMTTimeString(relExpiresInMillis));
         response.setContentType("image/jpeg");
         int width, height, x, y;
@@ -65,34 +70,31 @@ public static String getGMTTimeString(final long milliSeconds) {
         int blobIdentifier;
 
         try {
-            blobIdentifier = Integer.parseInt(request.getParameter("blob"));
+            blobIdentifier = parseInt(request.getParameter("blob"));
             pageIdentifier = request.getParameter("page");
-        } catch (final NumberFormatException e) {
-            return;
-        } catch (final NullPointerException e) {
+        } catch (final NumberFormatException | NullPointerException e) {
             return;
         }
         final blobGetter thisBlob = new blobGetter(pageIdentifier, blobIdentifier);
         final TokenManager man = new TokenManager();
         final String s = (man.getProperties().getProperty("SERVERCONTEXT") + "imageResize?folioNum=" + pageIdentifier
                 + "&height=2000");
-        System.out.print(s + "\n");
-        BufferedImage originalImg = ImageCache.getImage(Integer.parseInt(pageIdentifier));// imageHelpers.readAsBufferedImage(new
+        out.print(s + "\n");
+        BufferedImage originalImg = getImage(parseInt(pageIdentifier));// imageHelpers.readAsBufferedImage(new
         width = thisBlob.getHeight();
         height = thisBlob.getWidth();
         x = thisBlob.getX();
         y = thisBlob.getY();
         // scale coordinates based on the fixed 1500 pixel size of the observations
         final double factor = originalImg.getHeight() / (double) 2000;
-        ;
         // factor=1.0;
         width = (int) (width * factor);
         height = (int) (height * factor);
         x = (int) (x * factor);
         y = (int) (y * factor);
         final OutputStream os = response.getOutputStream();
-        ImageIO.write(originalImg.getSubimage(x, y, width, height), "jpg", os);
-        originalImg = null;
+        write(originalImg.getSubimage(x, y, width, height), "jpg", os);
+        originalImg = null; // hack to recover memory
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the
@@ -111,7 +113,7 @@ public static String getGMTTimeString(final long milliSeconds) {
         try {
             processRequest(request, response);
         } catch (final SQLException ex) {
-            Logger.getLogger(characterImage.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(characterImage.class.getName()).log(SEVERE, null, ex);
         }
     }
 
@@ -129,7 +131,7 @@ public static String getGMTTimeString(final long milliSeconds) {
         try {
             processRequest(request, response);
         } catch (final SQLException ex) {
-            Logger.getLogger(characterImage.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(characterImage.class.getName()).log(SEVERE, null, ex);
         }
     }
 

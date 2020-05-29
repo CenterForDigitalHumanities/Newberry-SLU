@@ -5,8 +5,9 @@
  */
 package edu.slu.tpen.servlet;
 
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
-
+import edu.slu.tpen.entity.Image.Canvas;
+import edu.slu.tpen.servlet.util.CreateAnnoListUtil;
+import edu.slu.util.ServletUtils;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -19,15 +20,11 @@ import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import edu.slu.tpen.entity.image.Canvas;
-import edu.slu.tpen.servlet.util.CreateAnnoListUtil;
-import edu.slu.util.ServletUtils;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -38,11 +35,11 @@ import tokens.TokenManager;
 /**
  *
  * @author bhaberbe
- * 
- *         Copy all project metadata and the annotation list with its
- *         annotations for each canvas (here named folio). Makes use of Mongo
- *         Bulk operation capabilities to limit the amount of necessary http
- *         connections which greatly improved speed.
+ *
+ * Copy all project metadata and the annotation list with its annotations for
+ * each canvas (here named folio). Makes use of Mongo Bulk operation
+ * capabilities to limit the amount of necessary http connections which greatly
+ * improved speed.
  */
 public class CopyProjectAndAnnos extends HttpServlet {
 
@@ -50,10 +47,10 @@ public class CopyProjectAndAnnos extends HttpServlet {
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request  servlet request
+     * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
@@ -89,9 +86,8 @@ public class CopyProjectAndAnnos extends HttpServlet {
                     // System.out.println("Created a new project template. What was the ID assigned
                     // to it: "+thisProject.getProjectID());
                     if (null != folios && folios.length > 0) {
-                        for (int i = 0; i < folios.length; i++) {
+                        for (Folio folio : folios) {
                             // System.out.println("Starting copy for canvas");
-                            final Folio folio = folios[i];
                             // Parse folio.getImageURL() to retrieve paleography pid, and then generate new
                             // canvas id
                             final String imageURL = folio.getImageURL();
@@ -159,42 +155,41 @@ public class CopyProjectAndAnnos extends HttpServlet {
                                 ucCopyAnno.setRequestProperty("Content-Type", "application/json; charset=utf-8");
                                 ucCopyAnno.setRequestProperty("Authorization", "Bearer " + pubTok);
                                 ucCopyAnno.connect();
-                                final DataOutputStream dataOutCopyAnno = new DataOutputStream(
-                                        ucCopyAnno.getOutputStream());
-                                String str_resources = "";
-                                if (resources.size() > 0) {
-                                    str_resources = resources.toString();
-                                } else {
-                                    str_resources = "[]";
+                                try (DataOutputStream dataOutCopyAnno = new DataOutputStream(
+                                        ucCopyAnno.getOutputStream())) {
+                                    String str_resources;
+                                    if (resources.size() > 0) {
+                                        str_resources = resources.toString();
+                                    } else {
+                                        str_resources = "[]";
+                                    }
+                                    // System.out.println("Batch create these");
+                                    // System.out.println(str_resources);
+                                    final byte[] toWrite = str_resources.getBytes("UTF-8");
+                                    dataOutCopyAnno.write(toWrite);
+                                    dataOutCopyAnno.flush();
                                 }
-                                // System.out.println("Batch create these");
-                                // System.out.println(str_resources);
-                                final byte[] toWrite = str_resources.getBytes("UTF-8");
-                                dataOutCopyAnno.write(toWrite);
-                                dataOutCopyAnno.flush();
-                                dataOutCopyAnno.close();
                                 codeOverwrite = ucCopyAnno.getResponseCode();
                                 response.setStatus(codeOverwrite);
-                                String lines = "";
+                                String lines;
                                 final StringBuilder sbAnnoLines = new StringBuilder();
-                                try {
-                                    final BufferedReader returnedAnnoList = new BufferedReader(
-                                            new InputStreamReader(ucCopyAnno.getInputStream(), "utf-8"));
+                                try (BufferedReader returnedAnnoList = new BufferedReader(
+                                        new InputStreamReader(ucCopyAnno.getInputStream(), "utf-8"))) {
                                     while ((lines = returnedAnnoList.readLine()) != null) {
                                         // System.out.println(lineAnnoLs);
                                         sbAnnoLines.append(lines);
                                     }
-                                    returnedAnnoList.close();
                                 } catch (final IOException ex) {
-                                    // Forward error response from RERUM
-                                    final BufferedReader error = new BufferedReader(
-                                            new InputStreamReader(ucCopyAnno.getErrorStream(), "utf-8"));
-                                    String errorLine = "";
-                                    final StringBuilder sb = new StringBuilder();
-                                    while ((errorLine = error.readLine()) != null) {
-                                        sb.append(errorLine);
+                                    final StringBuilder sb;
+                                    try ( // Forward error response from RERUM
+                                            BufferedReader error = new BufferedReader(
+                                                    new InputStreamReader(ucCopyAnno.getErrorStream(), "utf-8"))) {
+                                        String errorLine;
+                                        sb = new StringBuilder();
+                                        while ((errorLine = error.readLine()) != null) {
+                                            sb.append(errorLine);
+                                        }
                                     }
-                                    error.close();
                                     result = sb.toString();
                                     er = true;
                                     break;
@@ -230,11 +225,11 @@ public class CopyProjectAndAnnos extends HttpServlet {
                             uc.setRequestProperty("Content-Type", "application/json; charset=utf-8");
                             uc.setRequestProperty("Authorization", "Bearer " + pubTok);
                             uc.connect();
-                            final DataOutputStream dataOut = new DataOutputStream(uc.getOutputStream());
-                            final byte[] toWrite2 = canvasList.toString().getBytes("UTF-8");
-                            dataOut.write(toWrite2);
-                            dataOut.flush();
-                            dataOut.close();
+                            try (DataOutputStream dataOut = new DataOutputStream(uc.getOutputStream())) {
+                                final byte[] toWrite2 = canvasList.toString().getBytes("UTF-8");
+                                dataOut.write(toWrite2);
+                                dataOut.flush();
+                            }
                             codeOverwrite = uc.getResponseCode();
                             response.setStatus(codeOverwrite);
                             try {
@@ -243,15 +238,16 @@ public class CopyProjectAndAnnos extends HttpServlet {
                                 reader.close();
                                 uc.disconnect();
                             } catch (final IOException ex) {
-                                // forward error response from ererum
-                                final BufferedReader error = new BufferedReader(
-                                        new InputStreamReader(uc.getErrorStream(), "utf-8"));
-                                String errorLine = "";
-                                final StringBuilder sb = new StringBuilder();
-                                while ((errorLine = error.readLine()) != null) {
-                                    sb.append(errorLine);
+                                final StringBuilder sb;
+                                try ( // forward error response from ererum
+                                        BufferedReader error = new BufferedReader(
+                                                new InputStreamReader(uc.getErrorStream(), "utf-8"))) {
+                                    String errorLine;
+                                    sb = new StringBuilder();
+                                    while ((errorLine = error.readLine()) != null) {
+                                        sb.append(errorLine);
+                                    }
                                 }
-                                error.close();
                                 result = sb.toString();
                                 er = true;
                                 break;
@@ -272,7 +268,6 @@ public class CopyProjectAndAnnos extends HttpServlet {
                     result = "Could not find a project name";
                 }
             } catch (final Exception e) {
-                e.printStackTrace();
                 response.setStatus(codeOverwrite);
                 result = e.getMessage();
                 response.getWriter().print(e);
@@ -295,7 +290,7 @@ public class CopyProjectAndAnnos extends HttpServlet {
 
     public static JSONArray getFromV0(final JSONObject params) throws MalformedURLException, IOException {
         final URL postUrl = new URL(Constant.OLD_ANNOTATION_SERVER_ADDR + "/anno/getAnnotationByProperties.action");
-        JSONArray v0Objs = new JSONArray();
+        JSONArray v0Objs;
         final HttpURLConnection connection = (HttpURLConnection) postUrl.openConnection();
         connection.setDoOutput(true);
         connection.setDoInput(true);
@@ -304,19 +299,20 @@ public class CopyProjectAndAnnos extends HttpServlet {
         connection.setInstanceFollowRedirects(true);
         connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
         connection.connect();
-        final DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-        // value to save
-        out.writeBytes("content=" + URLEncoder.encode(params.toString(), "utf-8"));
-        out.flush();
-        out.close(); // flush and close
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "utf-8"));
-        String line = "";
-        final StringBuilder sb = new StringBuilder();
-        while ((line = reader.readLine()) != null){
-            line = new String(line.getBytes(), "utf-8");
-            sb.append(line);
+        try (DataOutputStream out = new DataOutputStream(connection.getOutputStream())) {
+            // value to save
+            out.writeBytes("content=" + URLEncoder.encode(params.toString(), "utf-8"));
+            out.flush();
         }
-        reader.close();
+        final StringBuilder sb;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "utf-8"))) {
+            String line;
+            sb = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                line = new String(line.getBytes(), "utf-8");
+                sb.append(line);
+            }
+        }
         connection.disconnect();
         //FIXME: Every now and then, this line throws an error: A JSONArray text must start with '[' at character 1 of &lt
         String jarray = sb.toString();
@@ -326,4 +322,3 @@ public class CopyProjectAndAnnos extends HttpServlet {
     }
 
 }
-

@@ -46,8 +46,15 @@ import edu.slu.util.NetUtils;
 import imageLines.ImageCache;
 import imageLines.ImageHelpers;
 import java.io.FileNotFoundException;
+import static java.lang.System.out;
+import static java.net.HttpURLConnection.HTTP_OK;
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import static textdisplay.DatabaseWrapper.closeDBConnection;
+import static textdisplay.DatabaseWrapper.closePreparedStatement;
+import static textdisplay.DatabaseWrapper.getConnection;
 import tokens.TokenManager;
 
 /**
@@ -168,12 +175,27 @@ public class Folio {
          DatabaseWrapper.closePreparedStatement(stmt);
       }
    }
+         
+    public Integer getMSID() throws SQLException {
+      try (Connection j = textdisplay.DatabaseWrapper.getConnection()){
+         Integer toret = -1;
+         String qry = "select * from folios where pageNumber=?";
+         PreparedStatement stmt = j.prepareStatement(qry);
+         stmt.setInt(1, folioNumber);
+         ResultSet rs = stmt.executeQuery();
+         if (rs.next()) {
+            toret = rs.getInt("msID");
+         }
+         return toret;
+      }
+   }
+
    
    /**
     * Add a Folio record identifying Archive, shelfmark, and page and return the unique id associated with
     * it
     *
-    * @param collection a way of itentifying this Manuscript (ie ms415)
+    * @param collection a way of identifying this Manuscript (ie ms415)
     * @param pageName name of the page
     * @param imageName full name of the image of this page
     * @param Archive the name of the Archive this collection is housed in
@@ -247,6 +269,40 @@ public class Folio {
            DatabaseWrapper.closePreparedStatement(stmt);
         }
     }
+    
+        /**
+    * Add a Folio record identifying Archive, shelfmark, and page and return the unique id associated with
+    * it
+    *
+    * @param collection a way of itentifying this Manuscript (ie ms415)
+    * @param pageName name of the page
+    * @param imageName full name of the image of this page
+    * @param Archive the name of the Archive this collection is housed in
+    * @return
+    * @throws SQLException
+    */
+    public static int createFolioRecordFromManifest(String collection, String pageName, String imageName, String archive, int msID, int sequence) throws SQLException {
+        try (Connection j = getConnection()) {
+            String query = "insert into folios (collection,pageName,imageName,archive,msID, uri, sequence) values (?,?,?,?,?,?,?)";
+            PreparedStatement stmt = j.prepareStatement(query, RETURN_GENERATED_KEYS);
+            stmt.setString(1, collection);
+            stmt.setString(2, pageName);
+            stmt.setString(3, imageName);
+            stmt.setString(4, archive);
+            stmt.setInt(5, msID);
+            stmt.setString(6, imageName);
+            stmt.setInt(7, sequence);
+            stmt.execute();
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+               int toret = rs.getInt(1);
+               return (toret);
+            } else {
+               return 0;
+            }
+        }
+    }
+
 
    /**
     * Create a folio record including the SharedCanvas uri associated with the image.
@@ -1441,6 +1497,59 @@ public class Folio {
          result.add(new Line(left, left + rs.getInt("width"), rs.getInt("top"), rs.getInt("bottom")));
       }
       return result;
+   }
+
+      public static String getBadFolioReport() throws SQLException{
+       String responseString = "";
+       String strUrl;
+       int folioID;
+       String newline = "\n";
+       DecimalFormat df = new DecimalFormat("#.#");
+        
+       try (Connection j = getConnection()) {
+           try (PreparedStatement stmt2 = j.prepareStatement("select pageNumber, uri from folios")) { //LIMIT 100
+            ResultSet rs = stmt2.executeQuery();
+            //System.out.println("Generating report...");
+            int count = 0;
+            int rowcount = 0;
+            if (rs.last()) {
+              rowcount = rs.getRow();
+              rs.beforeFirst(); 
+              //System.out.println(rowcount + " entries found.  Generating report...");
+            }
+            while (rs.next() && count < 100) { //&&count < 100
+                count += 1;
+                float percentage = (float)count*100/rowcount;
+                String percent = df.format(percentage) + "%";
+                if(count % 10 == 0){
+                        out.println("Folio Report is "+percent+" complete. "+count+"/"+rowcount +" folios checked.");
+                }
+                if(count == rowcount){
+                        out.println("Folio Report is 100% complete");
+                }
+                strUrl = rs.getString("uri");
+                folioID = rs.getInt("pageNumber");
+                try {
+                    URL url = new URL(strUrl);
+                    HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+                    urlConn.connect();
+                    if(urlConn.getResponseCode() == HTTP_OK){
+                        //responseString += "Folio "+folioID+" is OK.  URI:  "+strUrl+newline;
+                    }
+                    else{
+                        responseString += "Folio "+folioID+", Code:"+urlConn.getResponseCode()+",  URI: "+strUrl+newline;
+                    }
+                }
+                 catch (IOException e) {
+                    //System.err.println("Error creating HTTP connection");                
+
+                    responseString += "Folio "+folioID+", Code: HTTP_err,  URI: "+strUrl+newline;
+                }
+            }
+         }
+       }
+        out.println("Report Generated!");
+       return responseString;       
    }
 
    private static final Logger LOG = Logger.getLogger(Folio.class.getName());

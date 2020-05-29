@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import static java.lang.System.out;
 import java.sql.SQLException;
+import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -39,7 +41,7 @@ public class FolioReport extends HttpServlet {
      * it waits for the servlet to finish and writes the whole file at once.
      * There are roughly 1.5 million entries to do a header request for to check, so it takes around 8 days to run.  
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
         response.setContentType("text/plain;charset=UTF-8");
         try{
             PrintWriter clearer = new PrintWriter("/home/hanyan/sql/folioOutput.txt");
@@ -58,7 +60,7 @@ public class FolioReport extends HttpServlet {
                 String foliosToReturn = getBadFolioReport();
                 out.println("Writing to text file...");
                 out.println(foliosToReturn + newline);
-            } catch (SQLException ex) {
+            } catch (Exception ex) {
                 getLogger(FolioReport.class.getName()).log(SEVERE, null, ex);
                 out.println(ex + newline);
             }
@@ -81,7 +83,11 @@ public class FolioReport extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (SQLException ex) {
+            Logger.getLogger(FolioReport.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -95,7 +101,11 @@ public class FolioReport extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (SQLException ex) {
+            Logger.getLogger(FolioReport.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
