@@ -56,7 +56,8 @@ public class UpdateProjectTag extends HttpServlet {
         try {
             TagButton buttonToUpdate = new TagButton(projectID, position, true);
             String toUp = buttonToUpdate.getDescription();
-            buttonToUpdate.setTag(newTag, desc);
+// FIXME cubap broke this because it is clearly wrong for TPEN, issue
+//            buttonToUpdate.setTag(newTag, desc);
             out.println("Tag "+toUp+" updated");
         } catch (SQLException ex) {
             Logger.getLogger(UpdateProjectTag.class.getName()).log(Level.SEVERE, null, ex);

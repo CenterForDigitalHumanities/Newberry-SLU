@@ -323,7 +323,15 @@ jQuery.extend(Drupal.settings, {"basePath": "\/", "pathPrefix": "", "ajaxPageSta
 <p>Paleography is the history and study of handwriting. Old scripts can be very beautiful, but sometimes difficult to read. This site presents over 100 carefully selected French manuscripts written between 1300 and 1700, with tools for deciphering them and learning about their social, cultural, and institutional settings.</p>
 <h2><a href="content/get-started">Get Started</a></h2>
 <div class="col-md-12 col-sm-12">
-<h3><img alt="transcribe" class="tpen-logo" src="//content.library.utoronto.ca/common/dh-images/paleography/t-pen-logo.png"><a class="show-transcribe" href="user/login">Transcribe</a><span class="hide-transcribe">Transcribe</span></h3>
+<div id="projectsList"></div>
+<script>
+    fetch('projects')
+    .then(res=>res.json())
+    .catch(err=>projectsList.innerHTML=`<a href="login.jsp">login</a>`)
+    .then(projects=>projectsList.innerHTML=projects.reduce((a,b)=>a+=`<li><a href="transcription.html?projectID=${b.id.split('/')[1]}">${b.name}</a></li>`,``))
+</script>
+<h3>
+<img alt="transcribe" class="tpen-logo" src="//content.library.utoronto.ca/common/dh-images/paleography/t-pen-logo.png"><a class="show-transcribe" href="user/login">Transcribe</a><span class="hide-transcribe">Transcribe</span></h3>
 <h4>Reading Difficulty</h4>
 <ul><li><a href="islandora/search/%20?f[0]=mods_targetAudience_ms%3A%22Introductory%22">Introductory</a></li>
 <li><a href="islandora/search/%20?f[0]=mods_targetAudience_ms%3A%22Intermediate%22">Intermediate</a></li>

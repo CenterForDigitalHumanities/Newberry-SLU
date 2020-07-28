@@ -35,6 +35,7 @@ public class batchUpdateLinePositions extends HttpServlet {
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
+     * @throws java.sql.SQLException
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException, SQLException {
@@ -42,7 +43,7 @@ public class batchUpdateLinePositions extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             if(request.getParameter("lineID")!=null)
             {
-                String lineID = request.getParameter("lineID");
+                int lineID = Integer.parseInt(request.getParameter("lineID"));
                 if(request.getParameter("newwidth")!=null)
                 {
                     int newWidth=parseInt(request.getParameter("newwidth"));

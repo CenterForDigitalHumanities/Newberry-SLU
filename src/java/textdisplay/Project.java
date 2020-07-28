@@ -691,7 +691,7 @@ public class Project {
       //}
       System.out.println("Creating a project template from "+projectName);
       //TPEN_NL does not want someone who copied a project to be able to edit it.  Only creators of master transcriptions (and whoever they promote).
-      Group g = new Group(conn, projectName, leaderUID, false);
+      Group g = new Group(conn, projectName, leaderUID);
       //Only the user that created this transcription can see it because they are the only contributor in the group. 
 
       Project p = new Project(conn, projectName, g.getGroupID());

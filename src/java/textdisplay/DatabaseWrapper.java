@@ -68,8 +68,10 @@ public class DatabaseWrapper
         {
             Logger.getLogger(DatabaseWrapper.class.getName()).log(Level.SEVERE, null, ex);
             return null;
+        } catch (IOException ex) {
+            Logger.getLogger(DatabaseWrapper.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        return null;
     }
     
     /**Close the db connection, catching a potentially useless error and ignoring nulls*/

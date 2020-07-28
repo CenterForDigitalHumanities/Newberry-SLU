@@ -6,6 +6,7 @@
 package tokens;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import edu.slu.tpen.servlet.Constant;
 import java.io.BufferedReader;
@@ -25,10 +26,11 @@ import java.util.Properties;
 import net.sf.json.JSONObject;
 
 /**
- * @author bhaberbe
- * This is the token manager for this application.  It handles all token interactions.
+ * @author bhaberbe This is the token manager for this application. It handles
+ * all token interactions.
  */
-public class TokenManager{
+public class TokenManager {
+
     //Notice that when it is initialized, nothing is set.
     private String currentAccessToken = "";
     private String currentRefreshToken = "";
@@ -36,57 +38,59 @@ public class TokenManager{
     private String canvasPrefix = "";
     private String propFileLocation = "";
     private String testingFlag = "";
-    private Properties props = new Properties();
-    
+    private final Properties props = new Properties();
+
     /**
      * Initializer for a TokenManager that reads in the properties File
-     * @param propFile The location of the properties file necessary to initialize.  
+     *
      * @throws IOException if no properties file
      */
     public TokenManager() throws IOException {
         init();
     }
-    
+
     /**
-     * After initializing, read in the properties you have and set the class values.
+     * After initializing, read in the properties you have and set the class
+     * values.
+     *
      * @return A Properties object containing the properties from the file.
      * @throws FileNotFoundException
-     * @throws IOException 
+     * @throws IOException
      */
-    public final Properties init() throws FileNotFoundException, IOException{
+    public final Properties init() throws FileNotFoundException, IOException {
         /*
             Your properties file must be in the deployed .war file in WEB-INF/classes/tokens.  It is there automatically
             if you have it in Source Packages/java/tokens when you build.  That is how this will read it in without defining a root location
             https://stackoverflow.com/questions/2395737/java-relative-path-of-a-file-in-a-java-web-application
-        */
+         */
         String fileLoc = TokenManager.class.getResource(Constant.PROPERTIES_FILE_NAME).toString();
         fileLoc = fileLoc.replace("file:", "");
         setFileLocation(fileLoc);
-        InputStream input = new FileInputStream(propFileLocation);
-        props.load(input);
-        currentAccessToken = Constant.RERUM_ACCESS_TOKEN_URL;
-        currentRefreshToken = Constant.RERUM_REFRESH_TOKEN_URL;
-        registeredAgent = "tag://newberry-slu/test";
-        canvasPrefix = Constant.TPEN_CANVAS_PREFIX;
-        testingFlag = props.getProperty("debug");
-        input.close();
-        
-//        System.out.println("Read in props.  Here is my token info");
-//        System.out.println(currentAccessToken);
+        try (InputStream input = new FileInputStream(propFileLocation)) {
+            props.load(input);
+            currentAccessToken = props.getProperty("TPEN_NL_ACCESS_TOKEN");
+            currentRefreshToken = props.getProperty("TPEN_NL_REFRESH_TOKEN");
+            registeredAgent = props.getProperty("TPEN_NL_AGENT");
+            canvasPrefix = props.getProperty("PALEO_CANVAS_ID_PREFIX");
+            testingFlag = props.getProperty("TESTING");
+        }
+
+        System.out.println("Read in props.  Here is my token info");
+        System.out.println(currentAccessToken);
 //        System.out.println(currentRefreshToken);
 //        System.out.println(registeredAgent);
         return props;
     }
-    
+
     /**
-     * 
+     *
      * @param prop The property to write or overwrite
      * @param propValue The value of the property
      * @throws FileNotFoundException
-     * @throws IOException 
+     * @throws IOException
      */
-    public void writeProperty (String prop, String propValue) throws FileNotFoundException, IOException{
-        OutputStream output = null;
+    public void writeProperty(String prop, String propValue) throws FileNotFoundException, IOException {
+        OutputStream output;
         output = new FileOutputStream(propFileLocation);
         // set the properties value
         props.setProperty(prop, propValue);
@@ -94,12 +98,15 @@ public class TokenManager{
         props.store(output, null);
         output.close();
     }
-    
+
     /**
-     * Check if the token being used is expired or not.  Expired access tokens can be replaced with a new one so long as your property file
-     * has a valid refresh_token value stored.
+     * Check if the token being used is expired or not. Expired access tokens
+     * can be replaced with a new one so long as your property file has a valid
+     * refresh_token value stored.
+     *
      * @param token
-     * @return Boolean true if expired or could not read token, false if token is not yet expired.
+     * @return Boolean true if expired or could not read token, false if token
+     * is not yet expired.
      */
     public boolean checkTokenExpiry(String token) {
         Date now = new Date();
@@ -112,20 +119,21 @@ public class TokenManager{
             tokenEXPClaim = recievedToken.getExpiresAt();
             expires = tokenEXPClaim.getTime();
             return nowTime >= expires;
-        } 
-        catch (Exception exception){
+        } catch (JWTDecodeException exception) {
             System.out.println("Problem with token, no way to check expiry");
             System.out.println(exception);
             return true;
         }
-  
+
     }
-    
+
     /**
-     * Check if the token being used is expired or not.  Expired access tokens can be replaced with a new one so long as your property file
-     * has a valid refresh_token value stored.
-     * @param token
-     * @return Boolean true if expired or could not read token, false if token is not yet expired.
+     * Check if the token being used is expired or not.Expired access tokens can
+     * be replaced with a new one so long as your property file has a valid
+     * refresh_token value stored.
+     *
+     * @return Boolean true if expired or could not read token, false if token
+     * is not yet expired.
      */
     public boolean checkTokenExpiry() {
         Date now = new Date();
@@ -139,43 +147,42 @@ public class TokenManager{
             tokenEXPClaim = recievedToken.getExpiresAt();
             expires = tokenEXPClaim.getTime();
             return nowTime >= expires;
-        } 
-        catch (Exception exception){
+        } catch (JWTDecodeException exception) {
             System.out.println("Problem with token, no way to check expiry");
             System.out.println(exception);
             return true;
         }
-  
+
     }
-    
+
     /**
-     * Expired access tokens can be replaced with valid ones.
-     * Note you must have read your properties in already so I know the currentRefreshToken.  
+     * Expired access tokens can be replaced with valid ones. Note you must have
+     * read your properties in already so I know the currentRefreshToken.
+     *
      * @see init()
      * @return A new valid access token.
      * @throws SocketTimeoutException
      * @throws IOException
-     * @throws Exception 
+     * @throws Exception
      */
-    public String generateNewAccessToken() throws SocketTimeoutException, IOException, Exception{
+    public String generateNewAccessToken() throws SocketTimeoutException, IOException, Exception {
         System.out.println("TPEN has to get a new access token...");
         String newAccessToken = "";
-        JSONObject jsonReturn = new JSONObject();
+        JSONObject jsonReturn;
         JSONObject tokenRequestParams = new JSONObject();
         tokenRequestParams.element("refresh_token", currentRefreshToken);
-        if(currentRefreshToken.equals("")){
+        if (currentRefreshToken.equals("")) {
             //You must read in the properties first!
             System.out.println("You must read in the properties first with init()");
             Exception noProps = new Exception("You must read in the properties first with init().  There was no refresh token set.");
             throw noProps;
-        }
-        else{
-            try{
+        } else {
+            try {
                 System.out.println("Connecting to RERUM with refresh token...");
                 URL rerum = new URL(Constant.RERUM_ACCESS_TOKEN_URL);
                 HttpURLConnection connection = (HttpURLConnection) rerum.openConnection();
-                connection.setRequestMethod("POST"); 
-                connection.setConnectTimeout(5*1000); 
+                connection.setRequestMethod("POST");
+                connection.setConnectTimeout(5 * 1000);
                 connection.setDoOutput(true);
                 connection.setDoInput(true);
                 connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
@@ -184,12 +191,12 @@ public class TokenManager{
                 //Pass in the user provided JSON for the body 
                 outStream.writeBytes(tokenRequestParams.toString());
                 outStream.flush();
-                outStream.close(); 
+                outStream.close();
                 //Execute rerum server v1 request
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(),"utf-8"));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "utf-8"));
                 StringBuilder sb = new StringBuilder();
                 String line;
-                while ((line = reader.readLine()) != null){
+                while ((line = reader.readLine()) != null) {
                     //Gather rerum server v1 response
                     sb.append(line);
                 }
@@ -198,8 +205,7 @@ public class TokenManager{
                 jsonReturn = JSONObject.fromObject(sb.toString());
                 System.out.println("RERUM responded with access token...");
                 newAccessToken = jsonReturn.getString("access_token");
-            }
-            catch(java.net.SocketTimeoutException e){ //This specifically catches the timeout
+            } catch (java.net.SocketTimeoutException e) { //This specifically catches the timeout
                 System.out.println("The RERUM token endpoint is taking too long...");
                 jsonReturn = new JSONObject(); //We were never going to get a response, so return an empty object.
                 jsonReturn.element("error", "The RERUM endpoint took too long");
@@ -212,32 +218,33 @@ public class TokenManager{
         System.out.println("TPEN has a new access token, and it is written to the properties file...");
         return newAccessToken;
     }
-    
+
     /**
-     * Expired access tokens can be replaced with valid ones.
-     * If you have not read your properties file in, you can use this to pass the refresh_token directly.  
+     * Expired access tokens can be replaced with valid ones. If you have not
+     * read your properties file in, you can use this to pass the refresh_token
+     * directly.
+     *
      * @param refresh_token The refresh token to use to get a new access token
      * @return A new valid access token.
      * @throws SocketTimeoutException
      * @throws IOException
-     * @throws Exception 
+     * @throws Exception
      */
-    public String generateNewAccessToken(String refresh_token) throws SocketTimeoutException, IOException, Exception{
+    public String generateNewAccessToken(String refresh_token) throws SocketTimeoutException, IOException, Exception {
         String newAccessToken = "";
-        JSONObject jsonReturn = new JSONObject();
+        JSONObject jsonReturn;
         JSONObject tokenRequestParams = new JSONObject();
         tokenRequestParams.element("refresh_token", refresh_token);
-        if(currentRefreshToken.equals("")){
+        if (currentRefreshToken.equals("")) {
             //You must read in the properties first!
             Exception noProps = new Exception("You must read in the properties first with init().  There was no refresh token set.");
             throw noProps;
-        }
-        else{
-            try{
+        } else {
+            try {
                 URL rerum = new URL(Constant.RERUM_ACCESS_TOKEN_URL);
                 HttpURLConnection connection = (HttpURLConnection) rerum.openConnection();
-                connection.setRequestMethod("POST"); 
-                connection.setConnectTimeout(5*1000); 
+                connection.setRequestMethod("POST");
+                connection.setConnectTimeout(5 * 1000);
                 connection.setDoOutput(true);
                 connection.setDoInput(true);
                 connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
@@ -246,12 +253,12 @@ public class TokenManager{
                 //Pass in the user provided JSON for the body 
                 outStream.writeBytes(tokenRequestParams.toString());
                 outStream.flush();
-                outStream.close(); 
+                outStream.close();
                 //Execute rerum server v1 request
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(),"utf-8"));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "utf-8"));
                 StringBuilder sb = new StringBuilder();
                 String line;
-                while ((line = reader.readLine()) != null){
+                while ((line = reader.readLine()) != null) {
                     //Gather rerum server v1 response
                     sb.append(line);
                 }
@@ -259,8 +266,7 @@ public class TokenManager{
                 connection.disconnect();
                 jsonReturn = JSONObject.fromObject(sb.toString());
                 newAccessToken = jsonReturn.getString("access_token");
-            }
-            catch(java.net.SocketTimeoutException e){ //This specifically catches the timeout
+            } catch (java.net.SocketTimeoutException e) { //This specifically catches the timeout
                 System.out.println("The Auth0 token endpoint is taking too long...");
                 jsonReturn = new JSONObject(); //We were never going to get a response, so return an empty object.
                 jsonReturn.element("error", "The Auth0 endpoint took too long");
@@ -271,57 +277,57 @@ public class TokenManager{
         writeProperty("access_token", newAccessToken);
         return newAccessToken;
     }
-    
-    public void setFileLocation(String location){
+
+    public void setFileLocation(String location) {
         propFileLocation = location;
     }
-    
-    public void setRegisteredAgent(String agentID){
+
+    public void setRegisteredAgent(String agentID) {
         registeredAgent = agentID;
     }
-    
-    public void setAccessToken(String newToken){
+
+    public void setAccessToken(String newToken) {
         currentAccessToken = newToken;
     }
-    
-    public void setRefreshToken(String newToken){
+
+    public void setRefreshToken(String newToken) {
         currentRefreshToken = newToken;
     }
-    
-    public void setCanvasPrefix(String newPrefix){
+
+    public void setCanvasPrefix(String newPrefix) {
         canvasPrefix = newPrefix;
     }
-    
-    public void setTestingFlag(String bool){
+
+    public void setTestingFlag(String bool) {
         testingFlag = bool;
     }
-    
-    public String getAccessToken(){
+
+    public String getAccessToken() {
         return currentAccessToken;
     }
-    
-    public String getRefreshToken(){
+
+    public String getRefreshToken() {
         return currentRefreshToken;
     }
-    
-    public String getFileLocation(){
+
+    public String getFileLocation() {
         return propFileLocation;
     }
-    
-    public String getRegisteredAgent(){
+
+    public String getRegisteredAgent() {
         return registeredAgent;
     }
-    
-    public String getCanvasPrefix(){
+
+    public String getCanvasPrefix() {
         return canvasPrefix;
     }
-    
-    public String getTestingFlag(){
+
+    public String getTestingFlag() {
         return testingFlag;
     }
-    
-    public Properties getProperties(){
+
+    public Properties getProperties() {
         return props;
     }
-    
+
 }

@@ -3,6 +3,7 @@
     Created on : Oct 26, 2010, 12:08:31 PM
     Author     : cubap,jdeerin1,bhaberbe
 --%>
+<%@page import="tokens.TokenManager"%>
 <%@page import="java.sql.Connection"%>
 <%@page import="java.util.Date"%>
 <%@page import="edu.slu.util.ServletUtils"%>
@@ -22,6 +23,7 @@
     "http://www.w3.org/TR/html4/loose.dtd">
 <%
     user.User thisUser = null;
+    TokenManager man;
 
     int UID = 0;
     if (session.getAttribute("UID") != null) {
@@ -42,10 +44,9 @@
             }
         }
     }
-    TokenManager man;
     try {
         man = new TokenManager();
-    } catch {
+    } catch (Exception ex){
         // TODO: this is as good as auto-generated.
     }
     %>
@@ -63,7 +64,7 @@
         <meta itemprop="name" content="T&#8209;PEN">
         <meta itemprop="description" content="Digital tool for transcription">
         <meta itemprop="image" content="https://lh3.googleusercontent.com/-TysT8pvMcgI/AAAAAAAAAAI/AAAAAAAAADI/PWEsFECiPwE/s250-c-k/photo.jpg">        
-        <title>T&#8209;PEN <%out.println("Version " + man.getProperties().getProperty("VERSION"));%></title>
+        <title>T&#8209;PEN Version <%out.println((new TokenManager()).getProperties().getProperty("VERSION"));%></title>
         <link rel="stylesheet" href="css/tpen.css" type="text/css" media="screen, projection">
         <link rel="stylesheet" href="css/print.css" type="text/css" media="print">
         <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
@@ -1119,7 +1120,7 @@
                         <p><em>Watch a video on how to get started with T-PEN 2.8 (9 minutes):</em><br/>
                             <iframe src="http://www.youtube.com/embed/0S5ilvLM9fw" frameborder="0" allowfullscreen></iframe>
                         </p>
-<!--                        <p><em>Learn more about transcribing in this five minute tour <span class="quiet small">(please note this is for version 0.4, current is <%out.print(man.getProperties().getProperty("VERSION"));%>)</span>:</em><br/>
+<!--                        <p><em>Learn more about transcribing in this five minute tour <span class="quiet small">(please note this is for version 0.4, current is <%out.print((new TokenManager()).getProperties().getProperty("VERSION"));%>)</span>:</em><br/>
                             <iframe src="http://www.youtube.com/embed/sOnJtWtCFZc" frameborder="0" allowfullscreen></iframe>
                         </p>-->
                     </div>

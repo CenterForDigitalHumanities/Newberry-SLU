@@ -90,7 +90,7 @@ PreparedStatement ps=null;
                     int thisID=rs.getInt("id");
                     String thisTagtag=rs.getString("tag");
                     int folio=rs.getInt("folio");
-                    String line=rs.getString("line");
+                    int line=rs.getInt("line");
                     Transcription t=new Transcription(line);
                     if(!t.getText().contains("<"+thisTagtag))
                     {
